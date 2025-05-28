@@ -347,7 +347,7 @@
     <div id="channelNumberOverlay"></div>
     <div id="errorBox">This channel is not available for now</div>
   </div>
-  <img id="azinLogo" src="https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png" alt="Azin TV Logo">
+  <img id="azinLogo" src="https://i.postimg.cc/wM7JWXh3/Pixelated-Play-Button-on-TV-Screen-2.png" alt="Azin TV Logo">
   <div id="incompatibleBox">Sorry, only Android TVs are supported for this app</div>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script>
