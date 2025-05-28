@@ -14,7 +14,7 @@
       height: 100vh;
       background: black;
       color: #fff;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
       overflow: hidden;
       position: relative;
     }
@@ -171,7 +171,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: url('httpq/staif') center/cover no-repeat;
+      background: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif') center/cover no-repeat;
       opacity: 0;
       z-index: 6;
       transition: opacity .5s ease;
@@ -300,7 +300,9 @@
       white-space: nowrap;
       overflow: hidden;
       width: 0;
-      animation: typing 4s steps(34, end) forwards;
+      max-width: 90%;
+      display: inline-block;
+      animation: typing 4s steps(33, end) forwards;
     }
     @keyframes typing {
       from { width: 0; }
@@ -331,369 +333,15 @@
     <div class="title"></div>
   </div>
   <div id="greetingScreen" class="hidden">
-    <div id="greetingText">Assalamualaikum, Welcome to our App</div>
+    <div id="greetingText"></div> <!-- Text will be set via JavaScript -->
   </div>
   <div id="container">
     <div class="channel-list" id="channelList">
       <h2 style="margin:0 0 10px;padding:10px;font-size:20px;text-align:center;border-bottom:1px solid gray">Channels</h2>
     </div>
     <div id="staticNoise"></div>
-    <audio id="noiseSound" src="https://cdn.pixabay.com/audio/2025/04/06/audio_7ad9983b3e.mp3" preload="auto" loop></audio>
-    <audio id="typingSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_d1d3b9819f.mp3" preload="auto"></audio>
-    <video id="player" playsinline controlslist="nodownload noplaybackrate" disablePictureInPicture></video>
-    <div id="playButton" tabindex="0"></div>
-    <div id="channelNumberOverlay"></div>
-    <div id="errorBox">This channel is not available for now</div>
-  </div>
-  <img id="azinLogo" src="https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png" alt="Azin TV Logo">
-  <div id="incompatibleBox">Sorry, only Android TVs are supported for this app</div>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1uedes
-
-System: I apologize, but it seems the code you provided was cut off, and I need to ensure the full JavaScript section is included correctly. Below is the complete HTML code with the modifications for the typing animation of "Assalamualaikum, Welcome to our App" without a cursor and with the typing sound stopping after the 4-second animation. I've also included the full JavaScript section, ensuring all functionality remains intact.
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart TV Live App</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      height: 100vh;
-      background: black;
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
-      overflow: hidden;
-      position: relative;
-    }
-    #container {
-      position: relative;
-      height: 100vh;
-      width: 100vw;
-      background: transparent;
-      display: none;
-    }
-    .channel-list {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 300px;
-      height: 100%;
-      background: rgba(0,0,0,.85);
-      display: none;
-      flex-direction: column;
-      padding: 0;
-      overflow-y: auto;
-      z-index: 100;
-    }
-    #incompatibleBox {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%,-50%);
-      background: rgba(0,0,0,.85);
-      border: 3px solid #fff;
-      border-radius: 12px;
-      padding: 30px 40px;
-      color: #fff;
-      font-size: 22px;
-      text-align: center;
-      max-width: 90vw;
-      z-index: 9999;
-      display: none;
-    }
-    .channel {
-      padding: 10px;
-      border: 1px solid gray;
-      margin-bottom: 5px;
-      background: #222;
-      cursor: pointer;
-    }
-    .channel.active {
-      background: #444;
-      border-color: #fff;
-    }
-    video {
-      width: 100vw;
-      height: 100vh;
-      background: transparent;
-      z-index: 1;
-      object-fit: fill;
-    }
-    #playButton {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%,-50%);
-      width: 100px;
-      height: 100px;
-      background: rgba(255,255,255,.15);
-      border: 2px solid #fff;
-      border-radius: 50%;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 100;
-      will-change: transform,opacity;
-      transition: opacity 0.5s ease;
-    }
-    #playButton.fade-out {
-      opacity: 0;
-      pointer-events: none;
-    }
-    #playButton::before {
-      content: '';
-      display: block;
-      width: 0;
-      height: 0;
-      border-left: 25px solid #fff;
-      border-top: 15px solid transparent;
-      border-bottom: 15px solid transparent;
-      margin-left: 5px;
-    }
-    #playButton.playing::before {
-      content: '';
-      display: block;
-      width: 25px;
-      height: 30px;
-      background: none;
-      border-left: 10px solid #fff;
-      border-right: 10px solid #fff;
-      border-top: none;
-      border-bottom: none;
-      margin-left: 0;
-    }
-    #channelNumberOverlay {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: rgba(0,0,0,.7);
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-size: 32px;
-      font-weight: 700;
-      z-index: 20;
-      pointer-events: none;
-      opacity: 0;
-      color: #fff;
-      transition: opacity .4s ease;
-      will-change: opacity;
-    }
-    #azinLogo {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      width: 120px;
-      height: auto;
-      z-index: 6;
-      opacity: .7;
-      filter: drop-shadow(0 1.5px 3px rgba(0,0,0,.25));
-      transition: opacity .3s ease;
-      cursor: default;
-      user-select: none;
-      display: none;
-    }
-    #errorBox {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%,-50%);
-      background: #000;
-      color: #fff;
-      padding: 40px 60px;
-      font-size: 28px;
-      border: 4px solid #fff;
-      border-radius: 16px;
-      z-index: 100;
-      display: none;
-      text-align: center;
-      box-sizing: border-box;
-      min-width: 360px;
-      max-width: 95vw;
-      will-change: transform,opacity;
-    }
-    #staticNoise {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: url('httpq/staif') center/cover no-repeat;
-      opacity: 0;
-      z-index: 6;
-      transition: opacity .5s ease;
-      pointer-events: none;
-      display: none;
-      will-change: opacity;
-    }
-    /* Loading Animation Styles */
-    #loadingScreen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 10001;
-      opacity: 1;
-      transition: opacity 1s ease;
-    }
-    #loadingScreen.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .logo-container {
-      position: relative;
-      width: 300px;
-      height: auto;
-      opacity: 0;
-      animation: fadeIn 2s ease 1s forwards;
-      transform: scale(0.95);
-      z-index: 2;
-    }
-    .logo-container img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .light-ring {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 500px;
-      height: 500px;
-      border-radius: 50%;
-      border: 4px solid transparent;
-      border-top: 4px solid #ff6600;
-      border-right: 4px solid rgba(255, 102, 0, 0.3);
-      box-shadow: 0 0 20px rgba(255, 102, 0, 0.5);
-      animation: spin 6s linear infinite;
-      z-index: 1;
-      will-change: transform;
-    }
-    @keyframes spin {
-      0% { transform: translate(-50%, -50%) rotate(0deg); }
-      100% { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-    .particle {
-      position: absolute;
-      width: 3px;
-      height: 3px;
-      background: #ffaa00;
-      border-radius: 50%;
-      animation: floatUp 4s infinite ease-in-out;
-      opacity: 0.6;
-    }
-    @keyframes floatUp {
-      0% {
-        transform: translateY(0) scale(1);
-        opacity: 0.1;
-      }
-      50% {
-        transform: translateY(-40px) scale(1.3);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-80px) scale(0.8);
-        opacity: 0;
-      }
-    }
-    .title {
-      position: absolute;
-      bottom: 50px;
-      font-size: 2.2rem;
-      color: #ffffff;
-      letter-spacing: 4px;
-      animation: fadeIn 2s ease 2.5s forwards;
-      opacity: 0;
-      z-index: 2;
-    }
-    @keyframes fadeIn {
-      to {
-        opacity: 1;
-      }
-    }
-    /* Greeting Screen Styles */
-    #greetingScreen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 10000;
-      opacity: 0;
-      transition: opacity 1s ease;
-    }
-    #greetingScreen.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-    #greetingScreen.visible {
-      opacity: 1;
-    }
-    #greetingText {
-      font-size: 48px;
-      font-weight: 700;
-      color: #fff;
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      width: 0;
-      animation: typing 4s steps(34, end) forwards;
-    }
-    @keyframes typing {
-      from { width: 0; }
-      to { width: 100%; }
-    }
-    video::-webkit-media-controls,video::-webkit-media-controls-panel,video::-webkit-media-controls-play-button {
-      display: none !important;
-    }
-    .cast-button,#cast-button,google-cast-button,.google-cast-button,.cast-icon,.cast-context,.castSender,.cast-receiver,[is="google-cast-button"],[class*="cast"],[id*="cast"] {
-      display: none !important;
-      visibility: hidden !important;
-      width: 0 !important;
-      height: 0 !important;
-      opacity: 0 !important;
-      pointer-events: none !important;
-      position: absolute !important;
-      left: -9999px !important;
-      top: -9999px !important;
-    }
-  </style>
-</head>
-<body>
-  <div id="loadingScreen">
-    <div class="light-ring"></div>
-    <div class="logo-container">
-      <img id="loadingLogo" src="https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png" alt="">
-    </div>
-    <div class="title"></div>
-  </div>
-  <div id="greetingScreen" class="hidden">
-    <div id="greetingText">Assalamualaikum, Welcome to our App</div>
-  </div>
-  <div id="container">
-    <div class="channel-list" id="channelList">
-      <h2 style="margin:0 0 10px;padding:10px;font-size:20px;text-align:center;border-bottom:1px solid gray">Channels</h2>
-    </div>
-    <div id="staticNoise"></div>
-    <audio id="noiseSound" src="https://cdn.pixabay.com/audio/2025/04/06/audio_7ad9983b3e.mp3" preload="auto" loop></audio>
-    <audio id="typingSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_d1d3b9819f.mp3" preload="auto"></audio>
+    <audio id="noiseSound" src="https://cdn.pixabay.com/audio/2025/04/06/audio_513747fd8d.mp3" preload="auto" loop></audio>
+    <audio id="typingSound" src="https://cdn.pixabay.com/audio/2025/05/01/audio_555697663f.mp3" preload="auto"></audio>
     <video id="player" playsinline controlslist="nodownload noplaybackrate" disablePictureInPicture></video>
     <div id="playButton" tabindex="0"></div>
     <div id="channelNumberOverlay"></div>
@@ -732,8 +380,30 @@ System: I apologize, but it seems the code you provided was cut off, and I need 
           greetingScreen = document.getElementById("greetingScreen"),
           typingSound = document.getElementById("typingSound"),
           loadingScreen = document.getElementById("loadingScreen"),
-          loadingLogo = document.getElementById("loadingLogo");
+          loadingLogo = document.getElementById("loadingLogo"),
+          greetingText = document.getElementById("greetingText");
     let currentIndex = 0, playingIndex = 0, hls, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
+
+    // JavaScript-based typing animation fallback
+    function typeText(element, text, duration) {
+      console.log("Starting JavaScript typing animation");
+      element.textContent = "";
+      element.style.width = "auto"; // Disable CSS animation
+      element.style.animation = "none";
+      const chars = text.split("");
+      const charTime = duration / chars.length;
+      let i = 0;
+      function addChar() {
+        if (i < chars.length) {
+          element.textContent += chars[i];
+          i++;
+          setTimeout(addChar, charTime);
+        } else {
+          console.log("JavaScript typing animation completed");
+        }
+      }
+      addChar();
+    }
 
     function initializeApp() {
       console.log("Initializing app...");
@@ -767,7 +437,7 @@ System: I apologize, but it seems the code you provided was cut off, and I need 
           loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
         });
         // Show loading screen for 6 seconds
-        console.log("Showing loading screen with new spin ring");
+        console.log("Showing loading screen");
         setTimeout(() => {
           console.log("Hiding loading screen");
           loadingScreen.classList.add('hidden');
@@ -777,7 +447,10 @@ System: I apologize, but it seems the code you provided was cut off, and I need 
             greetingScreen.style.display = 'flex';
             greetingScreen.classList.remove('hidden');
             greetingScreen.classList.add('visible');
-            // Play typing sound for greeting
+            // Play typing sound and start animation
+            const greetingMessage = "Assalamualaikum, Welcome to our App";
+            // Use JavaScript fallback for typing animation
+            typeText(greetingText, greetingMessage, 4000);
             typingSound.addEventListener('canplay', () => {
               console.log("Typing sound is ready to play");
               typingSound.play().catch(err => console.error("Typing sound play error:", err.message));
@@ -786,12 +459,12 @@ System: I apologize, but it seems the code you provided was cut off, and I need 
               console.error("Typing sound load error:", typingSound.error);
             });
             typingSound.load();
-            // Stop typing sound after 4 seconds (sync with typing animation)
+            // Stop typing sound after 4 seconds
             setTimeout(() => {
               console.log("Stopping typing sound");
               typingSound.pause();
               typingSound.currentTime = 0;
-            }, 4000); // Matches the 4s duration of the typing animation
+            }, 4000);
             setTimeout(() => {
               console.log("Hiding greeting screen");
               greetingScreen.classList.remove('visible');
@@ -810,7 +483,7 @@ System: I apologize, but it seems the code you provided was cut off, and I need 
                   showPlayButton(false);
                 }
               }, 1000);
-            }, 4000); // Matches the typing animation duration
+            }, 4000);
           }, 1000);
         }, 6000);
       }
