@@ -491,15 +491,24 @@
       staticNoise.style.display = "block";
       errorBox.innerText = msg;
       errorBox.style.display = "block";
-      // Reset and play noise sound
-      noiseSound.pause(); // Ensure sound is stopped
-      noiseSound.currentTime = 0; // Reset to start
-      noiseSound.load(); // Reload to ensure readiness
-      noiseSound.play().then(() => {
-        console.log("Noise sound playing");
-      }).catch(err => {
-        console.error("Noise sound play error:", err.message);
-      });
+      // Reset and play noise sound with retry mechanism
+      function attemptPlayNoiseSound(retries = 3, delay = 500) {
+        noiseSound.pause(); // Ensure sound is stopped
+        noiseSound.currentTime = 0; // Reset to start
+        noiseSound.load(); // Reload to ensure readiness
+        noiseSound.play().then(() => {
+          console.log("Noise sound playing successfully");
+        }).catch(err => {
+          console.error("Noise sound play error:", err.message);
+          if (retries > 0) {
+            console.log(`Retrying noise sound playback, attempts left: ${retries}`);
+            setTimeout(() => attemptPlayNoiseSound(retries - 1, delay), delay);
+          } else {
+            console.error("Failed to play noise sound after retries");
+          }
+        });
+      }
+      attemptPlayNoiseSound();
     }
 
     function hideErrorVisual() {
