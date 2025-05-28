@@ -384,7 +384,7 @@
           greetingText = document.getElementById("greetingText");
     let currentIndex = 0, playingIndex = 0, hls, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
 
-    // JavaScript-based typing animation fallback
+    // JavaScript-based typing animation with synchronized sound
     function typeText(element, text, duration) {
       console.log("Starting JavaScript typing animation");
       element.textContent = "";
@@ -393,6 +393,11 @@
       const chars = text.split("");
       const charTime = duration / chars.length;
       let i = 0;
+
+      // Start typing sound
+      typingSound.load(); // Ensure sound is ready
+      typingSound.play().catch(err => console.error("Typing sound play error:", err.message));
+
       function addChar() {
         if (i < chars.length) {
           element.textContent += chars[i];
@@ -400,6 +405,10 @@
           setTimeout(addChar, charTime);
         } else {
           console.log("JavaScript typing animation completed");
+          // Stop typing sound when animation completes
+          typingSound.pause();
+          typingSound.currentTime = 0;
+          console.log("Typing sound stopped");
         }
       }
       addChar();
@@ -447,24 +456,9 @@
             greetingScreen.style.display = 'flex';
             greetingScreen.classList.remove('hidden');
             greetingScreen.classList.add('visible');
-            // Play typing sound and start animation
+            // Start typing animation with synchronized sound
             const greetingMessage = "Assalamualaikum, Welcome to our App";
-            // Use JavaScript fallback for typing animation
             typeText(greetingText, greetingMessage, 4000);
-            typingSound.addEventListener('canplay', () => {
-              console.log("Typing sound is ready to play");
-              typingSound.play().catch(err => console.error("Typing sound play error:", err.message));
-            });
-            typingSound.addEventListener('error', () => {
-              console.error("Typing sound load error:", typingSound.error);
-            });
-            typingSound.load();
-            // Stop typing sound after 4 seconds
-            setTimeout(() => {
-              console.log("Stopping typing sound");
-              typingSound.pause();
-              typingSound.currentTime = 0;
-            }, 4000);
             setTimeout(() => {
               console.log("Hiding greeting screen");
               greetingScreen.classList.remove('visible');
