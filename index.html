@@ -385,7 +385,7 @@
     let currentIndex = 0, playingIndex = 0, hls, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
 
     // JavaScript-based typing animation with synchronized sound
-    function typeText(element, text, duration, callback) {
+    function typeText(element, text, duration) {
       console.log("Starting JavaScript typing animation");
       element.textContent = "";
       element.style.width = "auto"; // Disable CSS animation
@@ -393,6 +393,10 @@
       const chars = text.split("");
       const charTime = duration / chars.length;
       let i = 0;
+
+      // Ensure typing sound is loaded and play it immediately
+      typingSound.load(); // Reset sound to start
+      typingSound.play().catch(err => console.error("Typing sound play error:", err.message));
 
       function addChar() {
         if (i < chars.length) {
@@ -405,27 +409,10 @@
           typingSound.pause();
           typingSound.currentTime = 0;
           console.log("Typing sound stopped");
-          if (callback) callback(); // Call callback to proceed with app flow
         }
       }
-
-      // Start typing sound only when audio is ready
-      typingSound.load();
-      typingSound.oncanplay = () => {
-        console.log("Typing sound is ready to play");
-        typingSound.play().catch(err => {
-          console.error("Typing sound play error:", err.message);
-          // Proceed with animation even if sound fails
-          addChar();
-        });
-        // Start animation after sound is ready
-        addChar();
-      };
-      typingSound.onerror = () => {
-        console.error("Typing sound load error:", typingSound.error);
-        // Proceed with animation if sound fails to load
-        addChar();
-      };
+      // Start typing immediately
+      addChar();
     }
 
     function initializeApp() {
@@ -472,8 +459,8 @@
             greetingScreen.classList.add('visible');
             // Start typing animation with synchronized sound
             const greetingMessage = "Assalamualaikum, Welcome to our App";
-            typeText(greetingText, greetingMessage, 4000, () => {
-              // Callback to hide greeting screen and proceed
+            typeText(greetingText, greetingMessage, 4000);
+            setTimeout(() => {
               console.log("Hiding greeting screen");
               greetingScreen.classList.remove('visible');
               greetingScreen.classList.add('hidden');
@@ -491,7 +478,7 @@
                   showPlayButton(false);
                 }
               }, 1000);
-            });
+            }, 4000);
           }, 1000);
         }, 6000);
       }
@@ -504,8 +491,15 @@
       staticNoise.style.display = "block";
       errorBox.innerText = msg;
       errorBox.style.display = "block";
-      noiseSound.currentTime = 0;
-      noiseSound.play().catch(err => console.log("Audio play error:", err));
+      // Reset and play noise sound
+      noiseSound.pause(); // Ensure sound is stopped
+      noiseSound.currentTime = 0; // Reset to start
+      noiseSound.load(); // Reload to ensure readiness
+      noiseSound.play().then(() => {
+        console.log("Noise sound playing");
+      }).catch(err => {
+        console.error("Noise sound play error:", err.message);
+      });
     }
 
     function hideErrorVisual() {
@@ -720,8 +714,6 @@
     video.addEventListener('pause', () => { console.log("Video paused"); });
     video.addEventListener('error', () => { console.log("Video element error event"); });
 
-    // Preload typing sound during app initialization
-    typingSound.load();
     initializeApp();
   </script>
 </body>
