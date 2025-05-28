@@ -171,7 +171,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: url('httpq/staif') center/cover no-repeat;
+      background: url('https://media.tenor.com/lk5YUP4Co1QAAAPo/static-glitch.mp4') center/cover no-repeat;
       opacity: 0;
       z-index: 6;
       transition: opacity .5s ease;
@@ -338,8 +338,8 @@
       <h2 style="margin:0 0 10px;padding:10px;font-size:20px;text-align:center;border-bottom:1px solid gray">Channels</h2>
     </div>
     <div id="staticNoise"></div>
-    <audio id="noiseSound" src="https://cdn.pixabay.com/audio/2025/04/06/audio_7ad9983b3e.mp3" preload="auto" loop></audio>
-    <audio id="typingSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_d1d3b9819f.mp3" preload="auto"></audio>
+    <audio id="noiseSound" src="https://cdn.pixabay.com/audio/2025/04/06/audio_513747fd8d.mp3" preload="auto" loop></audio>
+    <audio id="typingSound" src="https://cdn.pixabay.com/audio/2025/05/04/audio_54a0f41884.mp3" preload="auto"></audio>
     <video id="player" playsinline controlslist="nodownload noplaybackrate" disablePictureInPicture></video>
     <div id="playButton" tabindex="0"></div>
     <div id="channelNumberOverlay"></div>
@@ -352,7 +352,7 @@
     console.log("App initialization started at", new Date().toLocaleString());
     const channels = [
       {name: "Channel 1 - BTV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1709/output/1709-audio_113392_eng=113200-video=1692000.m3u8"},
-      {name: "Channel 2 - NTV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1716/output/index.m3u8"},
+      {name: "Channel 2 - ATN Bangla", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1716/output/index.m3u8"},
       {name: "Channel 3 - Channel I", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1723/output/index.m3u8"},
       {name: "Channel 4 - Ekattor TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1705/output/1705-audio_113352_eng= ειφ200-video=1692000.m3u8"},
       {name: "Channel 5 - Somoy TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1702/output/1702-audio_113322_eng=113200-video=1692000.m3u8"},
