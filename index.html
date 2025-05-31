@@ -203,7 +203,7 @@
       width: 300px;
       height: auto;
       opacity: 0;
-      animation: fadeIn 1s ease forwards; /* Reduced duration */
+      animation: fadeIn 1s ease forwards;
       transform: scale(0.95);
       z-index: 2;
     }
@@ -261,7 +261,7 @@
       font-size: 2.2rem;
       color: #ffffff;
       letter-spacing: 4px;
-      animation: fadeIn 1s ease forwards; /* Reduced duration */
+      animation: fadeIn 1s ease forwards;
       opacity: 0;
       z-index: 2;
     }
@@ -270,8 +270,9 @@
       color: #fff;
       font-size: 1.5rem;
       position: absolute;
-      bottom: 100px;
+      bottom: 20px; /* Moved to bottom of screen */
       text-align: center;
+      width: 100%;
       opacity: 0;
       transition: opacity 0.5s ease;
       z-index: 2;
@@ -447,7 +448,6 @@
         p.style.animationDelay = `${Math.random() * 4}s`;
         loadingScreen.appendChild(p);
       }
-      // Handle logo loading with timeout
       let logoLoaded = false;
       loadingLogo.addEventListener('load', () => {
         console.log("Loading logo loaded successfully");
@@ -458,7 +458,6 @@
         loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
         logoLoaded = true;
       });
-      // Fallback if logo takes too long to load
       setTimeout(() => {
         if (!logoLoaded) {
           console.warn("Logo loading timeout, switching to fallback");
@@ -478,7 +477,6 @@
         }
       }
       function proceedWithApp() {
-        // Wait for logo to load or timeout before proceeding
         function waitForLogo() {
           if (logoLoaded) {
             console.log("Showing loading screen");
