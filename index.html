@@ -265,22 +265,6 @@
       opacity: 0;
       z-index: 2;
     }
-    #offlineMessage {
-      display: none;
-      color: #fff;
-      font-size: 1.5rem;
-      position: absolute;
-      bottom: 20px; /* Moved to bottom of screen */
-      text-align: center;
-      width: 100%;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      z-index: 2;
-    }
-    #offlineMessage.visible {
-      display: block;
-      opacity: 1;
-    }
     @keyframes fadeIn {
       to {
         opacity: 1;
@@ -346,7 +330,6 @@
       <img id="loadingLogo" src="https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png" alt="">
     </div>
     <div class="title"></div>
-    <div id="offlineMessage">No Internet Connection. Please check your network.</div>
   </div>
   <div id="greetingScreen" class="hidden">
     <div id="greetingText"></div>
@@ -468,11 +451,10 @@
       function checkInternet() {
         if (!navigator.onLine) {
           console.log("No internet connection detected");
-          document.getElementById("offlineMessage").classList.add("visible");
+          // Only show loading animation, no message
           setTimeout(checkInternet, 5000);
         } else {
           console.log("Internet connection detected");
-          document.getElementById("offlineMessage").classList.remove("visible");
           proceedWithApp();
         }
       }
@@ -521,12 +503,10 @@
       checkInternet();
       window.addEventListener('online', () => {
         console.log("Internet connection restored");
-        document.getElementById("offlineMessage").classList.remove("visible");
         proceedWithApp();
       });
       window.addEventListener('offline', () => {
         console.log("Internet connection lost");
-        document.getElementById("offlineMessage").classList.add("visible");
         document.getElementById("loadingScreen").style.display = "flex";
         document.getElementById("loadingScreen").classList.remove("hidden");
         document.getElementById("container").style.display = "none";
@@ -605,7 +585,6 @@
         console.log("No internet connection, reverting to loading screen");
         document.getElementById("loadingScreen").style.display = "flex";
         document.getElementById("loadingScreen").classList.remove("hidden");
-        document.getElementById("offlineMessage").classList.add("visible");
         document.getElementById("container").style.display = "none";
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
