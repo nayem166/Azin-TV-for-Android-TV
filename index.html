@@ -265,40 +265,53 @@
       opacity: 0;
       z-index: 2;
     }
-    #noInternetContainer {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: none;
+    #noInternetScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+      display: flex;
       flex-direction: column;
+      justify-content: center;
       align-items: center;
-      z-index: 2;
+      z-index: 10002;
       opacity: 0;
       transition: opacity 0.5s ease;
     }
-    #noInternetContainer.visible {
-      display: flex;
+    #noInternetScreen.visible {
       opacity: 1;
     }
-    #noInternetMessage {
-      color: #fff;
+    #noInternetIcon {
+      width: 80px;
+      height: 80px;
+      opacity: 0.7;
+    }
+    #noInternetText {
       font-size: 1.5rem;
+      margin: 10px 0;
       text-align: center;
-      margin-bottom: 10px;
+      color: #ccc;
+    }
+    #noInternetSubtext {
+      font-size: 1rem;
+      color: #888;
+      text-align: center;
+      margin-bottom: 20px;
     }
     #retryButton {
       padding: 10px 20px;
       font-size: 1.2rem;
       color: #fff;
-      background-color: #ff6600;
-      border: 2px solid #fff;
-      border-radius: 8px;
+      background-color: #ccc;
+      border: none;
+      border-radius: 4px;
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
     #retryButton:hover, #retryButton:focus {
-      background-color: #e65c00;
+      background-color: #bbb;
     }
     @keyframes fadeIn {
       to {
@@ -365,10 +378,15 @@
       <img id="loadingLogo" src="https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png" alt="">
     </div>
     <div class="title"></div>
-    <div id="noInternetContainer">
-      <div id="noInternetMessage">No Internet</div>
-      <button id="retryButton">Retry</button>
-    </div>
+  </div>
+  <div id="noInternetScreen">
+    <svg id="noInternetIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 2l20 20M12 2v20M5 12h14M12 5v14" />
+      <line x1="5" y1="5" x2="19" y2="19" style="stroke: #fff; stroke-width: 3;" />
+    </svg>
+    <div id="noInternetText">No internet connection</div>
+    <div id="noInternetSubtext">Check your connection and try again</div>
+    <button id="retryButton">Retry</button>
   </div>
   <div id="greetingScreen" class="hidden">
     <div id="greetingText"></div>
@@ -420,7 +438,7 @@
           loadingScreen = document.getElementById("loadingScreen"),
           loadingLogo = document.getElementById("loadingLogo"),
           greetingText = document.getElementById("greetingText"),
-          noInternetContainer = document.getElementById("noInternetContainer"),
+          noInternetScreen = document.getElementById("noInternetScreen"),
           retryButton = document.getElementById("retryButton");
     let currentIndex = 0, playingIndex = 0, hls, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
 
@@ -461,6 +479,7 @@
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
         document.getElementById("loadingScreen").style.display = "none";
+        document.getElementById("noInternetScreen").style.display = "none";
         return;
       }
       console.log("Creating 50 particles for loading animation");
@@ -492,11 +511,12 @@
       function checkInternet() {
         if (!navigator.onLine) {
           console.log("No internet connection detected");
-          noInternetContainer.classList.add("visible");
+          noInternetScreen.classList.add("visible");
+          loadingScreen.classList.add("hidden");
           setTimeout(checkInternet, 5000);
         } else {
           console.log("Internet connection detected");
-          noInternetContainer.classList.remove("visible");
+          noInternetScreen.classList.remove("visible");
           proceedWithApp();
         }
       }
@@ -549,14 +569,13 @@
       checkInternet();
       window.addEventListener('online', () => {
         console.log("Internet connection restored");
-        noInternetContainer.classList.remove("visible");
+        noInternetScreen.classList.remove("visible");
         proceedWithApp();
       });
       window.addEventListener('offline', () => {
         console.log("Internet connection lost");
-        noInternetContainer.classList.add("visible");
-        document.getElementById("loadingScreen").style.display = "flex";
-        document.getElementById("loadingScreen").classList.remove("hidden");
+        noInternetScreen.classList.add("visible");
+        loadingScreen.classList.add("hidden");
         document.getElementById("container").style.display = "none";
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
@@ -630,10 +649,9 @@
 
     function loadChannel(index, autoPlay = false) {
       if (!navigator.onLine) {
-        console.log("No internet connection, reverting to loading screen");
-        document.getElementById("loadingScreen").style.display = "flex";
-        document.getElementById("loadingScreen").classList.remove("hidden");
-        noInternetContainer.classList.add("visible");
+        console.log("No internet connection, showing no internet screen");
+        noInternetScreen.classList.add("visible");
+        loadingScreen.classList.add("hidden");
         document.getElementById("container").style.display = "none";
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
