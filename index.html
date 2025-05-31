@@ -265,6 +265,41 @@
       opacity: 0;
       z-index: 2;
     }
+    #noInternetContainer {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    #noInternetContainer.visible {
+      display: flex;
+      opacity: 1;
+    }
+    #noInternetMessage {
+      color: #fff;
+      font-size: 1.5rem;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    #retryButton {
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      color: #fff;
+      background-color: #ff6600;
+      border: 2px solid #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    #retryButton:hover, #retryButton:focus {
+      background-color: #e65c00;
+    }
     @keyframes fadeIn {
       to {
         opacity: 1;
@@ -330,6 +365,10 @@
       <img id="loadingLogo" src="https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png" alt="">
     </div>
     <div class="title"></div>
+    <div id="noInternetContainer">
+      <div id="noInternetMessage">No Internet</div>
+      <button id="retryButton">Retry</button>
+    </div>
   </div>
   <div id="greetingScreen" class="hidden">
     <div id="greetingText"></div>
@@ -380,7 +419,9 @@
           typingSound = document.getElementById("typingSound"),
           loadingScreen = document.getElementById("loadingScreen"),
           loadingLogo = document.getElementById("loadingLogo"),
-          greetingText = document.getElementById("greetingText");
+          greetingText = document.getElementById("greetingText"),
+          noInternetContainer = document.getElementById("noInternetContainer"),
+          retryButton = document.getElementById("retryButton");
     let currentIndex = 0, playingIndex = 0, hls, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
 
     function typeText(element, text, duration) {
@@ -451,10 +492,11 @@
       function checkInternet() {
         if (!navigator.onLine) {
           console.log("No internet connection detected");
-          // Only show loading animation, no message
+          noInternetContainer.classList.add("visible");
           setTimeout(checkInternet, 5000);
         } else {
           console.log("Internet connection detected");
+          noInternetContainer.classList.remove("visible");
           proceedWithApp();
         }
       }
@@ -500,13 +542,19 @@
         }
         waitForLogo();
       }
+      retryButton.addEventListener('click', () => {
+        console.log("Retry button clicked, reloading app");
+        window.location.reload();
+      });
       checkInternet();
       window.addEventListener('online', () => {
         console.log("Internet connection restored");
+        noInternetContainer.classList.remove("visible");
         proceedWithApp();
       });
       window.addEventListener('offline', () => {
         console.log("Internet connection lost");
+        noInternetContainer.classList.add("visible");
         document.getElementById("loadingScreen").style.display = "flex";
         document.getElementById("loadingScreen").classList.remove("hidden");
         document.getElementById("container").style.display = "none";
@@ -585,6 +633,7 @@
         console.log("No internet connection, reverting to loading screen");
         document.getElementById("loadingScreen").style.display = "flex";
         document.getElementById("loadingScreen").classList.remove("hidden");
+        noInternetContainer.classList.add("visible");
         document.getElementById("container").style.display = "none";
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
@@ -683,6 +732,12 @@
     document.addEventListener('keydown', e => {
       const key = e.key, code = e.keyCode;
       console.log(`Key pressed: ${key} (code: ${code})`);
+      if (!navigator.onLine && (key === "Enter" || code === 13)) {
+        console.log("Enter key pressed while offline, triggering retry");
+        window.location.reload();
+        e.preventDefault();
+        return;
+      }
       if (key >= "0" && key <= "9") {
         numberInput += key;
         showOverlay(numberInput);
