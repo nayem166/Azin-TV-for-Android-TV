@@ -24,8 +24,7 @@
       position: relative;
       height: 100vh;
       width: 100vw;
-      background: transparent;
-      display: none;
+      background: black; /* আগের মতো কালো ব্যাকগ্রাউন্ড */
     }
     .channel-list {
       position: absolute;
@@ -72,6 +71,7 @@
       height: 100vh;
       object-fit: fill;
       z-index: 1;
+      background: black; /* প্লেয়ারের ব্যাকগ্রাউন্ড কালো */
     }
     #playButton {
       position: absolute;
@@ -187,7 +187,7 @@
     }
     .logo-container {
       position: relative;
-      width: 300px;
+      width: 200px; /* লোডিং লোগোর সাইজ অ্যাডজাস্ট করা */
       height: auto;
       opacity: 0;
       animation: fadeIn 1s ease forwards;
@@ -204,8 +204,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 500px;
-      height: 500px;
+      width: 400px; /* লাইট রিংয়ের সাইজও অ্যাডজাস্ট করা */
+      height: 400px;
       border-radius: 50%;
       border: 4px solid transparent;
       border-top: 4px solid #ff6600;
