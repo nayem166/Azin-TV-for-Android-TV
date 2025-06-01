@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart TV Live App</title>
   <style>
-    /* Existing CSS styles remain unchanged */
     * {
       margin: 0;
       padding: 0;
@@ -52,7 +51,7 @@
       font-size: 22px;
       text-align: center;
       max-width: 90vw;
-      z-index: 9999;
+      z-index: 10002; /* Higher than loadingScreen's z-index (10001) */
       display: none;
     }
     .channel {
@@ -180,7 +179,6 @@
       display: none;
       will-change: opacity;
     }
-    /* Loading Animation Styles */
     #loadingScreen {
       position: fixed;
       top: 0;
@@ -271,7 +269,6 @@
         opacity: 1;
       }
     }
-    /* Greeting Screen Styles */
     #greetingScreen {
       position: fixed;
       top: 0;
@@ -350,11 +347,11 @@
   </div>
   <img id="azinLogo" src="https://i.postimg.cc/65q6CC2P/file-00000000201c61f6b67764f95c3588ed.png" alt="Azin TV Logo">
   <div id="incompatibleBox">Sorry, only Android TVs are supported for this app</div>
-  <!-- Include ExoPlayer Web SDK -->
   <script src="https://cdn.jsdelivr.net/npm/exoplayer@2.18.7/dist/web/exoplayer.min.js"></script>
   <script>
     console.log("App initialization started at", new Date().toLocaleString());
     const channels = [
+      {name: "Test Channel - Big Buck Bunny", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"}, // Test channel
       {name: "Channel 1 - BTV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1709/output/1709-audio_113392_eng=113200-video=1692000.m3u8"},
       {name: "Channel 2 - ATN Bangla", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1716/output/index.m3u8"},
       {name: "Channel 3 - Channel I", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1723/output/index.m3u8"},
@@ -383,8 +380,9 @@
           typingSound = document.getElementById("typingSound"),
           loadingScreen = document.getElementById("loadingScreen"),
           loadingLogo = document.getElementById("loadingLogo"),
+          incompatibleBox = document.getElementById("incompatibleBox"),
           greetingText = document.getElementById("greetingText");
-    let currentIndex = 0, playingIndex = 0, player, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
+    let currentIndex = 0, playingIndex = 0, player, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false, useExoPlayer = true;
 
     // JavaScript-based typing animation with synchronized sound
     function typeText(element, text, duration) {
@@ -414,11 +412,20 @@
       addChar();
     }
 
-    // Network check function
-    function isOnline() {
-      const online = navigator.onLine;
-      console.log("Network status:", online ? "Online" : "Offline");
-      return online;
+    // Network check with ping
+    async function isOnline() {
+      if (!navigator.onLine) {
+        console.log("Navigator reports offline");
+        return false;
+      }
+      try {
+        const response = await fetch('https://www.google.com', { method: 'HEAD', cache: 'no-store' });
+        console.log("Network ping successful, status:", response.status);
+        return response.ok;
+      } catch (err) {
+        console.log("Network ping failed:", err.message);
+        return false;
+      }
     }
 
     function initializeApp() {
@@ -426,28 +433,7 @@
       const ua = navigator.userAgent,
             isSmartTV = /TV|BRAVIA|AFT|SmartTV|Tizen|Web0S|NetCast|AppleTV/i.test(ua);
       console.log("User Agent:", ua, "Is Smart TV:", isSmartTV);
-      if (!isSmartTV) {
-        console.log("Non-Smart TV detected, showing incompatible message");
-        document.getElementById("incompatibleBox").style.display = "block";
-        document.getElementById("container").style.display = "none";
-        document.getElementById("azinLogo").style.display = "none";
-        document.getElementById("greetingScreen").style.display = "none";
-        document.getElementById("loadingScreen").style.display = "none";
-        return;
-      }
-
-      // Check network status
-      if (!isOnline()) {
-        console.log("No network detected, showing error");
-        document.getElementById("incompatibleBox").style.display = "block";
-        document.getElementById("incompatibleBox").innerText = "No internet connection. Please check your network.";
-        document.getElementById("container").style.display = "none";
-        document.getElementById("azinLogo").style.display = "none";
-        document.getElementById("greetingScreen").style.display = "none";
-        document.getElementById("loadingScreen").style.display = "none";
-        return;
-      }
-
+      
       // Add particles for loading animation
       console.log("Creating 50 particles for loading animation");
       for (let i = 0; i < 50; i++) {
@@ -458,7 +444,6 @@
         p.style.animationDelay = `${Math.random() * 4}s`;
         loadingScreen.appendChild(p);
       }
-
       loadingLogo.addEventListener('load', () => {
         console.log("Loading logo loaded successfully");
       });
@@ -467,64 +452,93 @@
         loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
       });
 
-      // Show loading screen for 6 seconds
-      console.log("Showing loading screen");
-      setTimeout(() => {
-        console.log("Hiding loading screen");
-        loadingScreen.classList.add('hidden');
+      if (!isSmartTV) {
+        console.log("Non-Smart TV detected, showing incompatible message");
+        document.getElementById("container").style.display = "none";
+        document.getElementById("azinLogo").style.display = "none";
+        document.getElementById("greetingScreen").style.display = "none";
+        incompatibleBox.innerText = "Sorry, only Android TVs are supported for this app";
+        incompatibleBox.style.display = "block";
+        return;
+      }
+
+      // Check network status
+      isOnline().then(online => {
+        if (!online) {
+          console.log("No network detected, showing loading screen with error");
+          incompatibleBox.innerText = "No internet connection. Please check your network.";
+          incompatibleBox.style.display = "block";
+          return;
+        }
+
+        // Show loading screen for 6 seconds
+        console.log("Showing loading screen");
         setTimeout(() => {
-          loadingScreen.style.display = 'none';
-          console.log("Showing greeting screen");
-          greetingScreen.style.display = 'flex';
-          greetingScreen.classList.remove('hidden');
-          greetingScreen.classList.add('visible');
-          const greetingMessage = "Assalamualaikum, Welcome to our App";
-          typeText(greetingText, greetingMessage, 4000);
+          console.log("Hiding loading screen");
+          loadingScreen.classList.add('hidden');
           setTimeout(() => {
-            console.log("Hiding greeting screen");
-            greetingScreen.classList.remove('visible');
-            greetingScreen.classList.add('hidden');
+            loadingScreen.style.display = 'none';
+            console.log("Showing greeting screen");
+            greetingScreen.style.display = 'flex';
+            greetingScreen.classList.remove('hidden');
+            greetingScreen.classList.add('visible');
+            const greetingMessage = "Assalamualaikum, Welcome to our App";
+            typeText(greetingText, greetingMessage, 4000);
             setTimeout(() => {
-              greetingScreen.style.display = 'none';
-              console.log("Showing main app");
-              document.getElementById("container").style.display = 'block';
-              document.getElementById("azinLogo").style.display = 'block';
-              if (typeof exoPlayer === 'undefined') {
-                console.error("ExoPlayer failed to load");
-                showErrorVisual("Streaming library failed to load");
-              } else {
-                console.log("ExoPlayer loaded successfully");
-                initializeExoPlayer();
+              console.log("Hiding greeting screen");
+              greetingScreen.classList.remove('visible');
+              greetingScreen.classList.add('hidden');
+              setTimeout(() => {
+                greetingScreen.style.display = 'none';
+                console.log("Showing main app");
+                document.getElementById("container").style.display = 'block';
+                document.getElementById("azinLogo").style.display = 'block';
+                if (typeof exoPlayer !== 'undefined') {
+                  console.log("ExoPlayer loaded successfully");
+                  initializeExoPlayer();
+                } else {
+                  console.warn("ExoPlayer not loaded, falling back to native video");
+                  useExoPlayer = false;
+                }
                 loadChannel(0, false);
                 showPlayButton(false);
-              }
-            }, 1000);
-          }, 4000);
-        }, 1000);
-      }, 6000);
+              }, 1000);
+            }, 4000);
+          }, 1000);
+        }, 6000);
+      });
     }
 
     function initializeExoPlayer() {
       console.log("Initializing ExoPlayer");
-      player = new exoPlayer.Player(video);
-      player.addEventListener('error', (event) => {
-        console.error("ExoPlayer error:", event.detail);
-        showErrorVisual("Failed to load channel");
-        player.stop();
-        showPlayButton(false);
-      });
-      player.addEventListener('statechanged', (event) => {
-        if (event.detail.state === exoPlayer.Player.STATE_READY) {
-          console.log("ExoPlayer ready");
-          if (hasManuallyPlayed) {
-            player.play();
-            showPlayButton(true);
-          }
-        } else if (event.detail.state === exoPlayer.Player.STATE_ENDED || event.detail.state === exoPlayer.Player.STATE_IDLE) {
-          console.log("ExoPlayer stopped or ended");
+      try {
+ copier = new exoPlayer.Player(video);
+        player.addEventListener('error', (event) => {
+          console.error("ExoPlayer error:", event.detail);
+          showErrorVisual(`Failed to load channel: ${event.detail.message || 'Unknown error'}`);
+          player.stop();
           showPlayButton(false);
-        }
-      });
+          // Fallback to native video if ExoPlayer fails
+          useExoPlayer = false;
+          loadChannel(currentIndex, hasManuallyPlayed);
+        });
+        player.addEventListener('statechanged', (event) => {
+          console.log("ExoPlayer state:", event.detail.state);
+          if (event.detail.state === exoPlayer.Player.STATE_READY) {
+            console.log("ExoPlayer ready");
+            if (hasManuallyPlayed) {
+              player.play();
+              showPlayButton(true);
+            }
+          } else if (event.detail.state === exoPlayer.Player.STATE_ENDED || event.detail.state === exoPlayer.Player.STATE_IDLE) {
+            console.log("ExoPlayer stopped or ended");
+            showPlayButton(false);
+          }
+        });
+      } catch (err) {
+        console.error("ExoPlayer initialization failed:", err.message);
+        useExoPlayer = false;
+      }
     }
 
     function showErrorVisual(msg = "This channel is not available for now") {
@@ -592,17 +606,57 @@
       overlayTimeout = setTimeout(() => { overlay.style.opacity = '0'; }, 2000);
     }
 
-    function loadChannel(index, autoPlay = false) {
-      console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
+    function loadChannel(index, autoPlay = false, retries = 2) {
+      console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}, retries left: ${retries}`);
       currentIndex = index;
       playingIndex = index;
       hideErrorVisual();
-      if (player) {
+
+      if (useExoPlayer && player) {
         player.stop();
-        player.setSource(channels[index].url, autoPlay ? exoPlayer.Player.AUTOPLAY : exoPlayer.Player.PRELOAD);
+        try {
+          player.setSource(channels[index].url, autoPlay ? exoPlayer.Player.AUTOPLAY : exoPlayer.Player.PRELOAD);
+        } catch (err) {
+          console.error("ExoPlayer setSource error:", err.message);
+          if (retries > 0) {
+            console.log(`Retrying channel load, attempts left: ${retries}`);
+            setTimeout(() => loadChannel(index, autoPlay, retries - 1), 2000);
+          } else {
+            console.warn("ExoPlayer failed, falling back to native video");
+            useExoPlayer = false;
+            loadChannel(index, autoPlay, retries);
+          }
+        }
       } else {
-        console.error("ExoPlayer not initialized");
-        showErrorVisual("Streaming library not initialized");
+        console.log("Using native video element");
+        video.src = channels[index].url;
+        video.onloadeddata = () => {
+          console.log("Native video data loaded");
+          if (autoPlay) {
+            video.play().catch(err => {
+              console.error("Native video play error:", err.message);
+              if (retries > 0) {
+                console.log(`Retrying channel load, attempts left: ${retries}`);
+                setTimeout(() => loadChannel(index, autoPlay, retries - 1), 2000);
+              } else {
+                showErrorVisual("Failed to play channel");
+              }
+            });
+            showPlayButton(true);
+          } else {
+            showPlayButton(false);
+          }
+        };
+        video.onerror = () => {
+          console.error("Native video error");
+          if (retries > 0) {
+            console.log(`Retrying channel load, attempts left: ${retries}`);
+            setTimeout(() => loadChannel(index, autoPlay, retries - 1), 2000);
+          } else {
+            showErrorVisual("Failed to load channel");
+            showPlayButton(false);
+          }
+        };
       }
       video.muted = false;
       updateUI();
@@ -664,15 +718,34 @@
         if (listVisible) {
           loadChannel(currentIndex, hasManuallyPlayed);
         } else {
-          if (player.getState() !== exoPlayer.Player.STATE_PLAYING) {
-            console.log("Attempting to play video");
-            hasManuallyPlayed = true;
-            player.play().catch(err => { console.log("Play error:", err); });
-            showPlayButton(true);
+          if (useExoPlayer && player) {
+            if (player.getState() !== exoPlayer.Player.STATE_PLAYING) {
+              console.log("Attempting to play video");
+              hasManuallyPlayed = true;
+              player.play().catch(err => {
+                console.error("ExoPlayer play error:", err.message);
+                showErrorVisual("Failed to play channel");
+              });
+              showPlayButton(true);
+            } else {
+              console.log("Pausing video");
+              player.pause();
+              showPlayButton(false);
+            }
           } else {
-            console.log("Pausing video");
-            player.pause();
-            showPlayButton(false);
+            if (video.paused) {
+              console.log("Attempting to play native video");
+              hasManuallyPlayed = true;
+              video.play().catch(err => {
+                console.error("Native video play error:", err.message);
+                showErrorVisual("Failed to play channel");
+              });
+              showPlayButton(true);
+            } else {
+              console.log("Pausing native video");
+              video.pause();
+              showPlayButton(false);
+            }
           }
         }
         e.preventDefault();
@@ -709,15 +782,34 @@
         }
       }
       if (["MediaPlayPause", " "].includes(key)) {
-        if (player.getState() !== exoPlayer.Player.STATE_PLAYING) {
-          console.log("Attempting to play video via MediaPlayPause");
-          hasManuallyPlayed = true;
-          player.play().catch(err => { console.log("Play error:", err); });
-          showPlayButton(true);
+        if (useExoPlayer && player) {
+          if (player.getState() !== exoPlayer.Player.STATE_PLAYING) {
+            console.log("Attempting to play video via MediaPlayPause");
+            hasManuallyPlayed = true;
+            player.play().catch(err => {
+              console.error("ExoPlayer play error:", err.message);
+              showErrorVisual("Failed to play channel");
+            });
+            showPlayButton(true);
+          } else {
+            console.log("Pausing video via MediaPlayPause");
+            player.pause();
+            showPlayButton(false);
+          }
         } else {
-          console.log("Pausing video via MediaPlayPause");
-          player.pause();
-          showPlayButton(false);
+          if (video.paused) {
+            console.log("Attempting to play native video via MediaPlayPause");
+            hasManuallyPlayed = true;
+            video.play().catch(err => {
+              console.error("Native video play error:", err.message);
+              showErrorVisual("Failed to play channel");
+            });
+            showPlayButton(true);
+          } else {
+            console.log("Pausing native video via MediaPlayPause");
+            video.pause();
+            showPlayButton(false);
+          }
         }
         e.preventDefault();
       }
