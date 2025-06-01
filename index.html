@@ -359,7 +359,7 @@
       {name: "Channel 6 - Jamuna TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1701/output/1701-audio_113312_eng=113200-video=1692000.m3u8"},
       {name: "Channel 7 - Channel 24", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1703/output/1703-audio_113332_eng=113200-video=1692000.m3u8"},
       {name: "Channel 8 - Ekushey ETV", url: "http://210.4.72.204/hls-live/livepkgr/_definst_/liveevent/livestream3.m3u8"},
-      {name: "Channel 9 - Massranga TV", url: "https://mtv.sunplex.live/MAASRANGA-TV/tracks-v1a1/mono.m3u8"},
+      {name: "Channel 9 - Massranga TV", url: "https://mtv.sunplex.live/MAASRANGA-TV/tracks-v1a1/mono.m3u8", fallbackUrl: ""},
       {name: "Channel 10 - Bangla Waz", url: "https://live20.bozztv.com/giatvplayout7/giatv-209617/tracks-v1a1/mono.ts.m3u8"},
       {name: "Channel 11 - Peace TV Bangla", url: "https://dzkyvlfyge.erbvr.com/PeaceTvBangla/index.m3u8"},
       {name: "Channel 12 - Al Istiqima", url: "http://jmc-live.ercdn.net/alistiqama/alistiqama_576p.m3u8"},
@@ -388,10 +388,54 @@
     function checkNetworkStatus() {
       if (!navigator.onLine) {
         console.log("No network connection detected via navigator.onLine");
-        showErrorVisual("No internet connection. Please check your network and try again.");
+        showErrorVisual("No internet connection. Please check your network and try again.", true);
         return false;
       }
       return true;
+    }
+
+    // Modified showErrorVisual to handle network errors without static noise
+    function showErrorVisual(msg = "This channel is not available for now", isNetworkError = false) {
+      console.log("Showing error:", msg);
+      video.style.display = "none";
+      errorBox.innerText = msg;
+      errorBox.style.display = "block";
+      // Only show static noise and play sound for non-network errors
+      if (!isNetworkError) {
+        staticNoise.style.opacity = "1";
+        staticNoise.style.display = "block";
+        function attemptPlayNoiseSound(retries = 3, delay = 500) {
+          noiseSound.pause();
+          noiseSound.currentTime = 0;
+          noiseSound.load();
+          noiseSound.play().then(() => {
+            console.log("Noise sound playing successfully");
+          }).catch(err => {
+            console.error("Noise sound play error:", err.message);
+            if (retries > 0) {
+              console.log(`Retrying noise sound playback, attempts left: ${retries}`);
+              setTimeout(() => attemptPlayNoiseSound(retries - 1, delay), delay);
+            } else {
+              console.error("Failed to play noise sound after retries");
+            }
+          });
+        }
+        attemptPlayNoiseSound();
+      } else {
+        staticNoise.style.display = "none";
+        noiseSound.pause();
+        noiseSound.currentTime = 0;
+      }
+    }
+
+    function hideErrorVisual() {
+      console.log("Hiding error visual");
+      video.style.display = "block";
+      staticNoise.style.opacity = "0";
+      staticNoise.style.display = "none";
+      errorBox.style.display = "none";
+      noiseSound.pause();
+      noiseSound.currentTime = 0;
     }
 
     // JavaScript-based typing animation with synchronized sound
@@ -437,7 +481,12 @@
         return;
       }
 
-      if (!checkNetworkStatus()) return;
+      // Check network before showing loading screen
+      if (!checkNetworkStatus()) {
+        document.getElementById("loadingScreen").style.display = "none";
+        document.getElementById("container").style.display = "block"; // Show container to display errorBox
+        return;
+      }
 
       console.log("Creating 50 particles for loading animation");
       for (let i = 0; i < 50; i++) {
@@ -492,42 +541,6 @@
       }, 6000);
     }
 
-    function showErrorVisual(msg = "This channel is not available for now") {
-      console.log("Showing error:", msg);
-      video.style.display = "none";
-      staticNoise.style.opacity = "1";
-      staticNoise.style.display = "block";
-      errorBox.innerText = msg;
-      errorBox.style.display = "block";
-      function attemptPlayNoiseSound(retries = 3, delay = 500) {
-        noiseSound.pause();
-        noiseSound.currentTime = 0;
-        noiseSound.load();
-        noiseSound.play().then(() => {
-          console.log("Noise sound playing successfully");
-        }).catch(err => {
-          console.error("Noise sound play error:", err.message);
-          if (retries > 0) {
-            console.log(`Retrying noise sound playback, attempts left: ${retries}`);
-            setTimeout(() => attemptPlayNoiseSound(retries - 1, delay), delay);
-          } else {
-            console.error("Failed to play noise sound after retries");
-          }
-        });
-      }
-      attemptPlayNoiseSound();
-    }
-
-    function hideErrorVisual() {
-      console.log("Hiding error visual");
-      video.style.display = "block";
-      staticNoise.style.opacity = "0";
-      staticNoise.style.display = "none";
-      errorBox.style.display = "none";
-      noiseSound.pause();
-      noiseSound.currentTime = 0;
-    }
-
     setTimeout(() => {
       channels.forEach((ch, i) => {
         const div = document.createElement("div");
@@ -571,63 +584,80 @@
         hls.destroy();
         hls = null;
       }
-      const url = channels[index].url;
-      const isHls = isHlsStream(url);
+      let url = channels[index].url;
+      let isHls = isHlsStream(url);
+      let attemptFallback = false;
 
-      if (isHls && typeof Hls !== 'undefined' && Hls.isSupported()) {
-        console.log("Detected HLS stream, using hls.js");
-        hls = new Hls();
-        hls.loadSource(url);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          console.log("HLS manifest parsed");
-          if (autoPlay) {
-            video.play().catch(err => {
-              console.log("Play error:", err);
-              showErrorVisual("Failed to play channel. Please check your network or try another channel.");
-            });
-            showPlayButton(true);
-          } else {
+      function tryLoadStream(sourceUrl) {
+        if (isHls && typeof Hls !== 'undefined' && Hls.isSupported()) {
+          console.log("Detected HLS stream, using hls.js");
+          hls = new Hls();
+          hls.loadSource(sourceUrl);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            console.log("HLS manifest parsed");
+            if (autoPlay) {
+              video.play().catch(err => {
+                console.log("Play error:", err);
+                showErrorVisual("Failed to play channel. Please check your network or try another channel.");
+              });
+              showPlayButton(true);
+            } else {
+              showPlayButton(false);
+            }
+          });
+          hls.on(Hls.Events.ERROR, (_, data) => {
+            console.error("HLS error details:", data.type, data.details, data.fatal, data.networkDetails || "No network details");
+            if (data.type === Hls.ErrorTypes.NETWORK_ERROR || data.networkDetails) {
+              console.log("Network-related HLS error detected");
+              showErrorVisual("No internet connection. Please check your network and try again.", true);
+            } else if (data.fatal && !attemptFallback && channels[index].fallbackUrl) {
+              console.log("Attempting fallback URL:", channels[index].fallbackUrl);
+              attemptFallback = true;
+              url = channels[index].fallbackUrl;
+              isHls = isHlsStream(url);
+              tryLoadStream(url);
+            } else if (data.fatal) {
+              showErrorVisual("This channel is not available or unsupported. Please try another channel.");
+            }
+            video.pause();
             showPlayButton(false);
-          }
-        });
-        hls.on(Hls.Events.ERROR, (_, data) => {
-          console.error("HLS error:", data);
-          if (data.type === Hls.ErrorTypes.NETWORK_ERROR || data.networkDetails) {
-            console.log("Network-related HLS error detected");
-            showErrorVisual("No internet connection. Please check your network and try again.");
-          } else if (data.fatal) {
-            showErrorVisual("This channel is not available or unsupported. Please try another channel.");
-          }
-          video.pause();
-          showPlayButton(false);
-        });
-      } else {
-        console.log(`Detected non-HLS stream (${url.split('.').pop()}), using native video`);
-        video.src = url;
-        video.onerror = () => {
-          console.error("Video element error for URL:", url);
-          if (!navigator.onLine) {
-            showErrorVisual("No internet connection. Please check your network and try again.");
-          } else {
-            showErrorVisual("This channel is not available or unsupported. Please try another channel.");
-          }
-          video.pause();
-          showPlayButton(false);
-        };
-        video.onloadeddata = () => {
-          console.log("Video data loaded");
-          if (autoPlay) {
-            video.play().catch(err => {
-              console.log("Play error:", err);
-              showErrorVisual("Failed to play channel. Please check your network or try another channel.");
-            });
-            showPlayButton(true);
-          } else {
+          });
+        } else {
+          console.log(`Detected non-HLS stream (${sourceUrl.split('.').pop()}), using native video`);
+          video.src = sourceUrl;
+          video.onerror = () => {
+            console.error("Video element error for URL:", sourceUrl);
+            if (!navigator.onLine) {
+              showErrorVisual("No internet connection. Please check your network and try again.", true);
+            } else if (!attemptFallback && channels[index].fallbackUrl) {
+              console.log("Attempting fallback URL:", channels[index].fallbackUrl);
+              attemptFallback = true;
+              url = channels[index].fallbackUrl;
+              isHls = isHlsStream(url);
+              tryLoadStream(url);
+            } else {
+              showErrorVisual("This channel is not available for now");
+            }
+            video.pause();
             showPlayButton(false);
-          }
-        };
+          };
+          video.onloadeddata = () => {
+            console.log("Video data loaded");
+            if (autoPlay) {
+              video.play().catch(err => {
+                console.log("Play error:", err);
+                showErrorVisual("Failed to play channel. Please check your network or try another channel.");
+              });
+              showPlayButton(true);
+            } else {
+              showPlayButton(false);
+            }
+          };
+        }
       }
+
+      tryLoadStream(url);
       video.muted = false;
       updateUI();
       hideChannelList();
@@ -673,12 +703,16 @@
     window.addEventListener('online', () => {
       console.log("Network is back online");
       hideErrorVisual();
-      loadChannel(currentIndex, hasManuallyPlayed);
+      // Show loading and greeting screens before reloading channel
+      document.getElementById("container").style.display = "none";
+      document.getElementById("azinLogo").style.display = "none";
+      document.getElementById("loadingScreen").style.display = "flex";
+      initializeApp(); // Restart initialization to show loading and greeting
     });
 
     window.addEventListener('offline', () => {
       console.log("Network is offline");
-      showErrorVisual("No internet connection. Please check your network and try again.");
+      showErrorVisual("No internet connection. Please check your network and try again.", true);
     });
 
     document.addEventListener('keydown', e => {
