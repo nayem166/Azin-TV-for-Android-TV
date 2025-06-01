@@ -87,6 +87,7 @@
       justify-content: center;
       cursor: pointer;
       z-index: 100;
+      willavsett
       will-change: transform,opacity;
       transition: opacity 0.5s ease;
     }
@@ -330,10 +331,10 @@
     <div class="logo-container">
       <img id="loadingLogo" src="https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png" alt="">
     </div>
-    <div class="title"></div>
+    <div class="title">Smart TV Live</div>
   </div>
   <div id="greetingScreen" class="hidden">
-    <div id="greetingText"></div> <!-- Text will be set via JavaScript -->
+    <div id="greetingText"></div>
   </div>
   <div id="container">
     <div class="channel-list" id="channelList">
@@ -361,10 +362,9 @@
       {name: "Channel 6 - Jamuna TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1701/output/1701-audio_113312_eng=113200-video=1692000.m3u8"},
       {name: "Channel 7 - Channel 24", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1703/output/1703-audio_113332_eng=113200-video=1692000.m3u8"},
       {name: "Channel 8 - Ekushey ETV", url: "http://210.4.72.204/hls-live/livepkgr/_definst_/liveevent/livestream3.m3u8"},
-     {name: "Channel 9 - Independent TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1704/output/master.m3u8"},
+      {name: "Channel 9 - Independent TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1704/output/master.m3u8"},
       {name: "Channel 10 - Deepto TV", url: "https://byphdgllyk.gpcdn.net/hls/deeptotv/index.m3u8"},
       {name: "Channel 11 - Massranga TV", url: "https://mtv.sunplex.live/MAASRANGA-TV/tracks-v1a1/mono.m3u8"},
-      {name: 
       {name: "Channel 12 - Bangla Waz", url: "https://live20.bozztv.com/giatvplayout7/giatv-209617/tracks-v1a1/mono.ts.m3u8"},
       {name: "Channel 13 - Peace TV Bangla", url: "https://dzkyvlfyge.erbvr.com/PeaceTvBangla/index.m3u8"},
       {name: "Channel 14 - Al Istiqima", url: "http://jmc-live.ercdn.net/alistiqama/alistiqama_576p.m3u8"},
@@ -372,12 +372,11 @@
       {name: "Channel 16 - Gopa Bhar Live", url: "https://live20.bozztv.com/giatvplayout7/giatv-209611/tracks-v1a1/mono.ts.m3u8"},
       {name: "Channel 17 - PBS Kids", url: "https://2-fss-2.streamhoster.com/pl_140/amlst:200914-1298290/playlist.m3u8"},
       {name: "Channel 18 - TV9 Bangla", url: "https://dyjmyiv3bp2ez.cloudfront.net/pub-iotv9banaen8yq/liveabr/playlist.m3u8"},
-{name: "Channel 19 - FIFA+", url: "https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8"},
-{name: "Channel 20 - Ten Sports", url: "https://off1.gogohaalmal.com:1686/hls/tenspk.m3u8?md5=WykzXfTqxBBd6viZyyYdpA&expires=1748760489"},
+      {name: "Channel 19 - FIFA+", url: "https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8"},
+      {name: "Channel 20 - Ten Sports", url: "https://off1.gogohaalmal.com:1686/hls/tenspk.m3u8?md5=WykzXfTqxBBd6viZyyYdpA&expires=1748760489"},
       {name: "Channel 21 - PTV Sports", url: "https://off1.gogohaalmal.com:1686/hls/ptvpk.m3u8?md5=nG5LHjbMzwEDxsian2EeGA&expires=1748760488"}
     ];
-    
-  
+
     const video = document.getElementById("player"),
           list = document.getElementById("channelList"),
           overlay = document.getElementById("channelNumberOverlay"),
@@ -396,14 +395,13 @@
     function typeText(element, text, duration) {
       console.log("Starting JavaScript typing animation");
       element.textContent = "";
-      element.style.width = "auto"; // Disable CSS animation
+      element.style.width = "auto";
       element.style.animation = "none";
       const chars = text.split("");
       const charTime = duration / chars.length;
       let i = 0;
 
-      // Ensure typing sound is loaded and play it immediately
-      typingSound.load(); // Reset sound to start
+      typingSound.load();
       typingSound.play().catch(err => console.error("Typing sound play error:", err.message));
 
       function addChar() {
@@ -413,13 +411,11 @@
           setTimeout(addChar, charTime);
         } else {
           console.log("JavaScript typing animation completed");
-          // Stop typing sound when animation completes
           typingSound.pause();
           typingSound.currentTime = 0;
           console.log("Typing sound stopped");
         }
       }
-      // Start typing immediately
       addChar();
     }
 
@@ -436,7 +432,7 @@
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
         document.getElementById("loadingScreen").style.display = "none";
-        return; // Exit early for non-Smart TVs
+        return;
       }
 
       // Add particles for loading animation
@@ -462,51 +458,44 @@
       // Function to check network and proceed
       function checkNetworkAndProceed() {
         if (!navigator.onLine) {
-          console.log("No network detected, keeping loading screen visible");
-          // Retry after a delay
-          setTimeout(checkNetworkAndProceed, 3000); // Retry every 3 seconds
+          console.log("No network detected, showing loading screen");
+          loadingScreen.style.display = "flex";
+          setTimeout(checkNetworkAndProceed, 3000);
           return;
         }
 
         console.log("Network detected, proceeding with app initialization");
-        // Show loading screen for 6 seconds
-        console.log("Showing loading screen");
+        loadingScreen.classList.add('hidden');
         setTimeout(() => {
-          console.log("Hiding loading screen");
-          loadingScreen.classList.add('hidden');
+          loadingScreen.style.display = 'none';
+          console.log("Showing greeting screen");
+          greetingScreen.style.display = 'flex';
+          greetingScreen.classList.remove('hidden');
+          greetingScreen.classList.add('visible');
+          const greetingMessage = "Assalamualaikum, Welcome to our App";
+          typeText(greetingText, greetingMessage, 4000);
           setTimeout(() => {
-            loadingScreen.style.display = 'none';
-            console.log("Showing greeting screen");
-            greetingScreen.style.display = 'flex';
-            greetingScreen.classList.remove('hidden');
-            greetingScreen.classList.add('visible');
-            // Start typing animation with synchronized sound
-            const greetingMessage = "Assalamualaikum, Welcome to our App";
-            typeText(greetingText, greetingMessage, 4000);
+            console.log("Hiding greeting screen");
+            greetingScreen.classList.remove('visible');
+            greetingScreen.classList.add('hidden');
             setTimeout(() => {
-              console.log("Hiding greeting screen");
-              greetingScreen.classList.remove('visible');
-              greetingScreen.classList.add('hidden');
-              setTimeout(() => {
-                greetingScreen.style.display = 'none';
-                console.log("Showing main app");
-                document.getElementById("container").style.display = 'block';
-                document.getElementById("azinLogo").style.display = 'block';
-                if (typeof Hls === 'undefined') {
-                  console.error("hls.js failed to load");
-                  showErrorVisual("Streaming library failed to load");
-                } else {
-                  console.log("hls.js loaded successfully");
-                  loadChannel(0, false);
-                  showPlayButton(false);
-                }
-              }, 1000);
-            }, 4000);
-          }, 1000);
-        }, 6000);
+              greetingScreen.style.display = 'none';
+              console.log("Showing main app");
+              document.getElementById("container").style.display = 'block';
+              document.getElementById("azinLogo").style.display = 'block';
+              if (typeof Hls === 'undefined') {
+                console.error("hls.js failed to load");
+                showErrorVisual("Streaming library failed to load");
+              } else {
+                console.log("hls.js loaded successfully");
+                loadChannel(0, false);
+                showPlayButton(false);
+              }
+            }, 1000);
+          }, 4000);
+        }, 1000);
       }
 
-      // Start checking network
       checkNetworkAndProceed();
     }
 
@@ -517,11 +506,10 @@
       staticNoise.style.display = "block";
       errorBox.innerText = msg;
       errorBox.style.display = "block";
-      // Reset and play noise sound with retry mechanism
       function attemptPlayNoiseSound(retries = 3, delay = 500) {
-        noiseSound.pause(); // Ensure sound is stopped
-        noiseSound.currentTime = 0; // Reset to start
-        noiseSound.load(); // Reload to ensure readiness
+        noiseSound.pause();
+        noiseSound.currentTime = 0;
+        noiseSound.load();
         noiseSound.play().then(() => {
           console.log("Noise sound playing successfully");
         }).catch(err => {
