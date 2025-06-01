@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart TV Live App</title>
-  <link rel="preload" href="https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png" as="image">
   <style>
     * {
       margin: 0;
@@ -180,6 +179,7 @@
       display: none;
       will-change: opacity;
     }
+    /* Loading Animation Styles */
     #loadingScreen {
       position: fixed;
       top: 0;
@@ -203,7 +203,7 @@
       width: 300px;
       height: auto;
       opacity: 0;
-      animation: fadeIn 1s ease forwards;
+      animation: fadeIn 2s ease 1s forwards;
       transform: scale(0.95);
       z-index: 2;
     }
@@ -261,63 +261,16 @@
       font-size: 2.2rem;
       color: #ffffff;
       letter-spacing: 4px;
-      animation: fadeIn 1s ease forwards;
+      animation: fadeIn 2s ease 2.5s forwards;
       opacity: 0;
       z-index: 2;
-    }
-    #noInternetScreen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: black;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 10002;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-    #noInternetScreen.visible {
-      opacity: 1;
-    }
-    #noInternetIcon {
-      width: 80px;
-      height: 80px;
-      opacity: 0.7;
-    }
-    #noInternetText {
-      font-size: 1.5rem;
-      margin: 10px 0;
-      text-align: center;
-      color: #ccc;
-    }
-    #noInternetSubtext {
-      font-size: 1rem;
-      color: #888;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    #retryButton {
-      padding: 10px 20px;
-      font-size: 1.2rem;
-      color: #fff;
-      background-color: #ccc;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    #retryButton:hover, #retryButton:focus {
-      background-color: #bbb;
     }
     @keyframes fadeIn {
       to {
         opacity: 1;
       }
     }
+    /* Greeting Screen Styles */
     #greetingScreen {
       position: fixed;
       top: 0;
@@ -379,17 +332,8 @@
     </div>
     <div class="title"></div>
   </div>
-  <div id="noInternetScreen">
-    <svg id="noInternetIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M2 2l20 20M12 2v20M5 12h14M12 5v14" />
-      <line x1="5" y1="5" x2="19" y2="19" style="stroke: #fff; stroke-width: 3;" />
-    </svg>
-    <div id="noInternetText">No internet connection</div>
-    <div id="noInternetSubtext">Check your connection and try again</div>
-    <button id="retryButton">Retry</button>
-  </div>
   <div id="greetingScreen" class="hidden">
-    <div id="greetingText"></div>
+    <div id="greetingText"></div> <!-- Text will be set via JavaScript -->
   </div>
   <div id="container">
     <div class="channel-list" id="channelList">
@@ -410,21 +354,26 @@
     console.log("App initialization started at", new Date().toLocaleString());
     const channels = [
       {name: "Channel 1 - BTV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1709/output/1709-audio_113392_eng=113200-video=1692000.m3u8"},
-      {name: "Channel 2 - ATN Bangla", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1716/output/index.m3u8"},
+      {name: "Channel 2 - NTV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1716/output/index.m3u8"},
       {name: "Channel 3 - Channel I", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1723/output/index.m3u8"},
       {name: "Channel 4 - Ekattor TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1705/output/1705-audio_113352_eng=113200-video=1692000.m3u8"},
       {name: "Channel 5 - Somoy TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1702/output/1702-audio_113322_eng=113200-video=1692000.m3u8"},
       {name: "Channel 6 - Jamuna TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1701/output/1701-audio_113312_eng=113200-video=1692000.m3u8"},
       {name: "Channel 7 - Channel 24", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1703/output/1703-audio_113332_eng=113200-video=1692000.m3u8"},
       {name: "Channel 8 - Ekushey ETV", url: "http://210.4.72.204/hls-live/livepkgr/_definst_/liveevent/livestream3.m3u8"},
-      {name: "Channel 9 - Massranga TV", url: "https://mtv.sunplex.live/MAASRANGA-TV/tracks-v1a1/mono.m3u8"},
+      {name: "Channel 9 - Deepto TV", url: "https://byphdgllyk.gpcdn.net/hls/deeptotv/index.m3u8"},
       {name: "Channel 10 - Bangla Waz", url: "https://live20.bozztv.com/giatvplayout7/giatv-209617/tracks-v1a1/mono.ts.m3u8"},
       {name: "Channel 11 - Peace TV Bangla", url: "https://dzkyvlfyge.erbvr.com/PeaceTvBangla/index.m3u8"},
       {name: "Channel 12 - Al Istiqima", url: "http://jmc-live.ercdn.net/alistiqama/alistiqama_576p.m3u8"},
       {name: "Channel 13 - Iqra TV", url: "https://ap02.iqplay.tv:8082/iqb8002/iq53la/playlist.m3u8"},
       {name: "Channel 14 - Gopa Bhar Live", url: "https://live20.bozztv.com/giatvplayout7/giatv-209611/tracks-v1a1/mono.ts.m3u8"},
       {name: "Channel 15 - PBS Kids", url: "https://2-fss-2.streamhoster.com/pl_140/amlst:200914-1298290/playlist.m3u8"},
-      {name: "Channel 16 - TV9 Bangla", url: "https://dyjmyiv3bp2ez.cloudfront.net/pub-iotv9banaen8yq/liveabr/playlist.m3u8"}
+      {name: "Channel 16 - TV9 Bangla", url: "https://dyjmyiv3bp2ez.cloudfront.net/pub-iotv9banaen8yq/liveabr/playlist.m3u8"},
+{name: "Channel 17 - FIFA+", url: "https://dyjmyiv3bp2ez.cloudfront.net/pub-iotv9banaen8yq/liveabr/playlist.m3u8"},
+{name: "Channel 18 - Ten Sports", url: "https://dyjmyiv3bp2ez.cloudfront.net/pub-iotv9banaen8yq/liveabr/playlist.m3u8"},
+      {name: "Channel 19 - PTV Sports", url: "https://dyjmyiv3bp2ez.cloudfront.net/pub-iotv9banaen8yq/liveabr/playlist.m3u8"}
+    ];
+    
     ];
     const video = document.getElementById("player"),
           list = document.getElementById("channelList"),
@@ -437,21 +386,23 @@
           typingSound = document.getElementById("typingSound"),
           loadingScreen = document.getElementById("loadingScreen"),
           loadingLogo = document.getElementById("loadingLogo"),
-          greetingText = document.getElementById("greetingText"),
-          noInternetScreen = document.getElementById("noInternetScreen"),
-          retryButton = document.getElementById("retryButton");
+          greetingText = document.getElementById("greetingText");
     let currentIndex = 0, playingIndex = 0, hls, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
 
+    // JavaScript-based typing animation with synchronized sound
     function typeText(element, text, duration) {
       console.log("Starting JavaScript typing animation");
       element.textContent = "";
-      element.style.width = "auto";
+      element.style.width = "auto"; // Disable CSS animation
       element.style.animation = "none";
       const chars = text.split("");
       const charTime = duration / chars.length;
       let i = 0;
-      typingSound.load();
+
+      // Ensure typing sound is loaded and play it immediately
+      typingSound.load(); // Reset sound to start
       typingSound.play().catch(err => console.error("Typing sound play error:", err.message));
+
       function addChar() {
         if (i < chars.length) {
           element.textContent += chars[i];
@@ -459,11 +410,13 @@
           setTimeout(addChar, charTime);
         } else {
           console.log("JavaScript typing animation completed");
+          // Stop typing sound when animation completes
           typingSound.pause();
           typingSound.currentTime = 0;
           console.log("Typing sound stopped");
         }
       }
+      // Start typing immediately
       addChar();
     }
 
@@ -472,6 +425,7 @@
       const ua = navigator.userAgent,
             isSmartTV = /TV|BRAVIA|AFT|SmartTV|Tizen|Web0S|NetCast|AppleTV/i.test(ua);
       console.log("User Agent:", ua, "Is Smart TV:", isSmartTV);
+
       if (!isSmartTV) {
         console.log("Non-Smart TV detected, showing incompatible message");
         document.getElementById("incompatibleBox").style.display = "block";
@@ -479,9 +433,10 @@
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
         document.getElementById("loadingScreen").style.display = "none";
-        document.getElementById("noInternetScreen").style.display = "none";
-        return;
+        return; // Exit early for non-Smart TVs
       }
+
+      // Add particles for loading animation
       console.log("Creating 50 particles for loading animation");
       for (let i = 0; i < 50; i++) {
         const p = document.createElement('div');
@@ -491,95 +446,65 @@
         p.style.animationDelay = `${Math.random() * 4}s`;
         loadingScreen.appendChild(p);
       }
-      let logoLoaded = false;
+
+      // Check if logo loads
       loadingLogo.addEventListener('load', () => {
         console.log("Loading logo loaded successfully");
-        logoLoaded = true;
       });
       loadingLogo.addEventListener('error', () => {
         console.error("Failed to load logo, using fallback");
         loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
-        logoLoaded = true;
       });
-      setTimeout(() => {
-        if (!logoLoaded) {
-          console.warn("Logo loading timeout, switching to fallback");
-          loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
-          logoLoaded = true;
-        }
-      }, 5000);
-      function checkInternet() {
+
+      // Function to check network and proceed
+      function checkNetworkAndProceed() {
         if (!navigator.onLine) {
-          console.log("No internet connection detected");
-          noInternetScreen.classList.add("visible");
-          loadingScreen.classList.add("hidden");
-          setTimeout(checkInternet, 5000);
-        } else {
-          console.log("Internet connection detected");
-          noInternetScreen.classList.remove("visible");
-          proceedWithApp();
+          console.log("No network detected, keeping loading screen visible");
+          // Retry after a delay
+          setTimeout(checkNetworkAndProceed, 3000); // Retry every 3 seconds
+          return;
         }
-      }
-      function proceedWithApp() {
-        function waitForLogo() {
-          if (logoLoaded) {
-            console.log("Showing loading screen");
+
+        console.log("Network detected, proceeding with app initialization");
+        // Show loading screen for 6 seconds
+        console.log("Showing loading screen");
+        setTimeout(() => {
+          console.log("Hiding loading screen");
+          loadingScreen.classList.add('hidden');
+          setTimeout(() => {
+            loadingScreen.style.display = 'none';
+            console.log("Showing greeting screen");
+            greetingScreen.style.display = 'flex';
+            greetingScreen.classList.remove('hidden');
+            greetingScreen.classList.add('visible');
+            // Start typing animation with synchronized sound
+            const greetingMessage = "Assalamualaikum, Welcome to our App";
+            typeText(greetingText, greetingMessage, 4000);
             setTimeout(() => {
-              console.log("Hiding loading screen");
-              loadingScreen.classList.add('hidden');
+              console.log("Hiding greeting screen");
+              greetingScreen.classList.remove('visible');
+              greetingScreen.classList.add('hidden');
               setTimeout(() => {
-                loadingScreen.style.display = 'none';
-                console.log("Showing greeting screen");
-                greetingScreen.style.display = 'flex';
-                greetingScreen.classList.remove('hidden');
-                greetingScreen.classList.add('visible');
-                const greetingMessage = "Assalamualaikum, Welcome to our App";
-                typeText(greetingText, greetingMessage, 4000);
-                setTimeout(() => {
-                  console.log("Hiding greeting screen");
-                  greetingScreen.classList.remove('visible');
-                  greetingScreen.classList.add('hidden');
-                  setTimeout(() => {
-                    greetingScreen.style.display = 'none';
-                    console.log("Showing main app");
-                    document.getElementById("container").style.display = 'block';
-                    document.getElementById("azinLogo").style.display = 'block';
-                    if (typeof Hls === 'undefined') {
-                      console.error("hls.js failed to load");
-                      showErrorVisual("Streaming library failed to load");
-                    } else {
-                      console.log("hls.js loaded successfully");
-                      loadChannel(0, false);
-                      showPlayButton(false);
-                    }
-                  }, 1000);
-                }, 4000);
+                greetingScreen.style.display = 'none';
+                console.log("Showing main app");
+                document.getElementById("container").style.display = 'block';
+                document.getElementById("azinLogo").style.display = 'block';
+                if (typeof Hls === 'undefined') {
+                  console.error("hls.js failed to load");
+                  showErrorVisual("Streaming library failed to load");
+                } else {
+                  console.log("hls.js loaded successfully");
+                  loadChannel(0, false);
+                  showPlayButton(false);
+                }
               }, 1000);
-            }, 6000);
-          } else {
-            setTimeout(waitForLogo, 100);
-          }
-        }
-        waitForLogo();
+            }, 4000);
+          }, 1000);
+        }, 6000);
       }
-      retryButton.addEventListener('click', () => {
-        console.log("Retry button clicked, reloading app");
-        window.location.reload();
-      });
-      checkInternet();
-      window.addEventListener('online', () => {
-        console.log("Internet connection restored");
-        noInternetScreen.classList.remove("visible");
-        proceedWithApp();
-      });
-      window.addEventListener('offline', () => {
-        console.log("Internet connection lost");
-        noInternetScreen.classList.add("visible");
-        loadingScreen.classList.add("hidden");
-        document.getElementById("container").style.display = "none";
-        document.getElementById("azinLogo").style.display = "none";
-        document.getElementById("greetingScreen").style.display = "none";
-      });
+
+      // Start checking network
+      checkNetworkAndProceed();
     }
 
     function showErrorVisual(msg = "This channel is not available for now") {
@@ -589,10 +514,11 @@
       staticNoise.style.display = "block";
       errorBox.innerText = msg;
       errorBox.style.display = "block";
+      // Reset and play noise sound with retry mechanism
       function attemptPlayNoiseSound(retries = 3, delay = 500) {
-        noiseSound.pause();
-        noiseSound.currentTime = 0;
-        noiseSound.load();
+        noiseSound.pause(); // Ensure sound is stopped
+        noiseSound.currentTime = 0; // Reset to start
+        noiseSound.load(); // Reload to ensure readiness
         noiseSound.play().then(() => {
           console.log("Noise sound playing successfully");
         }).catch(err => {
@@ -648,15 +574,6 @@
     }
 
     function loadChannel(index, autoPlay = false) {
-      if (!navigator.onLine) {
-        console.log("No internet connection, showing no internet screen");
-        noInternetScreen.classList.add("visible");
-        loadingScreen.classList.add("hidden");
-        document.getElementById("container").style.display = "none";
-        document.getElementById("azinLogo").style.display = "none";
-        document.getElementById("greetingScreen").style.display = "none";
-        return;
-      }
       console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
       currentIndex = index;
       playingIndex = index;
@@ -750,12 +667,6 @@
     document.addEventListener('keydown', e => {
       const key = e.key, code = e.keyCode;
       console.log(`Key pressed: ${key} (code: ${code})`);
-      if (!navigator.onLine && (key === "Enter" || code === 13)) {
-        console.log("Enter key pressed while offline, triggering retry");
-        window.location.reload();
-        e.preventDefault();
-        return;
-      }
       if (key >= "0" && key <= "9") {
         numberInput += key;
         showOverlay(numberInput);
