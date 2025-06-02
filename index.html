@@ -361,34 +361,42 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 80px;
-      aspect-ratio: 1;
+      width: 100px;
+      height: 100px;
       display: none;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 102, 0, 0.8) 10%, transparent 10%) center/100% 100%;
-      background-size: 10% 100%, 100% 10%;
-      animation: l23 1s infinite linear;
       z-index: 99;
-      filter: drop-shadow(0 0 12px rgba(255, 102, 0, 0.7));
     }
-    #bitrateDisplay {
+    .loader::before {
+      content: '';
+      box-sizing: border-box;
       position: absolute;
-      top: calc(50% + 50px); /* Position below the loader */
-      left: 50%;
-      transform: translateX(-50%);
-      color: #fff;
-      font-size: 24px;
-      font-weight: 500;
-      background: rgba(0, 0, 0, 0.7);
-      padding: 8px 16px;
-      border-radius: 8px;
-      z-index: 99;
-      display: none;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
+      top: 0;
+      left: 0;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 4px solid transparent;
+      border-top-color: #ffaa00;
+      border-right-color: rgba(255, 170, 0, 0.3);
+      animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+      filter: drop-shadow(0 0 10px rgba(255, 170, 0, 0.5));
     }
-    @keyframes l23 {
-      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    .loader::after {
+      content: '';
+      box-sizing: border-box;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 4px solid transparent;
+      border-top-color: rgba(255, 255, 255, 0.8);
+      animation: spin 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite reverse;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -410,7 +418,6 @@
     </div>
     <div id="staticNoise"></div>
     <div class="loader" id="channelLoader"></div>
-    <div id="bitrateDisplay">Buffering...</div>
     <audio id="noiseSound" src="https://cdn.pixabay.com/audio/2025/04/06/audio_513747fd8d.mp3" preload="auto" loop></audio>
     <audio id="typingSound" src="https://assets.mixkit.co/active_storage/sfx/1392/1392-preview.mp3" preload="auto"></audio>
     <video id="player" playsinline controlslist="nodownload noplaybackrate" disablePictureInPicture></video>
@@ -460,8 +467,7 @@
           loadingScreen = document.getElementById("loadingScreen"),
           loadingLogo = document.getElementById("loadingLogo"),
           greetingText = document.getElementById("greetingText"),
-          channelLoader = document.getElementById("channelLoader"),
-          bitrateDisplay = document.getElementById("bitrateDisplay");
+          channelLoader = document.getElementById("channelLoader");
     let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
 
     function typeText(element, text, duration) {
@@ -606,7 +612,6 @@
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
         channelLoader.style.display = "none";
-        bitrateDisplay.style.display = "none";
       });
     }
 
@@ -618,7 +623,6 @@
       errorBox.innerText = msg;
       errorBox.style.display = "block";
       channelLoader.style.display = "none";
-      bitrateDisplay.style.display = "none";
       function attemptPlayNoiseSound(retries = 3, delay = 500) {
         noiseSound.pause();
         noiseSound.currentTime = 0;
@@ -651,16 +655,12 @@
 
     function showChannelLoader() {
       console.log("Showing channel loader");
-      channelLoader.style.display = "grid";
-      bitrateDisplay.style.display = "block";
-      bitrateDisplay.style.opacity = "1";
+      channelLoader.style.display = "block"; /* Changed to block for compatibility */
     }
 
     function hideChannelLoader() {
       console.log("Hiding channel loader");
       channelLoader.style.display = "none";
-      bitrateDisplay.style.display = "none";
-      bitrateDisplay.style.opacity = "0";
     }
 
     setTimeout(() => {
@@ -716,7 +716,6 @@
     async function loadVideo(url, autoPlay, channelName) {
       console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}`);
       showChannelLoader();
-      bitrateDisplay.innerText = "Buffering..."; // Default text
       if (hls) {
         hls.destroy();
         hls = null;
@@ -739,18 +738,8 @@
           });
           hls.loadSource(url);
           hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
             console.log(`HLS manifest parsed for ${channelName}`);
-            // Get bitrate from the first level
-            const bitrate = data.levels && data.levels[0] && data.levels[0].bitrate;
-            if (bitrate) {
-              const kbps = Math.round(bitrate / 1000);
-              bitrateDisplay.innerText = `${kbps} kbps`;
-              console.log(`Bitrate detected: ${kbps} kbps`);
-            } else {
-              bitrateDisplay.innerText = "Buffering...";
-              console.log("No bitrate data available");
-            }
             hideChannelLoader();
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
@@ -759,15 +748,6 @@
               });
             }
             showPlayButton();
-          });
-          hls.on(Hls.Events.LEVEL_SWITCHED, (_, data) => {
-            // Update bitrate when quality level changes
-            const level = hls.levels[data.level];
-            if (level && level.bitrate) {
-              const kbps = Math.round(level.bitrate / 1000);
-              bitrateDisplay.innerText = `${kbps} kbps`;
-              console.log(`Bitrate switched: ${kbps} kbps`);
-            }
           });
           hls.on(Hls.Events.ERROR, (_, data) => {
             console.error(`HLS error for ${channelName}:`, data);
@@ -788,7 +768,6 @@
           video.onloadeddata = () => {
             console.log(`Native video data loaded for ${channelName}`);
             hideChannelLoader();
-            bitrateDisplay.innerText = "Buffering..."; // No bitrate for native
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`Native video play error for ${channelName}:`, err);
@@ -819,7 +798,6 @@
             await shakaPlayer.load(url);
             console.log(`MPEG-DASH loaded for ${channelName}`);
             hideChannelLoader();
-            bitrateDisplay.innerText = "Buffering..."; // No bitrate for DASH in this implementation
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`MPEG-DASH play error for ${channelName}:`, err);
@@ -846,7 +824,6 @@
         video.onloadeddata = () => {
           console.log(`Video data loaded for ${channelName}`);
           hideChannelLoader();
-          bitrateDisplay.innerText = "Buffering..."; // No bitrate for direct
           if (autoPlay && hasManuallyPlayed) {
             video.play().catch(err => {
               console.error(`Direct video play error for ${channelName}:`, err);
@@ -875,7 +852,6 @@
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
         channelLoader.style.display = "none";
-        bitrateDisplay.style.display = "none";
         return;
       }
       console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
