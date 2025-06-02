@@ -361,35 +361,18 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 100px; /* Increased size for better visibility */
+      width: 80px; /* Increased size for better visibility on TV screens */
       aspect-ratio: 1;
       display: none;
       border-radius: 50%;
-      background:
-        linear-gradient(0deg, rgba(255, 102, 0, 0.5) 30%, transparent 30% 70%, rgba(255, 102, 0, 1) 70%) 50% / 8% 100%,
-        linear-gradient(90deg, rgba(255, 147, 0, 0.3) 30%, transparent 30% 70%, rgba(255, 147, 0, 0.8) 70%) 50% / 100% 8%;
-      background-repeat: no-repeat;
-      animation: l23 1s infinite steps(12);
-      z-index: 200; /* Higher z-index to ensure visibility */
-      filter: drop-shadow(0 0 10px rgba(255, 102, 0, 0.5));
-      background-color: rgba(0, 0, 0, 0.6); /* Slightly darker background */
-      padding: 15px; /* Increased padding */
-    }
-    .loader::before,
-    .loader::after {
-      content: "";
-      grid-area: 1/1;
-      border-radius: 50%;
-      background: inherit;
-      opacity: 0.915;
-      transform: rotate(30deg);
-    }
-    .loader::after {
-      opacity: 0.83;
-      transform: rotate(60deg);
+      background: radial-gradient(circle, rgba(255, 102, 0, 0.8) 10%, transparent 10%) center/100% 100%;
+      background-size: 10% 100%, 100% 10%;
+      animation: l23 1s infinite linear; /* Smooth circular rotation */
+      z-index: 99;
+      filter: drop-shadow(0 0 12px rgba(255, 102, 0, 0.7)); /* Enhanced shadow for visibility */
     }
     @keyframes l23 {
-      100% { transform: translate(-50%, -50%) rotate(1turn); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
   </style>
 </head>
@@ -708,13 +691,7 @@
 
     async function loadVideo(url, autoPlay, channelName) {
       console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}`);
-      
-      // Show spinner immediately for initial load
       showChannelLoader();
-      const minSpinnerDuration = 500; // Minimum time to show spinner for initial load (ms)
-      const spinnerStartTime = Date.now();
-
-      // Clean up existing players
       if (hls) {
         hls.destroy();
         hls = null;
@@ -723,19 +700,6 @@
         shakaPlayer.destroy();
         shakaPlayer = null;
       }
-
-      // Function to ensure minimum spinner duration for initial load
-      async function ensureMinSpinnerDuration() {
-        const elapsed = Date.now() - spinnerStartTime;
-        if (elapsed < minSpinnerDuration) {
-          await new Promise(resolve => setTimeout(resolve, minSpinnerDuration - elapsed));
-        }
-        // Only hide if not buffering
-        if (!video.waiting && !video.seeking) {
-          hideChannelLoader();
-        }
-      }
-
       if (isM3U8(url)) {
         if (typeof Hls !== 'undefined' && Hls.isSupported()) {
           console.log(`HLS supported, initializing Hls.js for ${channelName}`);
@@ -750,9 +714,9 @@
           });
           hls.loadSource(url);
           hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, async () => {
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
             console.log(`HLS manifest parsed for ${channelName}`);
-            await ensureMinSpinnerDuration();
+            hideChannelLoader();
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`HLS play error for ${channelName}:`, err);
@@ -761,38 +725,25 @@
             }
             showPlayButton();
           });
-          hls.on(Hls.Events.ERROR, async (_, data) => {
+          hls.on(Hls.Events.ERROR, (_, data) => {
             console.error(`HLS error for ${channelName}:`, data);
             if (data.fatal) {
               console.log(`Falling back to native video for ${channelName}`);
               video.src = url;
-              video.play().catch(async err => {
+              video.play().catch(err => {
                 console.error(`Native video play error for ${channelName}:`, err);
-                await ensureMinSpinnerDuration();
+                hideChannelLoader();
                 showErrorVisual(`Failed to load ${channelName}`);
                 showPlayButton();
               });
             }
           });
-          // Handle HLS buffering events
-          hls.on(Hls.Events.BUFFER_STALLING, () => {
-            console.log(`HLS buffering for ${channelName}`);
-            showChannelLoader();
-          });
-          hls.on(Hls.Events.BUFFER_STALLED, () => {
-            console.log(`HLS stalled for ${channelName}`);
-            showChannelLoader();
-          });
-          hls.on(Hls.Events.BUFFER_EOS, () => {
-            console.log(`HLS buffer end for ${channelName}`);
-            hideChannelLoader();
-          });
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
           console.log(`HLS not supported by Hls.js, using native video for ${channelName}`);
           video.src = url;
-          video.onloadeddata = async () => {
+          video.onloadeddata = () => {
             console.log(`Native video data loaded for ${channelName}`);
-            await ensureMinSpinnerDuration();
+            hideChannelLoader();
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`Native video play error for ${channelName}:`, err);
@@ -803,15 +754,15 @@
               showPlayButton();
             }
           };
-          video.onerror = async () => {
+          video.onerror = () => {
             console.error(`Native video error for ${channelName}`);
-            await ensureMinSpinnerDuration();
+            hideChannelLoader();
             showErrorVisual(`Failed to load ${channelName}`);
             showPlayButton();
           };
         } else {
           console.error(`HLS not supported for ${channelName}`);
-          await ensureMinSpinnerDuration();
+          hideChannelLoader();
           showErrorVisual(`HLS not supported for ${channelName}`);
           showPlayButton();
         }
@@ -819,19 +770,10 @@
         if (typeof shaka !== 'undefined') {
           console.log(`Loading MPEG-DASH for ${channelName}`);
           shakaPlayer = new shaka.Player(video);
-          shakaPlayer.addEventListener('buffering', event => {
-            if (event.buffering) {
-              console.log(`Shaka Player buffering for ${channelName}`);
-              showChannelLoader();
-            } else {
-              console.log(`Shaka Player done buffering for ${channelName}`);
-              hideChannelLoader();
-            }
-          });
           try {
             await shakaPlayer.load(url);
             console.log(`MPEG-DASH loaded for ${channelName}`);
-            await ensureMinSpinnerDuration();
+            hideChannelLoader();
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`MPEG-DASH play error for ${channelName}:`, err);
@@ -842,22 +784,22 @@
             }
           } catch (e) {
             console.error(`Error loading MPEG-DASH for ${channelName}:`, e);
-            await ensureMinSpinnerDuration();
+            hideChannelLoader();
             showErrorVisual(`Failed to load ${channelName}`);
             showPlayButton();
           }
         } else {
           console.error(`Shaka Player not available for ${channelName}`);
-          await ensureMinSpinnerDuration();
+          hideChannelLoader();
           showErrorVisual(`MPEG-DASH not supported for ${channelName}`);
           showPlayButton();
         }
       } else {
         console.log(`Using direct video source for ${channelName}`);
         video.src = url;
-        video.onloadeddata = async () => {
+        video.onloadeddata = () => {
           console.log(`Video data loaded for ${channelName}`);
-          await ensureMinSpinnerDuration();
+          hideChannelLoader();
           if (autoPlay && hasManuallyPlayed) {
             video.play().catch(err => {
               console.error(`Direct video play error for ${channelName}:`, err);
@@ -867,9 +809,9 @@
             showPlayButton();
           }
         };
-        video.onerror = async () => {
+        video.onerror = () => {
           console.error(`Direct video error for ${channelName}`);
-          await ensureMinSpinnerDuration();
+          hideChannelLoader();
           showErrorVisual(`Failed to load ${channelName}`);
           showPlayButton();
         };
@@ -1016,22 +958,8 @@
       showPlayButton();
     });
     video.addEventListener('waiting', () => {
-      console.log("Video is buffering (waiting event)");
+      console.log("Video is buffering");
       showChannelLoader();
-    });
-    video.addEventListener('stalled', () => {
-      console.log("Video stalled, showing loader");
-      showChannelLoader();
-    });
-    video.addEventListener('seeking', () => {
-      console.log("Video is seeking, showing loader");
-      showChannelLoader();
-    });
-    video.addEventListener('seeked', () => {
-      console.log("Video seeked, hiding loader if playing");
-      if (!video.paused && !video.ended) {
-        hideChannelLoader();
-      }
     });
 
     shaka.polyfill.installAll();
