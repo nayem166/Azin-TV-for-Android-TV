@@ -191,7 +191,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: url('https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGw0bWJrMDQ0a2wzcXU0eWtsem1hOHhkZW11bmFlOTVrY3ZpZjFiZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y8a0CT2xsbo9G/giphy.gif') center/cover no-repeat;
+      background: url('https://media0.giphy.com/media/v1/Y8a0CT2xsbo9G/giphy.gif') center/cover no-repeat;
       opacity: 0;
       z-index: 6;
       transition: opacity .5s ease;
@@ -200,7 +200,7 @@
       will-change: opacity;
     }
     #loadingScreen {
-      position: fixed;
+ position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
@@ -212,44 +212,42 @@
       z-index: 10001;
       opacity: 1;
       transition: opacity 1s ease;
+
     }
     #loadingScreen.hidden {
       opacity: 0;
       pointer-events: none;
+
     }
     .logo-container {
       position: relative;
       width: 300px;
       height: auto;
-      opacity: 0;
-      animation: fadeIn 1s ease forwards;
+      opacity: .0;
+      animation: none;
       transform: scale(0.95);
-      z-index: 2;
+      z-index: .2;
     }
     .logo-container img {
       width: 100%;
       height: auto;
-      display: block;
+      display: none;
     }
     .light-ring {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 500px;
-      height: 500px;
-      border-radius: 50%;
+      width: 50%;
+      height: 50%;
+      border-radius: 0%;
       border: 4px solid transparent;
-      border-top: 4px solid #ff6600;
-      border-right: 4px solid rgba(255, 102, 0, 0.3);
+      border-top: 255px solid #ff6600;
+      border-right: 255px solid rgba(255, 102, 0, 0.3);
       box-shadow: 0 0 20px rgba(255, 102, 0, 0.5);
-      animation: spin 6s linear infinite;
+      animation: none;
       z-index: 1;
       will-change: transform;
-    }
-    @keyframes spin {
-      0% { transform: translate(-50%, -50%) rotate(0deg); }
-      100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
     .particle {
       position: absolute;
@@ -257,55 +255,40 @@
       height: 3px;
       background: #ffaa00;
       border-radius: 50%;
-      animation: floatUp 4s infinite ease-in-out;
+      animation: none;
       opacity: 0.6;
-    }
-    @keyframes floatUp {
-      0% {
-        transform: translateY(0) scale(1);
-        opacity: 0.1;
-      }
-      50% {
-        transform: translateY(-40px) scale(1.3);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-80px) scale(0.8);
-        opacity: 0;
-      }
     }
     .title {
       position: absolute;
       bottom: 50px;
       font-size: 2.2rem;
-      color: #ffffff;
+      color: .#ffffff;
       letter-spacing: 4px;
-      animation: fadeIn 1s ease forwards;
-      opacity: 0;
-      z-index: 2;
+      animation: none;
+      opacity: .0;
+      z-index: .2;
     }
     #offlineMessage {
-      display: none;
+      display: absolute;
       color: #fff;
       font-size: 1.5rem;
       position: absolute;
-      bottom: 20px;
+      bottom: 0.2px;
       text-align: center;
       width: 100%;
-      opacity: 0;
+      opacity: .0;
       transition: opacity 0.5s ease;
       z-index: 2;
     }
     #offlineMessage.visible {
-      display: block;
-      opacity: 1;
+      display: .block;
+      opacity: block;
     }
     @keyframes fadeIn {
       to {
-        opacity: 1;
+        opacity: .0;
       }
-    }
-    #greetingScreen {
+        #greetingScreen {
       position: fixed;
       top: 0;
       left: 0;
@@ -315,28 +298,29 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 10000;
-      opacity: 0;
+      z-index: 100%;
+      opacity: .0;
       transition: opacity 1s ease;
     }
     #greetingScreen.hidden {
-      opacity: 0;
-      pointer-events: none;
+      opacity: .0;
+      pointer-events: .none;
     }
     #greetingScreen.visible {
-      opacity: 1;
+      opacity: .1;
     }
     #greetingText {
       font-size: 48px;
-      font-weight: 700;
+      font-weight: 700px;
+      margin-bottom: .0;
       color: #fff;
       text-align: center;
       white-space: nowrap;
       overflow: hidden;
       width: 0;
-      max-width: 90%;
+      max-width: 0;
       display: inline-block;
-      animation: typing 4s steps(33, end) forwards;
+      animation: none;
     }
     @keyframes typing {
       from { width: 0; }
