@@ -361,7 +361,7 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 80px; /* Increased size for better visibility */
+      width: 100px; /* Increased size for better visibility */
       aspect-ratio: 1;
       display: none;
       border-radius: 50%;
@@ -370,10 +370,10 @@
         linear-gradient(90deg, rgba(255, 147, 0, 0.3) 30%, transparent 30% 70%, rgba(255, 147, 0, 0.8) 70%) 50% / 100% 8%;
       background-repeat: no-repeat;
       animation: l23 1s infinite steps(12);
-      z-index: 100; /* Increased z-index */
+      z-index: 200; /* Higher z-index to ensure visibility */
       filter: drop-shadow(0 0 10px rgba(255, 102, 0, 0.5));
-      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-      padding: 10px; /* Add padding */
+      background-color: rgba(0, 0, 0, 0.6); /* Slightly darker background */
+      padding: 15px; /* Increased padding */
     }
     .loader::before,
     .loader::after {
@@ -709,9 +709,9 @@
     async function loadVideo(url, autoPlay, channelName) {
       console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}`);
       
-      // Show spinner immediately
+      // Show spinner immediately for initial load
       showChannelLoader();
-      const minSpinnerDuration = 500; // Minimum time to show spinner (ms)
+      const minSpinnerDuration = 500; // Minimum time to show spinner for initial load (ms)
       const spinnerStartTime = Date.now();
 
       // Clean up existing players
@@ -724,13 +724,16 @@
         shakaPlayer = null;
       }
 
-      // Function to ensure minimum spinner duration
+      // Function to ensure minimum spinner duration for initial load
       async function ensureMinSpinnerDuration() {
         const elapsed = Date.now() - spinnerStartTime;
         if (elapsed < minSpinnerDuration) {
           await new Promise(resolve => setTimeout(resolve, minSpinnerDuration - elapsed));
         }
-        hideChannelLoader();
+        // Only hide if not buffering
+        if (!video.waiting && !video.seeking) {
+          hideChannelLoader();
+        }
       }
 
       if (isM3U8(url)) {
@@ -771,6 +774,19 @@
               });
             }
           });
+          // Handle HLS buffering events
+          hls.on(Hls.Events.BUFFER_STALLING, () => {
+            console.log(`HLS buffering for ${channelName}`);
+            showChannelLoader();
+          });
+          hls.on(Hls.Events.BUFFER_STALLED, () => {
+            console.log(`HLS stalled for ${channelName}`);
+            showChannelLoader();
+          });
+          hls.on(Hls.Events.BUFFER_EOS, () => {
+            console.log(`HLS buffer end for ${channelName}`);
+            hideChannelLoader();
+          });
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
           console.log(`HLS not supported by Hls.js, using native video for ${channelName}`);
           video.src = url;
@@ -803,6 +819,15 @@
         if (typeof shaka !== 'undefined') {
           console.log(`Loading MPEG-DASH for ${channelName}`);
           shakaPlayer = new shaka.Player(video);
+          shakaPlayer.addEventListener('buffering', event => {
+            if (event.buffering) {
+              console.log(`Shaka Player buffering for ${channelName}`);
+              showChannelLoader();
+            } else {
+              console.log(`Shaka Player done buffering for ${channelName}`);
+              hideChannelLoader();
+            }
+          });
           try {
             await shakaPlayer.load(url);
             console.log(`MPEG-DASH loaded for ${channelName}`);
@@ -991,12 +1016,22 @@
       showPlayButton();
     });
     video.addEventListener('waiting', () => {
-      console.log("Video is buffering");
+      console.log("Video is buffering (waiting event)");
       showChannelLoader();
     });
     video.addEventListener('stalled', () => {
       console.log("Video stalled, showing loader");
       showChannelLoader();
+    });
+    video.addEventListener('seeking', () => {
+      console.log("Video is seeking, showing loader");
+      showChannelLoader();
+    });
+    video.addEventListener('seeked', () => {
+      console.log("Video seeked, hiding loader if playing");
+      if (!video.paused && !video.ended) {
+        hideChannelLoader();
+      }
     });
 
     shaka.polyfill.installAll();
