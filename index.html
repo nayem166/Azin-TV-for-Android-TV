@@ -356,6 +356,39 @@
       left: -9999px !important;
       top: -9999px !important;
     }
+    .loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      aspect-ratio: 1;
+      display: none;
+      border-radius: 50%;
+      background:
+        linear-gradient(0deg, rgba(255, 102, 0, 0.5) 30%, transparent 30% 70%, rgba(255, 102, 0, 1) 70%) 50% / 8% 100%,
+        linear-gradient(90deg, rgba(255, 147, 0, 0.3) 30%, transparent 30% 70%, rgba(255, 147, 0, 0.8) 70%) 50% / 100% 8%;
+      background-repeat: no-repeat;
+      animation: l23 1s infinite steps(12);
+      z-index: 99;
+      filter: drop-shadow(0 0 10px rgba(255, 102, 0, 0.5));
+    }
+    .loader::before,
+    .loader::after {
+      content: "";
+      grid-area: 1/1;
+      border-radius: 50%;
+      background: inherit;
+      opacity: 0.915;
+      transform: rotate(30deg);
+    }
+    .loader::after {
+      opacity: 0.83;
+      transform: rotate(60deg);
+    }
+    @keyframes l23 {
+      100% { transform: translate(-50%, -50%) rotate(1turn); }
+    }
   </style>
 </head>
 <body>
@@ -375,6 +408,7 @@
       <h2 style="margin:0 0 10px;padding:10px;font-size:20px;text-align:center;border-bottom:1px solid gray">Channels</h2>
     </div>
     <div id="staticNoise"></div>
+    <div class="loader" id="channelLoader"></div>
     <audio id="noiseSound" src="https://cdn.pixabay.com/audio/2025/04/06/audio_513747fd8d.mp3" preload="auto" loop></audio>
     <audio id="typingSound" src="https://assets.mixkit.co/active_storage/sfx/1392/1392-preview.mp3" preload="auto"></audio>
     <video id="player" playsinline controlslist="nodownload noplaybackrate" disablePictureInPicture></video>
@@ -423,7 +457,8 @@
           typingSound = document.getElementById("typingSound"),
           loadingScreen = document.getElementById("loadingScreen"),
           loadingLogo = document.getElementById("loadingLogo"),
-          greetingText = document.getElementById("greetingText");
+          greetingText = document.getElementById("greetingText"),
+          channelLoader = document.getElementById("channelLoader");
     let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
 
     function typeText(element, text, duration) {
@@ -567,6 +602,7 @@
         document.getElementById("container").style.display = "none";
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
+        channelLoader.style.display = "none";
       });
     }
 
@@ -577,6 +613,7 @@
       staticNoise.style.display = "block";
       errorBox.innerText = msg;
       errorBox.style.display = "block";
+      channelLoader.style.display = "none";
       function attemptPlayNoiseSound(retries = 3, delay = 500) {
         noiseSound.pause();
         noiseSound.currentTime = 0;
@@ -605,6 +642,16 @@
       errorBox.style.display = "none";
       noiseSound.pause();
       noiseSound.currentTime = 0;
+    }
+
+    function showChannelLoader() {
+      console.log("Showing channel loader");
+      channelLoader.style.display = "grid";
+    }
+
+    function hideChannelLoader() {
+      console.log("Hiding channel loader");
+      channelLoader.style.display = "none";
     }
 
     setTimeout(() => {
@@ -659,6 +706,7 @@
 
     async function loadVideo(url, autoPlay, channelName) {
       console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}`);
+      showChannelLoader();
       if (hls) {
         hls.destroy();
         hls = null;
@@ -686,6 +734,7 @@
           hls.attachMedia(video);
           hls.on(Hls.Events.MANIFEST_PARSED, () => {
             console.log(`HLS manifest parsed for ${channelName}`);
+            hideChannelLoader();
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`HLS play error for ${channelName}:`, err);
@@ -701,6 +750,7 @@
               video.src = url;
               video.play().catch(err => {
                 console.error(`Native video play error for ${channelName}:`, err);
+                hideChannelLoader();
                 showErrorVisual(`Failed to load ${channelName}`);
                 showPlayButton();
               });
@@ -711,6 +761,7 @@
           video.src = url;
           video.onloadeddata = () => {
             console.log(`Native video data loaded for ${channelName}`);
+            hideChannelLoader();
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`Native video play error for ${channelName}:`, err);
@@ -723,11 +774,13 @@
           };
           video.onerror = () => {
             console.error(`Native video error for ${channelName}`);
+            hideChannelLoader();
             showErrorVisual(`Failed to load ${channelName}`);
             showPlayButton();
           };
         } else {
           console.error(`HLS not supported for ${channelName}`);
+          hideChannelLoader();
           showErrorVisual(`HLS not supported for ${channelName}`);
           showPlayButton();
         }
@@ -738,6 +791,7 @@
           try {
             await shakaPlayer.load(url);
             console.log(`MPEG-DASH loaded for ${channelName}`);
+            hideChannelLoader();
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`MPEG-DASH play error for ${channelName}:`, err);
@@ -748,11 +802,13 @@
             }
           } catch (e) {
             console.error(`Error loading MPEG-DASH for ${channelName}:`, e);
+            hideChannelLoader();
             showErrorVisual(`Failed to load ${channelName}`);
             showPlayButton();
           }
         } else {
           console.error(`Shaka Player not available for ${channelName}`);
+          hideChannelLoader();
           showErrorVisual(`MPEG-DASH not supported for ${channelName}`);
           showPlayButton();
         }
@@ -761,6 +817,7 @@
         video.src = url;
         video.onloadeddata = () => {
           console.log(`Video data loaded for ${channelName}`);
+          hideChannelLoader();
           if (autoPlay && hasManuallyPlayed) {
             video.play().catch(err => {
               console.error(`Direct video play error for ${channelName}:`, err);
@@ -772,6 +829,7 @@
         };
         video.onerror = () => {
           console.error(`Direct video error for ${channelName}`);
+          hideChannelLoader();
           showErrorVisual(`Failed to load ${channelName}`);
           showPlayButton();
         };
@@ -780,6 +838,7 @@
 
     async function tryMassranga(url, autoPlay, channelName) {
       console.log("Trying Massranga TV with multiple fallback methods...");
+      showChannelLoader();
       if (typeof Hls !== 'undefined' && Hls.isSupported()) {
         console.log("Attempting hls.js for Massranga TV");
         hls = new Hls({
@@ -796,6 +855,7 @@
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           console.log("HLS manifest parsed for Massranga TV");
+          hideChannelLoader();
           if (autoPlay && hasManuallyPlayed) {
             video.play().catch(err => {
               console.error("HLS play error for Massranga TV:", err);
@@ -812,6 +872,7 @@
             video.src = url;
             video.onloadeddata = () => {
               console.log("Native video data loaded for Massranga TV");
+              hideChannelLoader();
               if (autoPlay && hasManuallyPlayed) {
                 video.play().catch(err => {
                   console.error("Native video play error for Massranga TV:", err);
@@ -824,6 +885,7 @@
             };
             video.onerror = () => {
               console.error("Native video error for Massranga TV");
+              hideChannelLoader();
               showErrorVisual("Failed to load Massranga TV");
               showPlayButton();
             };
@@ -834,6 +896,7 @@
         video.src = url;
         video.onloadeddata = () => {
           console.log("Native video data loaded for Massranga TV");
+          hideChannelLoader();
           if (autoPlay && hasManuallyPlayed) {
             video.play().catch(err => {
               console.error("Native video play error for Massranga TV:", err);
@@ -846,11 +909,13 @@
         };
         video.onerror = () => {
           console.error("Native video error for Massranga TV");
+          hideChannelLoader();
           showErrorVisual("Failed to load Massranga TV");
           showPlayButton();
         };
       } else {
         console.error("HLS not supported for Massranga TV");
+        hideChannelLoader();
         showErrorVisual("HLS not supported for Massranga TV");
         showPlayButton();
       }
@@ -865,6 +930,7 @@
         document.getElementById("container").style.display = "none";
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
+        channelLoader.style.display = "none";
         return;
       }
       console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
@@ -982,6 +1048,7 @@
 
     video.addEventListener('playing', () => {
       console.log("Video is playing");
+      hideChannelLoader();
       showPlayButton();
     });
     video.addEventListener('pause', () => {
@@ -990,7 +1057,12 @@
     });
     video.addEventListener('error', () => {
       console.log("Video element error event");
+      hideChannelLoader();
       showPlayButton();
+    });
+    video.addEventListener('waiting', () => {
+      console.log("Video is buffering");
+      showChannelLoader();
     });
 
     shaka.polyfill.installAll();
