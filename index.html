@@ -716,10 +716,7 @@
         shakaPlayer = null;
       }
       if (isM3U8(url)) {
-        if (channelName === "Channel 11 - Massranga TV") {
-          console.log("Attempting to load Massranga TV with enhanced settings...");
-          tryMassranga(url, autoPlay, channelName);
-        } else if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+        if (typeof Hls !== 'undefined' && Hls.isSupported()) {
           console.log(`HLS supported, initializing Hls.js for ${channelName}`);
           hls = new Hls({
             debug: true,
@@ -833,91 +830,6 @@
           showErrorVisual(`Failed to load ${channelName}`);
           showPlayButton();
         };
-      }
-    }
-
-    async function tryMassranga(url, autoPlay, channelName) {
-      console.log("Trying Massranga TV with multiple fallback methods...");
-      showChannelLoader();
-      if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-        console.log("Attempting hls.js for Massranga TV");
-        hls = new Hls({
-          debug: true,
-          enableWorker: true,
-          lowLatencyMode: true,
-          backBufferLength: 90,
-          xhrSetup: function(xhr) {
-            xhr.withCredentials = false;
-            xhr.setRequestHeader('Accept', '*/*');
-          }
-        });
-        hls.loadSource(url);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          console.log("HLS manifest parsed for Massranga TV");
-          hideChannelLoader();
-          if (autoPlay && hasManuallyPlayed) {
-            video.play().catch(err => {
-              console.error("HLS play error for Massranga TV:", err);
-              showPlayButton();
-            });
-          } else {
-            showPlayButton();
-          }
-        });
-        hls.on(Hls.Events.ERROR, (_, data) => {
-          console.error("HLS error for Massranga TV:", data);
-          if (data.fatal) {
-            console.log("Falling back to native video for Massranga TV");
-            video.src = url;
-            video.onloadeddata = () => {
-              console.log("Native video data loaded for Massranga TV");
-              hideChannelLoader();
-              if (autoPlay && hasManuallyPlayed) {
-                video.play().catch(err => {
-                  console.error("Native video play error for Massranga TV:", err);
-                  showErrorVisual("Failed to load Massranga TV");
-                  showPlayButton();
-                });
-              } else {
-                showPlayButton();
-              }
-            };
-            video.onerror = () => {
-              console.error("Native video error for Massranga TV");
-              hideChannelLoader();
-              showErrorVisual("Failed to load Massranga TV");
-              showPlayButton();
-            };
-          }
-        });
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        console.log("HLS not supported by hls.js, trying native video for Massranga TV");
-        video.src = url;
-        video.onloadeddata = () => {
-          console.log("Native video data loaded for Massranga TV");
-          hideChannelLoader();
-          if (autoPlay && hasManuallyPlayed) {
-            video.play().catch(err => {
-              console.error("Native video play error for Massranga TV:", err);
-              showErrorVisual("Failed to load Massranga TV");
-              showPlayButton();
-            });
-          } else {
-            showPlayButton();
-          }
-        };
-        video.onerror = () => {
-          console.error("Native video error for Massranga TV");
-          hideChannelLoader();
-          showErrorVisual("Failed to load Massranga TV");
-          showPlayButton();
-        };
-      } else {
-        console.error("HLS not supported for Massranga TV");
-        hideChannelLoader();
-        showErrorVisual("HLS not supported for Massranga TV");
-        showPlayButton();
       }
     }
 
