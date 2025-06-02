@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart TV Live App</title>
   <link rel="preload" href="https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png" as="image">
-  <link rel="preload" href="https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png" as="image">
-  <link rel="preload" href="https://i.postimg.cc/65q6CC2P/file-00000000201c61f6b67764f95c3588ed.png" as="image">
   <style>
     * {
       margin: 0;
@@ -232,7 +230,6 @@
       width: 100%;
       height: auto;
       display: block;
-      transition: opacity 0.5s ease;
     }
     .light-ring {
       position: absolute;
@@ -364,23 +361,35 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 50px;
-      --b: 8px;
+      width: 80px; /* Increased size for better visibility */
       aspect-ratio: 1;
-      border-radius: 50%;
-      padding: 1px;
-      background: conic-gradient(#0000 10%, #f03355) content-box;
-      -webkit-mask:
-        repeating-conic-gradient(#0000 0deg, #000 1deg 20deg, #0000 21deg 36deg),
-        radial-gradient(farthest-side, #0000 calc(100% - var(--b) - 1px), #000 calc(100% - var(--b)));
-      -webkit-mask-composite: destination-in;
-      mask-composite: intersect;
-      animation: l4 1s infinite steps(10);
-      z-index: 99;
       display: none;
+      border-radius: 50%;
+      background:
+        linear-gradient(0deg, rgba(255, 102, 0, 0.5) 30%, transparent 30% 70%, rgba(255, 102, 0, 1) 70%) 50% / 8% 100%,
+        linear-gradient(90deg, rgba(255, 147, 0, 0.3) 30%, transparent 30% 70%, rgba(255, 147, 0, 0.8) 70%) 50% / 100% 8%;
+      background-repeat: no-repeat;
+      animation: l23 1s infinite steps(12);
+      z-index: 100; /* Increased z-index */
+      filter: drop-shadow(0 0 10px rgba(255, 102, 0, 0.5));
+      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+      padding: 10px; /* Add padding */
     }
-    @keyframes l4 {
-      to { transform: translate(-50%, -50%) rotate(1turn); }
+    .loader::before,
+    .loader::after {
+      content: "";
+      grid-area: 1/1;
+      border-radius: 50%;
+      background: inherit;
+      opacity: 0.915;
+      transform: rotate(30deg);
+    }
+    .loader::after {
+      opacity: 0.83;
+      transform: rotate(60deg);
+    }
+    @keyframes l23 {
+      100% { transform: translate(-50%, -50%) rotate(1turn); }
     }
   </style>
 </head>
@@ -390,7 +399,7 @@
     <div class="logo-container">
       <img id="loadingLogo" src="https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png" alt="">
     </div>
-    <div class="title">Loading...</div> <!-- Added fallback text -->
+    <div class="title"></div>
     <div id="networkErrorBox">Please check your internet connection and try again.</div>
   </div>
   <div id="greetingScreen" class="hidden">
@@ -415,14 +424,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.7/shaka-player.compiled.min.js"></script>
   <script>
     console.log("App initialization started at", new Date().toLocaleString());
-
-    // Array of logo URLs for auto-changing
-    const logoUrls = [
-      "https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png",
-      "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png",
-      "https://i.postimg.cc/65q6CC2P/file-00000000201c61f6b67764f95c3588ed.png"
-    ];
-
     const channels = [
       {name: "Channel 1 - BTV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1709/output/1709-audio_113392_eng=113200-video=1692000.m3u8"},
       {name: "Channel 2 - NTV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1716/output/index.m3u8"},
@@ -489,9 +490,8 @@
 
     function initializeApp() {
       console.log("Initializing app...");
-      const ua = navigator.userAgent;
-      // Simplified Smart TV check for broader compatibility
-      const isSmartTV = /TV|BRAVIA|AFT|SmartTV|Tizen|Web0S|NetCast|AppleTV|Android/i.test(ua) || true; // Force true for testing
+      const ua = navigator.userAgent,
+            isSmartTV = /TV|BRAVIA|AFT|SmartTV|Tizen|Web0S|NetCast|AppleTV/i.test(ua);
       console.log("User Agent:", ua, "Is Smart TV:", isSmartTV);
       if (!isSmartTV) {
         console.log("Non-Smart TV detected, showing incompatible message");
@@ -502,7 +502,6 @@
         document.getElementById("loadingScreen").style.display = "none";
         return;
       }
-
       console.log("Creating 50 particles for loading animation");
       for (let i = 0; i < 50; i++) {
         const p = document.createElement('div');
@@ -512,71 +511,23 @@
         p.style.animationDelay = `${Math.random() * 4}s`;
         loadingScreen.appendChild(p);
       }
-
       let logoLoaded = false;
-      let currentLogoIndex = 0;
-      let logoChangeInterval;
-      let logoLoadAttempts = 0;
-      const maxLogoLoadAttempts = logoUrls.length;
-
-      // Ensure loading screen is visible
-      loadingScreen.style.display = "flex";
-      loadingScreen.classList.remove("hidden");
-      console.log("Loading screen set to visible");
-
-      // Function to change logo with fade effect
-      function changeLogo() {
-        loadingLogo.style.opacity = '0';
-        setTimeout(() => {
-          currentLogoIndex = (currentLogoIndex + 1) % logoUrls.length;
-          loadingLogo.src = logoUrls[currentLogoIndex];
-          console.log("Changing logo to:", logoUrls[currentLogoIndex]);
-          loadingLogo.style.opacity = '1';
-        }, 500);
-      }
-
-      // Start logo changing
-      function startLogoChange() {
-        changeLogo();
-        logoChangeInterval = setInterval(changeLogo, 2500);
-        console.log("Started logo change interval");
-      }
-
-      // Stop logo changing
-      function stopLogoChange() {
-        if (logoChangeInterval) {
-          clearInterval(logoChangeInterval);
-          console.log("Stopped logo change interval");
-        }
-      }
-
       loadingLogo.addEventListener('load', () => {
-        console.log("Loading logo loaded successfully:", loadingLogo.src);
+        console.log("Loading logo loaded successfully");
         logoLoaded = true;
-        logoLoadAttempts = 0;
       });
-
       loadingLogo.addEventListener('error', () => {
-        console.error("Failed to load logo:", loadingLogo.src);
-        logoLoadAttempts++;
-        if (logoLoadAttempts < maxLogoLoadAttempts) {
-          currentLogoIndex = (currentLogoIndex + 1) % logoUrls.length;
-          loadingLogo.src = logoUrls[currentLogoIndex];
-          console.log("Switching to next logo:", loadingLogo.src);
-        } else {
-          console.warn("All logo load attempts failed, proceeding anyway");
-          logoLoaded = true; // Proceed to avoid getting stuck
-        }
+        console.error("Failed to load logo, using fallback");
+        loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
+        logoLoaded = true;
       });
-
-      // Fallback to proceed if logo loading takes too long
       setTimeout(() => {
         if (!logoLoaded) {
-          console.warn("Logo loading timeout, proceeding anyway");
+          console.warn("Logo loading timeout, switching to fallback");
+          loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
           logoLoaded = true;
         }
-      }, 10000); // Increased to 10s to account for multiple logos
-
+      }, 5000);
       function checkInternet() {
         if (!navigator.onLine) {
           console.log("No internet connection detected");
@@ -586,7 +537,6 @@
           document.getElementById("container").style.display = "none";
           document.getElementById("azinLogo").style.display = "none";
           document.getElementById("greetingScreen").style.display = "none";
-          stopLogoChange();
           setTimeout(checkInternet, 5000);
         } else {
           console.log("Internet connection detected");
@@ -594,16 +544,12 @@
           proceedWithApp();
         }
       }
-
       function proceedWithApp() {
-        console.log("Proceeding with app...");
         function waitForLogo() {
           if (logoLoaded) {
-            console.log("Logo loaded, showing loading screen");
-            startLogoChange();
+            console.log("Showing loading screen");
             setTimeout(() => {
               console.log("Hiding loading screen");
-              stopLogoChange();
               loadingScreen.classList.add('hidden');
               setTimeout(() => {
                 loadingScreen.style.display = 'none';
@@ -635,32 +581,12 @@
               }, 1000);
             }, 6000);
           } else {
-            console.log("Waiting for logo to load...");
             setTimeout(waitForLogo, 100);
           }
         }
-        try {
-          waitForLogo();
-        } catch (err) {
-          console.error("Error in waitForLogo:", err);
-          // Fallback to show main app
-          loadingScreen.style.display = 'none';
-          greetingScreen.style.display = 'none';
-          document.getElementById("container").style.display = 'block';
-          document.getElementById("azinLogo").style.display = 'block';
-          showErrorVisual("Initialization error, please try again");
-        }
+        waitForLogo();
       }
-
-      // Global error handler
-      window.addEventListener('error', (e) => {
-        console.error("Global error:", e.message, e.filename, e.lineno);
-        loadingScreen.style.display = 'none';
-        greetingScreen.style.display = 'none';
-        document.getElementById("container").style.display = 'block';
-        showErrorVisual("An unexpected error occurred");
-      });
-
+      checkInternet();
       window.addEventListener('online', () => {
         console.log("Internet connection restored");
         document.getElementById("networkErrorBox").style.display = "none";
@@ -670,7 +596,6 @@
           proceedWithApp();
         }, 1000);
       });
-
       window.addEventListener('offline', () => {
         console.log("Internet connection lost");
         document.getElementById("loadingScreen").style.display = "flex";
@@ -680,15 +605,7 @@
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
         channelLoader.style.display = "none";
-        stopLogoChange();
       });
-
-      try {
-        checkInternet();
-      } catch (err) {
-        console.error("Error in checkInternet:", err);
-        showErrorVisual("Failed to check internet connection");
-      }
     }
 
     function showErrorVisual(msg = "This channel is not available for now") {
@@ -731,7 +648,7 @@
 
     function showChannelLoader() {
       console.log("Showing channel loader");
-      channelLoader.style.display = "block";
+      channelLoader.style.display = "grid";
     }
 
     function hideChannelLoader() {
@@ -791,7 +708,13 @@
 
     async function loadVideo(url, autoPlay, channelName) {
       console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}`);
+      
+      // Show spinner immediately
       showChannelLoader();
+      const minSpinnerDuration = 500; // Minimum time to show spinner (ms)
+      const spinnerStartTime = Date.now();
+
+      // Clean up existing players
       if (hls) {
         hls.destroy();
         hls = null;
@@ -800,6 +723,16 @@
         shakaPlayer.destroy();
         shakaPlayer = null;
       }
+
+      // Function to ensure minimum spinner duration
+      async function ensureMinSpinnerDuration() {
+        const elapsed = Date.now() - spinnerStartTime;
+        if (elapsed < minSpinnerDuration) {
+          await new Promise(resolve => setTimeout(resolve, minSpinnerDuration - elapsed));
+        }
+        hideChannelLoader();
+      }
+
       if (isM3U8(url)) {
         if (typeof Hls !== 'undefined' && Hls.isSupported()) {
           console.log(`HLS supported, initializing Hls.js for ${channelName}`);
@@ -814,9 +747,9 @@
           });
           hls.loadSource(url);
           hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          hls.on(Hls.Events.MANIFEST_PARSED, async () => {
             console.log(`HLS manifest parsed for ${channelName}`);
-            hideChannelLoader();
+            await ensureMinSpinnerDuration();
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`HLS play error for ${channelName}:`, err);
@@ -825,14 +758,14 @@
             }
             showPlayButton();
           });
-          hls.on(Hls.Events.ERROR, (_, data) => {
+          hls.on(Hls.Events.ERROR, async (_, data) => {
             console.error(`HLS error for ${channelName}:`, data);
             if (data.fatal) {
               console.log(`Falling back to native video for ${channelName}`);
               video.src = url;
-              video.play().catch(err => {
+              video.play().catch(async err => {
                 console.error(`Native video play error for ${channelName}:`, err);
-                hideChannelLoader();
+                await ensureMinSpinnerDuration();
                 showErrorVisual(`Failed to load ${channelName}`);
                 showPlayButton();
               });
@@ -841,9 +774,9 @@
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
           console.log(`HLS not supported by Hls.js, using native video for ${channelName}`);
           video.src = url;
-          video.onloadeddata = () => {
+          video.onloadeddata = async () => {
             console.log(`Native video data loaded for ${channelName}`);
-            hideChannelLoader();
+            await ensureMinSpinnerDuration();
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`Native video play error for ${channelName}:`, err);
@@ -854,15 +787,15 @@
               showPlayButton();
             }
           };
-          video.onerror = () => {
+          video.onerror = async () => {
             console.error(`Native video error for ${channelName}`);
-            hideChannelLoader();
+            await ensureMinSpinnerDuration();
             showErrorVisual(`Failed to load ${channelName}`);
             showPlayButton();
           };
         } else {
           console.error(`HLS not supported for ${channelName}`);
-          hideChannelLoader();
+          await ensureMinSpinnerDuration();
           showErrorVisual(`HLS not supported for ${channelName}`);
           showPlayButton();
         }
@@ -873,7 +806,7 @@
           try {
             await shakaPlayer.load(url);
             console.log(`MPEG-DASH loaded for ${channelName}`);
-            hideChannelLoader();
+            await ensureMinSpinnerDuration();
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`MPEG-DASH play error for ${channelName}:`, err);
@@ -884,22 +817,22 @@
             }
           } catch (e) {
             console.error(`Error loading MPEG-DASH for ${channelName}:`, e);
-            hideChannelLoader();
+            await ensureMinSpinnerDuration();
             showErrorVisual(`Failed to load ${channelName}`);
             showPlayButton();
           }
         } else {
           console.error(`Shaka Player not available for ${channelName}`);
-          hideChannelLoader();
+          await ensureMinSpinnerDuration();
           showErrorVisual(`MPEG-DASH not supported for ${channelName}`);
           showPlayButton();
         }
       } else {
         console.log(`Using direct video source for ${channelName}`);
         video.src = url;
-        video.onloadeddata = () => {
+        video.onloadeddata = async () => {
           console.log(`Video data loaded for ${channelName}`);
-          hideChannelLoader();
+          await ensureMinSpinnerDuration();
           if (autoPlay && hasManuallyPlayed) {
             video.play().catch(err => {
               console.error(`Direct video play error for ${channelName}:`, err);
@@ -909,9 +842,9 @@
             showPlayButton();
           }
         };
-        video.onerror = () => {
+        video.onerror = async () => {
           console.error(`Direct video error for ${channelName}`);
-          hideChannelLoader();
+          await ensureMinSpinnerDuration();
           showErrorVisual(`Failed to load ${channelName}`);
           showPlayButton();
         };
@@ -1059,6 +992,10 @@
     });
     video.addEventListener('waiting', () => {
       console.log("Video is buffering");
+      showChannelLoader();
+    });
+    video.addEventListener('stalled', () => {
+      console.log("Video stalled, showing loader");
       showChannelLoader();
     });
 
