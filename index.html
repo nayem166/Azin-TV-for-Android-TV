@@ -7,7 +7,7 @@
   <link rel="preload" href="https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png" as="image">
   <style>
     * {
-      margin: 0;
+      margin:  Hundreds of thousands of people are expected to attend the annual Urs celebration of Hazrat Shahjalal (R) in Sylhet, starting tomorrow, with key rituals including the Chadar Poshi at 10 AM and concluding with a dua on Thursday night. margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
@@ -211,64 +211,68 @@
       align-items: center;
       z-index: 10001;
       opacity: 1;
-      transition: opacity 0.8s ease-out;
+      transition: opacity 1s ease;
     }
     #loadingScreen.hidden {
       opacity: 0;
       pointer-events: none;
-      display: none;
     }
     .logo-container {
       position: relative;
       width: 300px;
       height: auto;
       opacity: 0;
-      animation: logoFadeIn 1.5s ease forwards 0.5s;
+      animation: fadeIn 1s ease forwards;
+      transform: scale(0.95);
       z-index: 2;
     }
     .logo-container img {
       width: 100%;
       height: auto;
       display: block;
-      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
-    }
-    @keyframes logoFadeIn {
-      0% { opacity: 0; transform: scale(0.9); }
-      100% { opacity: 1; transform: scale(1); }
     }
     .light-ring {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 400px;
-      height: 400px;
+      width: 500px;
+      height: 500px;
       border-radius: 50%;
-      border: 3px solid transparent;
-      border-top: 3px solid #ffaa00;
-      border-right: 3px solid rgba(255, 170, 0, 0.3);
-      box-shadow: 0 0 15px rgba(255, 170, 0, 0.4);
-      animation: spin 4s linear infinite, ringFadeIn 1s ease forwards;
+      border: 4px solid transparent;
+      border-top: 4px solid #ff6600;
+      border-right: 4px solid rgba(255, 102, 0, 0.3);
+      box-shadow: 0 0 20px rgba(255, 102, 0, 0.5);
+      animation: spin 6s linear infinite;
       z-index: 1;
-      will-change: transform, opacity;
+      will-change: transform;
     }
-    @keyframes ringFadeIn {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
     .particle {
       position: absolute;
-      width: 4px;
-      height: 4px;
+      width: 3px;
+      height: 3px;
       background: #ffaa00;
       border-radius: 50%;
-      animation: floatUp 3s ease-in-out infinite;
-      opacity: 0.7;
+      animation: floatUp 4s infinite ease-in-out;
+      opacity: 0.6;
     }
     @keyframes floatUp {
-      0% { transform: translateY(0); opacity: 0.3; }
-      50% { transform: translateY(-30px); opacity: 1; }
-      100% { transform: translateY(-60px); opacity: 0; }
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.1;
+      }
+      50% {
+        transform: translateY(-40px) scale(1.3);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-80px) scale(0.8);
+        opacity: 0;
+      }
     }
     .title {
       position: absolute;
@@ -297,7 +301,9 @@
       opacity: 1;
     }
     @keyframes fadeIn {
-      to { opacity: 1; }
+      to {
+        opacity: 1;
+      }
     }
     #greetingScreen {
       position: fixed;
@@ -355,11 +361,10 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 60px;
+      width: 40px;
       aspect-ratio: 1;
       display: grid;
       -webkit-mask: conic-gradient(from 15deg, #0000, #000);
-      mask: conic-gradient(from 15deg, transparent, black);
       animation: l26 1s infinite steps(12);
       z-index: 99;
     }
@@ -367,8 +372,10 @@
     .loader:before,
     .loader:after {
       background:
-        radial-gradient(closest-side at 50% 12.5%, #f03355 96%, transparent) 50% 0/20% 80% repeat-y,
-        radial-gradient(closest-side at 12.5% 50%, #f03355 96%, transparent) 0 50%/80% 20% repeat-x;
+        radial-gradient(closest-side at 50% 12.5%, 
+          #ffaa00 96%, #0000) 50% 0/20% 80% repeat-y,
+        radial-gradient(closest-side at 12.5% 50%, 
+          #ffaa00 96%, #0000) 0 50%/80% 20% repeat-x;
     }
     .loader:before,
     .loader:after {
@@ -483,6 +490,7 @@
       console.log("Initializing app...");
       const ua = navigator.userAgent,
             isSmartTV = /TV|BRAVIA|AFT|SmartTV|Tizen|Web0S|NetCast|AppleTV/i.test(ua);
+      console.log("User Agent:", ua, "Is Smart TV:", isSmartTV);
       if (!isSmartTV) {
         console.log("Non-Smart TV detected, showing incompatible message");
         document.getElementById("incompatibleBox").style.display = "block";
@@ -492,40 +500,32 @@
         document.getElementById("loadingScreen").style.display = "none";
         return;
       }
-      const particleCount = 30;
-      for (let i = 0; i < particleCount; i++) {
+      console.log("Creating 50 particles for loading animation");
+      for (let i = 0; i < 50; i++) {
         const p = document.createElement('div');
         p.classList.add('particle');
-        const angle = (i / particleCount) * 2 * Math.PI;
-        const radius = 150 + Math.random() * 50;
-        p.style.left = `calc(50% + ${Math.cos(angle) * radius}px)`;
-        p.style.top = `calc(50% + ${Math.sin(angle) * radius}px)`;
-        p.style.animationDelay = `${Math.random() * 2}s`;
+        p.style.left = `${Math.random() * 100}vw`;
+        p.style.top = `${Math.random() * 100}vh`;
+        p.style.animationDelay = `${Math.random() * 4}s`;
         loadingScreen.appendChild(p);
       }
       let logoLoaded = false;
-      function setLogoLoaded() {
-        if (!logoLoaded) {
-          console.log("Logo loaded or fallback applied");
-          logoLoaded = true;
-        }
-      }
-      loadingLogo.addEventListener('load', setLogoLoaded);
+      loadingLogo.addEventListener('load', () => {
+        console.log("Loading logo loaded successfully");
+        logoLoaded = true;
+      });
       loadingLogo.addEventListener('error', () => {
-        console.warn("Failed to load primary logo, using fallback");
+        console.error("Failed to load logo, using fallback");
         loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
-        loadingLogo.addEventListener('error', () => {
-          console.error("Fallback logo failed, using placeholder");
-          loadingLogo.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAQSURBVHgBAcAAMADj/////wAAAADqL3hKAAAAAElFTkSuQmCC";
-          setLogoLoaded();
-        }, { once: true });
-      }, { once: true });
+        logoLoaded = true;
+      });
       setTimeout(() => {
         if (!logoLoaded) {
-          console.warn("Logo loading timeout, forcing proceed");
-          setLogoLoaded();
+          console.warn("Logo loading timeout, switching to fallback");
+          loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
+          logoLoaded = true;
         }
-      }, 3000);
+      }, 5000);
       function checkInternet() {
         if (!navigator.onLine) {
           console.log("No internet connection detected");
@@ -535,8 +535,9 @@
           document.getElementById("container").style.display = "none";
           document.getElementById("azinLogo").style.display = "none";
           document.getElementById("greetingScreen").style.display = "none";
-          setTimeout(checkInternet, 3000);
+          setTimeout(checkInternet, 5000);
         } else {
+          console.log("Internet connection detected");
           document.getElementById("networkErrorBox").style.display = "none";
           proceedWithApp();
         }
@@ -544,11 +545,11 @@
       function proceedWithApp() {
         function waitForLogo() {
           if (logoLoaded) {
-            console.log("Starting loading animation");
+            console.log("Showing loading screen");
             setTimeout(() => {
-              console.log("Fading out loading screen");
+              console.log("Hiding loading screen");
               loadingScreen.classList.add('hidden');
-              loadingScreen.addEventListener('transitionend', () => {
+              setTimeout(() => {
                 loadingScreen.style.display = 'none';
                 console.log("Showing greeting screen");
                 greetingScreen.style.display = 'flex';
@@ -557,10 +558,10 @@
                 const greetingMessage = "Assalamualaikum, Welcome to our App";
                 typeText(greetingText, greetingMessage, 4000);
                 setTimeout(() => {
-                  console.log("Fading out greeting screen");
+                  console.log("Hiding greeting screen");
                   greetingScreen.classList.remove('visible');
                   greetingScreen.classList.add('hidden');
-                  greetingScreen.addEventListener('transitionend', () => {
+                  setTimeout(() => {
                     greetingScreen.style.display = 'none';
                     console.log("Showing main app");
                     document.getElementById("container").style.display = 'block';
@@ -569,13 +570,14 @@
                       console.error("Streaming libraries failed to load");
                       showErrorVisual("Streaming library failed to load");
                     } else {
+                      console.log("Streaming libraries loaded successfully");
                       loadChannel(0, false);
                       showPlayButton();
                     }
-                  }, { once: true });
+                  }, 1000);
                 }, 4000);
-              }, { once: true });
-            }, 4000);
+              }, 1000);
+            }, 6000);
           } else {
             setTimeout(waitForLogo, 100);
           }
@@ -590,7 +592,7 @@
         setTimeout(() => {
           document.getElementById("loadingScreen").style.display = "none";
           proceedWithApp();
-        }, 800);
+        }, 1000);
       });
       window.addEventListener('offline', () => {
         console.log("Internet connection lost");
@@ -644,7 +646,7 @@
 
     function showChannelLoader() {
       console.log("Showing channel loader");
-      channelLoader.style.display = "block";
+      channelLoader.style.display = "grid";
     }
 
     function hideChannelLoader() {
@@ -752,7 +754,7 @@
             }
           });
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-          console.log(`HLS not supported by Hls.js, using native video for ${channelName}`);
+          console log(`HLS not supported by Hls.js, using native video for ${channelName}`);
           video.src = url;
           video.onloadeddata = () => {
             console.log(`Native video data loaded for ${channelName}`);
