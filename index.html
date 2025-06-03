@@ -367,16 +367,14 @@
       -webkit-mask: conic-gradient(from 15deg, #0000, #000);
       animation: l26 1s infinite steps(12);
       z-index: 99;
-      filter: drop-shadow(0 0 8px rgba(255, 170, 0, 0.5)); /* Added glow effect */
+      filter: drop-shadow(0 0 8px rgba(255, 170, 0, 0.5));
     }
     .loader,
     .loader:before,
     .loader:after {
       background:
-        radial-gradient(closest-side at 50% 12.5%, 
-          #ffaa00 96%, #0000) 50% 0/20% 80% repeat-y,
-        radial-gradient(closest-side at 12.5% 50%, 
-          #ffaa00 96%, #0000) 0 50%/80% 20% repeat-x;
+        linear-gradient(to bottom, #ffb84d 0%, #ffaa00 100%) 50% 0/20% 80% repeat-y,
+        linear-gradient(to right, #ffb84d 0%, #ffaa00 100%) 0 50%/80% 20% repeat-x;
     }
     .loader:before,
     .loader:after {
@@ -410,7 +408,9 @@
     </div>
     <div id="staticNoise"></div>
     <div class="loader" id="channelLoader"></div>
-    <audio id="noiseSound" src="https://cdn.pixabay.com/audio/2025/04/06/audio_513747fd8d.mp3" preload="auto" loop></audio>
+    <audio id="noiseSound" src="https://cdn.pixabay.com/audio/2025/04/06/audio
+
+_513747fd8d.mp3" preload="auto" loop></audio>
     <audio id="typingSound" src="https://assets.mixkit.co/active_storage/sfx/1392/1392-preview.mp3" preload="auto"></audio>
     <video id="player" playsinline controlslist="nodownload noplaybackrate" disablePictureInPicture></video>
     <div id="playButton" tabindex="0"></div>
