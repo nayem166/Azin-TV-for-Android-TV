@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart TV Live App</title>
   <link rel="preload" href="https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png" as="image">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -15,7 +16,7 @@
       height: 100vh;
       background: black;
       color: #fff;
-      font-family: 'Segoe UI', Arial, sans-serif;
+      font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
       overflow: hidden;
       position: relative;
     }
@@ -361,36 +362,51 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 50px;
+      width: 60px;
       aspect-ratio: 1;
       display: none;
-      grid-template: 1fr / 1fr;
-      -webkit-mask: conic-gradient(from 15deg, #0000, #000);
-      animation: l26 1s infinite steps(12);
-      z-index: 200;
-      visibility: visible;
-      opacity: 1;
-    }
-    .loader,
-    .loader:before,
-    .loader:after {
+      border-radius: 50%;
       background:
-        radial-gradient(closest-side at 50% 12.5%, #f03355 96%, #0000) 50% 0/20% 80% repeat-y,
-        radial-gradient(closest-side at 12.5% 50%, #f03355 96%, #0000) 0 50%/80% 20% repeat-x;
+        linear-gradient(0deg, rgba(255, 102, 0, 0.5) 30%, transparent 30% 70%, rgba(255, 102, 0, 1) 70%) 50% / 8% 100%,
+        linear-gradient(90deg, rgba(255, 147, 0, 0.3) 30%, transparent 30% 70%, rgba(255, 147, 0, 0.8) 70%) 50% / 100% 8%;
+      background-repeat: no-repeat;
+      animation: l23 1s infinite steps(12);
+      z-index: 99;
+      filter: drop-shadow(0 0 10px rgba(255, 102, 0, 0.5));
     }
-    .loader:before,
-    .loader:after {
+    .loader::before,
+    .loader::after {
       content: "";
       grid-area: 1/1;
+      border-radius: 50%;
+      background: inherit;
+      opacity: 0.915;
       transform: rotate(30deg);
     }
-    .loader:after {
+    .loader::after {
+      opacity: 0.83;
       transform: rotate(60deg);
     }
-    @keyframes l26 {
-      100% {
-        transform: translate(-50%, -50%) rotate(1turn);
-      }
+    .loader-text {
+      position: absolute;
+      top: 60%;
+      left: 50%;
+      transform: translate(-50%, 0);
+      color: #fff;
+      font-size: 3vw; /* Responsive font size for TV screens */
+      font-weight: 500;
+      text-shadow: 0 0 8px rgba(255, 102, 0, 0.7);
+      animation: pulse 1.5s infinite ease-in-out;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    @keyframes l23 {
+      100% { transform: translate(-50%, -50%) rotate(1turn); }
+    }
+    @keyframes pulse {
+      0% { opacity: 0.7; }
+      50% { opacity: 1; }
+      100% { opacity: 0.7; }
     }
   </style>
 </head>
@@ -411,7 +427,9 @@
       <h2 style="margin:0 0 10px;padding:10px;font-size:20px;text-align:center;border-bottom:1px solid gray">Channels</h2>
     </div>
     <div id="staticNoise"></div>
-    <div class="loader" id="channelLoader"></div>
+    <div class="loader" id="channelLoader">
+      <span class="loader-text">Please wait...</span>
+    </div>
     <audio id="noiseSound" src="https://cdn.pixabay.com/audio/2025/04/06/audio_513747fd8d.mp3" preload="auto" loop></audio>
     <audio id="typingSound" src="https://assets.mixkit.co/active_storage/sfx/1392/1392-preview.mp3" preload="auto"></audio>
     <video id="player" playsinline controlslist="nodownload noplaybackrate" disablePictureInPicture></video>
@@ -462,7 +480,7 @@
           loadingLogo = document.getElementById("loadingLogo"),
           greetingText = document.getElementById("greetingText"),
           channelLoader = document.getElementById("channelLoader");
-    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false, loaderTimeout;
+    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
 
     function typeText(element, text, duration) {
       console.log("Starting JavaScript typing animation");
@@ -514,22 +532,21 @@
       }
       let logoLoaded = false;
       loadingLogo.addEventListener('load', () => {
-        console.log("Primary logo loaded successfully");
+        console.log("Loading logo loaded successfully");
         logoLoaded = true;
       });
       loadingLogo.addEventListener('error', () => {
-        console.error("Failed to load primary logo, switching to fallback");
+        console.error("Failed to load logo, using fallback");
         loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
         logoLoaded = true;
       });
-      // Increased timeout to 10 seconds
       setTimeout(() => {
         if (!logoLoaded) {
-          console.warn("Primary logo loading timeout, switching to fallback");
+          console.warn("Logo loading timeout, switching to fallback");
           loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
           logoLoaded = true;
         }
-      }, 10000);
+      }, 5000);
       function checkInternet() {
         if (!navigator.onLine) {
           console.log("No internet connection detected");
@@ -539,7 +556,6 @@
           document.getElementById("container").style.display = "none";
           document.getElementById("azinLogo").style.display = "none";
           document.getElementById("greetingScreen").style.display = "none";
-          channelLoader.style.display = "none";
           setTimeout(checkInternet, 5000);
         } else {
           console.log("Internet connection detected");
@@ -650,21 +666,13 @@
     }
 
     function showChannelLoader() {
-      console.log("Showing channel loader for buffering");
-      clearTimeout(loaderTimeout);
+      console.log("Showing channel loader");
       channelLoader.style.display = "grid";
-      channelLoader.style.opacity = "1";
-      channelLoader.style.visibility = "visible";
     }
 
     function hideChannelLoader() {
-      console.log("Attempting to hide channel loader");
-      loaderTimeout = setTimeout(() => {
-        channelLoader.style.display = "none";
-        channelLoader.style.opacity = "0";
-        channelLoader.style.visibility = "hidden";
-        console.log("Channel loader hidden");
-      }, 1000); // Minimum 1-second display time
+      console.log("Hiding channel loader");
+      channelLoader.style.display = "none";
     }
 
     setTimeout(() => {
@@ -719,7 +727,7 @@
 
     async function loadVideo(url, autoPlay, channelName) {
       console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}`);
-      showChannelLoader(); // Show loader at the start of loading
+      showChannelLoader();
       if (hls) {
         hls.destroy();
         hls = null;
@@ -744,23 +752,17 @@
           hls.attachMedia(video);
           hls.on(Hls.Events.MANIFEST_PARSED, () => {
             console.log(`HLS manifest parsed for ${channelName}`);
+            hideChannelLoader();
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`HLS play error for ${channelName}:`, err);
-                hideChannelLoader();
                 showPlayButton();
               });
-            } else {
-              hideChannelLoader();
-              showPlayButton();
             }
+            showPlayButton();
           });
           hls.on(Hls.Events.ERROR, (_, data) => {
             console.error(`HLS error for ${channelName}:`, data);
-            if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-              console.log(`HLS network error, showing loader for ${channelName}`);
-              showChannelLoader();
-            }
             if (data.fatal) {
               console.log(`Falling back to native video for ${channelName}`);
               video.src = url;
@@ -771,18 +773,6 @@
                 showPlayButton();
               });
             }
-          });
-          hls.on(Hls.Events.LEVEL_LOADING, () => {
-            console.log(`HLS level loading for ${channelName}`);
-            showChannelLoader();
-          });
-          hls.on(Hls.Events.BUFFER_STALLED, () => {
-            console.log(`HLS buffer stalled for ${channelName}`);
-            showChannelLoader();
-          });
-          hls.on(Hls.Events.BUFFER_APPENDED, () => {
-            console.log(`HLS buffer appended for ${channelName}`);
-            hideChannelLoader();
           });
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
           console.log(`HLS not supported by Hls.js, using native video for ${channelName}`);
@@ -816,15 +806,6 @@
         if (typeof shaka !== 'undefined') {
           console.log(`Loading MPEG-DASH for ${channelName}`);
           shakaPlayer = new shaka.Player(video);
-          shakaPlayer.addEventListener('buffering', (event) => {
-            if (event.buffering) {
-              console.log(`Shaka buffering started for ${channelName}`);
-              showChannelLoader();
-            } else {
-              console.log(`Shaka buffering ended for ${channelName}`);
-              hideChannelLoader();
-            }
-          });
           try {
             await shakaPlayer.load(url);
             console.log(`MPEG-DASH loaded for ${channelName}`);
@@ -937,8 +918,7 @@
       }
       if (["Enter", "OK", "Accept", "SoftRight"].includes(key) || code === 13) {
         if (listVisible) {
-          loadChannel(current先行
-currentIndex, hasManuallyPlayed);
+          loadChannel(currentIndex, hasManuallyPlayed);
         } else {
           if (video.paused) {
             console.log("Attempting to play video");
@@ -999,12 +979,8 @@ currentIndex, hasManuallyPlayed);
       }
     });
 
-    video.addEventListener('waiting', () => {
-      console.log("Video is buffering (waiting event)");
-      showChannelLoader();
-    });
     video.addEventListener('playing', () => {
-      console.log("Video is playing (playing event)");
+      console.log("Video is playing");
       hideChannelLoader();
       showPlayButton();
     });
@@ -1016,6 +992,10 @@ currentIndex, hasManuallyPlayed);
       console.log("Video element error event");
       hideChannelLoader();
       showPlayButton();
+    });
+    video.addEventListener('waiting', () => {
+      console.log("Video is buffering");
+      showChannelLoader();
     });
 
     shaka.polyfill.installAll();
