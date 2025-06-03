@@ -366,32 +366,38 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 50px;
-      aspect-ratio: 1;
-      display: grid;
-      border-radius: 50%;
-      background:
-        linear-gradient(0deg, rgb(0 0 0/50%) 30%, #0000 0 70%, rgb(0 0 0/100%) 0) 50%/8% 100%,
-        linear-gradient(90deg, rgb(0 0 0/25%) 30%, #0000 0 70%, rgb(0 0 0/75%) 0) 50%/100% 8%;
-      background-repeat: no-repeat;
-      animation: l23 1s infinite steps(12);
+      width: 100px;
+      height: 100px;
+      display: none;
       z-index: 99;
     }
-    .loader::before,
-    .loader::after {
-      content: "";
-      grid-area: 1/1;
+    .loader::before {
+      content: '';
+      box-sizing: border-box;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
-      background: inherit;
-      opacity: 0.915;
-      transform: rotate(30deg);
+      border: 6px solid transparent; /* Increased from 4px to 6px for thicker appearance */
+      border-top-color: #ffaa00;
+      border-right-color: rgba(255, 170, 0, 0.3);
+      animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+      filter: drop-shadow(0 0 10px rgba(255, 170, 0, 0.5));
     }
     .loader::after {
-      opacity: 0.83;
-      transform: rotate(60deg);
-    }
-    @keyframes l23 {
-      100% { transform: translate(-50%, -50%) rotate(1turn); }
+      content: '';
+      box-sizing: border-box;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 6px solid transparent; /* Increased from 4px to 6px for thicker appearance */
+      border-top-color: rgba(255, 255, 255, 0.8);
+      animation: spin 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite reverse;
     }
   </style>
 </head>
@@ -699,14 +705,19 @@
 
     function showPlayButton() {
       const isPlaying = !video.paused && !video.ended;
-      console.log("Showing play button, isPlaying:", isPlaying);
-      playButton.style.display = 'flex';
-      playButton.classList.toggle('playing', isPlaying);
-      playButton.classList.remove('fade-out');
-      if (isPlaying) {
-        setTimeout(() => {
-          playButton.classList.add('fade-out');
-        }, 3000);
+      const isBuffering = video.readyState < video.HAVE_FUTURE_DATA; // Check if video is buffering
+      console.log("Showing play button, isPlaying:", isPlaying, "isBuffering:", isBuffering);
+      if (!isBuffering) {
+        playButton.style.display = 'flex';
+        playButton.classList.toggle('playing', isPlaying);
+        playButton.classList.remove('fade-out');
+        if (isPlaying) {
+          setTimeout(() => {
+            playButton.classList.add('fade-out');
+          }, 3000);
+        }
+      } else {
+        playButton.style.display = 'none'; // Hide play button during buffering
       }
     }
 
@@ -844,6 +855,7 @@
         console.log("No internet connection, showing network error");
         document.getElementById("loadingScreen").style.display = "flex";
         document.getElementById("loadingScreen").classList.remove("hidden");
+        document90
         document.getElementById("networkErrorBox").style.display = "block";
         document.getElementById("container").style.display = "none";
         document.getElementById("azinLogo").style.display = "none";
