@@ -225,19 +225,24 @@
       animation: fadeIn 1s ease forwards;
       transform: scale(0.95);
       z-index: 2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     .logo-container img {
       width: 100%;
       height: auto;
       display: block;
+      position: relative;
+      z-index: 2;
     }
     .light-ring {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 500px;
-      height: 500px;
+      width: 340px;
+      height: 340px;
       border-radius: 50%;
       border: 4px solid transparent;
       border-top: 4px solid #ff6600;
@@ -356,6 +361,7 @@
       left: -9999px !important;
       top: -9999px !important;
     }
+    /* New Channel Loader Styles */
     .loader-container {
       position: absolute;
       top: 50%;
@@ -394,16 +400,12 @@
         transform: scale(1.2);
       }
     }
-    .loader-container div:last-child {
-      color: #FFA500;
-      font-size: 2rem;
-    }
   </style>
 </head>
 <body>
   <div id="loadingScreen">
-    <div class="light-ring"></div>
     <div class="logo-container">
+      <div class="light-ring"></div>
       <img id="loadingLogo" src="https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png" alt="">
     </div>
     <div class="title"></div>
@@ -417,7 +419,7 @@
       <h2 style="margin:0 0 10px;padding:10px;font-size:20px;text-align:center;border-bottom:1px solid gray">Channels</h2>
     </div>
     <div id="staticNoise"></div>
-    <div class="loader-container" id="dotLoader">
+    <div class="loader-container" id="channelLoader">
       <div class="dot-loader">
         <div></div>
         <div></div>
@@ -474,7 +476,7 @@
           loadingScreen = document.getElementById("loadingScreen"),
           loadingLogo = document.getElementById("loadingLogo"),
           greetingText = document.getElementById("greetingText"),
-          dotLoader = document.getElementById("dotLoader");
+          channelLoader = document.getElementById("channelLoader");
     let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
 
     function typeText(element, text, duration) {
@@ -514,6 +516,7 @@
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
         document.getElementById("loadingScreen").style.display = "none";
+        channelLoader.style.display = "none";
         return;
       }
       console.log("Creating 50 particles for loading animation");
@@ -551,6 +554,7 @@
           document.getElementById("container").style.display = "none";
           document.getElementById("azinLogo").style.display = "none";
           document.getElementById("greetingScreen").style.display = "none";
+          channelLoader.style.display = "none";
           setTimeout(checkInternet, 5000);
         } else {
           console.log("Internet connection detected");
@@ -618,7 +622,7 @@
         document.getElementById("container").style.display = "none";
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
-        dotLoader.style.display = "none";
+        channelLoader.style.display = "none";
       });
     }
 
@@ -629,7 +633,7 @@
       staticNoise.style.display = "block";
       errorBox.innerText = msg;
       errorBox.style.display = "block";
-      dotLoader.style.display = "none";
+      channelLoader.style.display = "none";
       function attemptPlayNoiseSound(retries = 3, delay = 500) {
         noiseSound.pause();
         noiseSound.currentTime = 0;
@@ -662,12 +666,12 @@
 
     function showChannelLoader() {
       console.log("Showing channel loader");
-      dotLoader.style.display = "flex";
+      channelLoader.style.display = "flex";
     }
 
     function hideChannelLoader() {
       console.log("Hiding channel loader");
-      dotLoader.style.display = "none";
+      channelLoader.style.display = "none";
     }
 
     setTimeout(() => {
@@ -709,14 +713,19 @@
 
     function showPlayButton() {
       const isPlaying = !video.paused && !video.ended;
-      console.log("Showing play button, isPlaying:", isPlaying);
-      playButton.style.display = 'flex';
-      playButton.classList.toggle('playing', isPlaying);
-      playButton.classList.remove('fade-out');
-      if (isPlaying) {
-        setTimeout(() => {
-          playButton.classList.add('fade-out');
-        }, 3000);
+      const isBuffering = video.readyState < video.HAVE_FUTURE_DATA;
+      console.log("Showing play button, isPlaying:", isPlaying, "isBuffering:", isBuffering);
+      if (!isBuffering) {
+        playButton.style.display = 'flex';
+        playButton.classList.toggle('playing', isPlaying);
+        playButton.classList.remove('fade-out');
+        if (isPlaying) {
+          setTimeout(() => {
+            playButton.classList.add('fade-out');
+          }, 3000);
+        }
+      } else {
+        playButton.style.display = 'none';
       }
     }
 
@@ -733,4 +742,274 @@
       }
       if (isM3U8(url)) {
         if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-          console.log(`
+          console.log(`HLS supported, initializing Hls.js for ${channelName}`);
+          hls = new Hls({
+            debug: true,
+            enableWorker: true,
+            lowLatencyMode: true,
+            backBufferLength: 90,
+            xhrSetup: function(xhr) {
+              xhr.withCredentials = false;
+            }
+          });
+          hls.loadSource(url);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            console.log(`HLS manifest parsed for ${channelName}`);
+            hideChannelLoader();
+            if (autoPlay && hasManuallyPlayed) {
+              video.play().catch(err => {
+                console.error(`HLS play error for ${channelName}:`, err);
+                showPlayButton();
+              });
+            }
+            showPlayButton();
+          });
+          hls.on(Hls.Events.ERROR, (_, data) => {
+            console.error(`HLS error for ${channelName}:`, data);
+            if (data.fatal) {
+              console.log(`Falling back to native video for ${channelName}`);
+              video.src = url;
+              video.play().catch(err => {
+                console.error(`Native video play error for ${channelName}:`, err);
+                hideChannelLoader();
+                showErrorVisual(`Failed to load ${channelName}`);
+                showPlayButton();
+              });
+            }
+          });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          console.log(`HLS not supported by Hls.js, using native video for ${channelName}`);
+          video.src = url;
+          video.onloadeddata = () => {
+            console.log(`Native video data loaded for ${channelName}`);
+            hideChannelLoader();
+            if (autoPlay && hasManuallyPlayed) {
+              video.play().catch(err => {
+                console.error(`Native video play error for ${channelName}:`, err);
+                showErrorVisual(`Failed to load ${channelName}`);
+                showPlayButton();
+              });
+            } else {
+              showPlayButton();
+            }
+          };
+          video.onerror = () => {
+            console.error(`Native video error for ${channelName}`);
+            hideChannelLoader();
+            showErrorVisual(`Failed to load ${channelName}`);
+            showPlayButton();
+          };
+        } else {
+          console.error(`HLS not supported for ${channelName}`);
+          hideChannelLoader();
+          showErrorVisual(`HLS not supported for ${channelName}`);
+          showPlayButton();
+        }
+      } else if (isMPD(url)) {
+        if (typeof shaka !== 'undefined') {
+          console.log(`Loading MPEG-DASH for ${channelName}`);
+          shakaPlayer = new shaka.Player(video);
+          try {
+            await shakaPlayer.load(url);
+            console.log(`MPEG-DASH loaded for ${channelName}`);
+            hideChannelLoader();
+            if (autoPlay && hasManuallyPlayed) {
+              video.play().catch(err => {
+                console.error(`MPEG-DASH play error for ${channelName}:`, err);
+                showPlayButton();
+              });
+            } else {
+              showPlayButton();
+            }
+          } catch (e) {
+            console.error(`Error loading MPEG-DASH for ${channelName}:`, e);
+            hideChannelLoader();
+            showErrorVisual(`Failed to load ${channelName}`);
+            showPlayButton();
+          }
+        } else {
+          console.error(`Shaka Player not available for ${channelName}`);
+          hideChannelLoader();
+          showErrorVisual(`MPEG-DASH not supported for ${channelName}`);
+          showPlayButton();
+        }
+      } else {
+        console.log(`Using direct video source for ${channelName}`);
+        video.src = url;
+        video.onloadeddata = () => {
+          console.log(`Video data loaded for ${channelName}`);
+          hideChannelLoader();
+          if (autoPlay && hasManuallyPlayed) {
+            video.play().catch(err => {
+              console.error(`Direct video play error for ${channelName}:`, err);
+              showPlayButton();
+            });
+          } else {
+            showPlayButton();
+          }
+        };
+        video.onerror = () => {
+          console.error(`Direct video error for ${channelName}`);
+          hideChannelLoader();
+          showErrorVisual(`Failed to load ${channelName}`);
+          showPlayButton();
+        };
+      }
+    }
+
+    function loadChannel(index, autoPlay = false) {
+      if (!navigator.onLine) {
+        console.log("No internet connection, showing network error");
+        document.getElementById("loadingScreen").style.display = "flex";
+        document.getElementById("loadingScreen").classList.remove("hidden");
+        document.getElementById("networkErrorBox").style.display = "block";
+        document.getElementById("container").style.display = "none";
+        document.getElementById("azinLogo").style.display = "none";
+        document.getElementById("greetingScreen").style.display = "none";
+        channelLoader.style.display = "none";
+        return;
+      }
+      console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
+      currentIndex = index;
+      playingIndex = index;
+      hideErrorVisual();
+      loadVideo(channels[index].url, autoPlay, channels[index].name);
+      video.muted = false;
+      updateUI();
+      hideChannelList();
+      showOverlay(String(index + 1));
+      setTimeout(showPlayButton, 500);
+    }
+
+    function showChannelList() {
+      console.log("Showing channel list");
+      list.style.display = "flex";
+      listVisible = true;
+      updateUI();
+      clearTimeout(listTimeout);
+      listTimeout = setTimeout(hideChannelList, 7000);
+    }
+
+    function hideChannelList() {
+      console.log("Hiding channel list");
+      list.style.display = "none";
+      listVisible = false;
+      currentIndex = playingIndex;
+      updateUI();
+    }
+
+    function changeChannelByStep(direction) {
+      currentIndex = direction === "up" ? (currentIndex - 1 + channels.length) % channels.length : (currentIndex + 1) % channels.length;
+      console.log(`Changing channel to index ${currentIndex}`);
+      listVisible ? updateUI() : loadChannel(currentIndex, hasManuallyPlayed);
+    }
+
+    document.addEventListener('keydown', e => {
+      const key = e.key, code = e.keyCode;
+      console.log(`Key pressed: ${key} (code: ${code})`);
+      if (key >= "0" && key <= "9") {
+        numberInput += key;
+        showOverlay(numberInput);
+        clearTimeout(numberTimeout);
+        numberTimeout = setTimeout(() => {
+          const num = parseInt(numberInput, 10);
+          if (num >= 1 && num <= channels.length) loadChannel(num - 1, hasManuallyPlayed);
+          numberInput = "";
+        }, 2000);
+        e.preventDefault();
+        return;
+      }
+      if (["Enter", "OK", "Accept", "SoftRight"].includes(key) || code === 13) {
+        if (listVisible) {
+          loadChannel(currentIndex, hasManuallyPlayed);
+        } else {
+          if (video.paused) {
+            console.log("Attempting to play video");
+            hasManuallyPlayed = true;
+            video.play().catch(err => { console.log("Play error:", err); });
+            showPlayButton();
+          } else {
+            console.log("Pausing video");
+            video.pause();
+            showPlayButton();
+          }
+        }
+        e.preventDefault();
+        return;
+      }
+      if (["ArrowLeft", "ArrowRight"].includes(key)) {
+        listVisible ? hideChannelList() : showChannelList();
+        e.preventDefault();
+        return;
+      }
+      if (listVisible) {
+        if (key === "ArrowUp" || key === "PageUp" || key === "ChannelUp" || code === 33) {
+          currentIndex = (currentIndex - 1 + channels.length) % channels.length;
+          updateUI();
+          e.preventDefault();
+          return;
+        }
+        if (key === "ArrowDown" || key === "PageDown" || key === "ChannelDown" || code === 34) {
+          currentIndex = (currentIndex + 1) % channels.length;
+          updateUI();
+          e.preventDefault();
+          return;
+        }
+      } else {
+        if (["ArrowUp", "ChannelUp"].includes(key) || code === 33) {
+          changeChannelByStep("down");
+          e.preventDefault();
+          return;
+        }
+        if (["ArrowDown", "ChannelDown"].includes(key) || code === 34) {
+          changeChannelByStep("up");
+          e.preventDefault();
+          return;
+        }
+      }
+      if (["MediaPlayPause", " "].includes(key)) {
+        if (video.paused) {
+          console.log("Attempting to play video via MediaPlayPause");
+          hasManuallyPlayed = true;
+          video.play().catch(err => { console.log("Play error:", err); });
+          showPlayButton();
+        } else {
+          console.log("Pausing video via MediaPlayPause");
+          video.pause();
+          showPlayButton();
+        }
+        e.preventDefault();
+      }
+    });
+
+    video.addEventListener('playing', () => {
+      console.log("Video is playing");
+      hideChannelLoader();
+      showPlayButton();
+    });
+    video.addEventListener('pause', () => {
+      console.log("Video paused");
+      showPlayButton();
+    });
+    video.addEventListener('error', () => {
+      console.log("Video element error event");
+      hideChannelLoader();
+      showPlayButton();
+    });
+    video.addEventListener('waiting', () => {
+      console.log("Video is buffering");
+      showChannelLoader();
+    });
+
+    shaka.polyfill.installAll();
+    if (shaka.Player.isBrowserSupported()) {
+      console.log("Shaka Player is supported");
+    } else {
+      console.error("Shaka Player is not supported");
+    }
+
+    initializeApp();
+  </script>
+</body>
+</html>
