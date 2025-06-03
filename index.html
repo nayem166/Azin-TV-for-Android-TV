@@ -7,7 +7,7 @@
   <link rel="preload" href="https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png" as="image">
   <style>
     * {
-      margin:  Hundreds of thousands of people are expected to attend the annual Urs celebration of Hazrat Shahjalal (R) in Sylhet, starting tomorrow, with key rituals including the Chadar Poshi at 10 AM and concluding with a dua on Thursday night. margin: 0;
+      margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
@@ -157,7 +157,7 @@
       padding: 40px 60px;
       font-size: 28px;
       border: 4px solid #fff;
-      border-radius: 16px;
+      border-radius: 4px;
       z-index: 100;
       display: none;
       text-align: center;
@@ -367,6 +367,7 @@
       -webkit-mask: conic-gradient(from 15deg, #0000, #000);
       animation: l26 1s infinite steps(12);
       z-index: 99;
+      filter: drop-shadow(0 0 8px rgba(255, 170, 0, 0.5)); /* Added glow effect */
     }
     .loader,
     .loader:before,
@@ -462,7 +463,7 @@
     let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
 
     function typeText(element, text, duration) {
-      console.log("Starting JavaScript typing animation");
+      console.log("Starting JavaScript typing animation for greeting screen");
       element.textContent = "";
       element.style.width = "auto";
       element.style.animation = "none";
@@ -488,8 +489,8 @@
 
     function initializeApp() {
       console.log("Initializing app...");
-      const ua = navigator.userAgent,
-            isSmartTV = /TV|BRAVIA|AFT|SmartTV|Tizen|Web0S|NetCast|AppleTV/i.test(ua);
+      const ua = navigator.userAgent;
+      const isSmartTV = /TV|BRAVIA|AFT|SmartTV|Tizen|Web0S|NetCast|AppleTV/i.test(ua);
       console.log("User Agent:", ua, "Is Smart TV:", isSmartTV);
       if (!isSmartTV) {
         console.log("Non-Smart TV detected, showing incompatible message");
@@ -527,6 +528,7 @@
         }
       }, 5000);
       function checkInternet() {
+        console.log("Checking internet connection, navigator.onLine:", navigator.onLine);
         if (!navigator.onLine) {
           console.log("No internet connection detected");
           document.getElementById("loadingScreen").style.display = "flex";
@@ -645,16 +647,17 @@
     }
 
     function showChannelLoader() {
-      console.log("Showing channel loader");
+      console.log("Showing channel loader, setting display to grid");
       channelLoader.style.display = "grid";
     }
 
     function hideChannelLoader() {
-      console.log("Hiding channel loader");
+      console.log("Hiding channel loader, setting display to none");
       channelLoader.style.display = "none";
     }
 
     setTimeout(() => {
+      console.log("Populating channel list");
       channels.forEach((ch, i) => {
         const div = document.createElement("div");
         div.className = "channel";
@@ -665,6 +668,7 @@
     }, 0);
 
     function updateUI() {
+      console.log("Updating UI, currentIndex:", currentIndex, "listVisible:", listVisible);
       document.querySelectorAll('.channel').forEach((el, i) => {
         el.classList.toggle('active', i === currentIndex);
         if (i === currentIndex && listVisible) el.scrollIntoView({ block: "nearest" });
@@ -676,11 +680,14 @@
     }
 
     function showOverlay(text) {
-      console.log("Showing overlay:", text);
+      console.log("Showing overlay with text:", text);
       overlay.innerText = text;
       overlay.style.opacity = '1';
       clearTimeout(overlayTimeout);
-      overlayTimeout = setTimeout(() => { overlay.style.opacity = '0'; }, 2000);
+      overlayTimeout = setTimeout(() => { 
+        overlay.style.opacity = '0'; 
+        console.log("Hiding overlay");
+      }, 2000);
     }
 
     function isM3U8(url) {
@@ -700,6 +707,7 @@
       if (isPlaying) {
         setTimeout(() => {
           playButton.classList.add('fade-out');
+          console.log("Play button faded out");
         }, 3000);
       }
     }
@@ -708,10 +716,12 @@
       console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}`);
       showChannelLoader();
       if (hls) {
+        console.log("Destroying existing HLS instance");
         hls.destroy();
         hls = null;
       }
       if (shakaPlayer) {
+        console.log("Destroying existing Shaka Player instance");
         shakaPlayer.destroy();
         shakaPlayer = null;
       }
@@ -754,7 +764,7 @@
             }
           });
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-          console log(`HLS not supported by Hls.js, using native video for ${channelName}`);
+          console.log(`HLS not supported by Hls.js, using native video for ${channelName}`);
           video.src = url;
           video.onloadeddata = () => {
             console.log(`Native video data loaded for ${channelName}`);
@@ -973,7 +983,7 @@
       showPlayButton();
     });
     video.addEventListener('waiting', () => {
-      console.log("Video is buffering");
+      console.log("Video is buffering, triggering loader");
       showChannelLoader();
     });
 
