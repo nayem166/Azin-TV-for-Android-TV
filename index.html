@@ -535,18 +535,13 @@
         console.log("Loading logo loaded successfully");
         logoLoaded = true;
       });
-      loadingLogo.addEventListener('error', () => {
-        console.error("Failed to load logo, using fallback");
-        loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
-        logoLoaded = true;
-      });
-      setTimeout(() => {
-        if (!logoLoaded) {
-          console.warn("Logo loading timeout, switching to fallback");
-          loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
-          logoLoaded = true;
-        }
-      }, 3000);
+    
+  window.addEventListener('DOMContentLoaded', () => {
+    const loadingLogo = document.getElementById('loadingLogo');
+    setTimeout(() => {
+      loadingLogo.src = "https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png";
+    }, 1000); // 1000 মিলিসেকেন্ড = 1 সেকেন্ড
+  });
       function checkInternet() {
         if (!navigator.onLine) {
           console.log("No internet connection detected");
