@@ -373,7 +373,7 @@
       flex-direction: column;
       align-items: center;
       gap: 30px;
-      z-index: 99;
+      z-index: 1000;
     }
     .dot-loader {
       display: flex;
@@ -546,7 +546,7 @@
           loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
           logoLoaded = true;
         }
-      }, 5000);
+      }, 3000);
       function checkInternet() {
         if (!navigator.onLine) {
           console.log("No internet connection detected");
