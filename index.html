@@ -235,6 +235,7 @@
       display: block;
       position: relative;
       z-index: 2;
+      Opacity: 2;
     }
     .light-ring {
       position: absolute;
@@ -376,11 +377,11 @@
     }
     .dot-loader {
       display: flex;
-      gap: 12px; /* Adjusted for smaller size */
+      gap: 20px; /* Adjusted for smaller size */
     }
     .dot-loader div {
-      width: 18px; /* Reduced from 24px */
-      height: 18px; /* Reduced from 24px */
+      width: 30px; /* Reduced from 24px */
+      height: 30px; /* Reduced from 24px */
       background-color: #FF6200;
       border-radius: 50%;
       animation: blink 1.2s infinite ease-in-out;
@@ -394,11 +395,11 @@
     @keyframes blink {
       0%, 80%, 100% {
         opacity: 0.2;
-        transform: scale(0.4); /* Adjusted for smaller size */
+        transform: scale(0.45); /* Adjusted for smaller size */
       }
       40% {
         opacity: 1;
-        transform: scale(1.0); /* Reduced maximum scale */
+        transform: scale(1.2); /* Reduced maximum scale */
       }
     }
   </style>
