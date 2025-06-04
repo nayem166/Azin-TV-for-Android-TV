@@ -6,7 +6,6 @@
   <title>Smart TV Live App</title>
   <link rel="preload" href="https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png" as="image">
   <link rel="preload" href="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGw0bWJrMDQ0a2wzcXU0eWtsem1hOHhkZW11bmFlOTVrY3ZpZjFiZSZlcD2MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y8a0CT2xsbo9G/giphy.gif" as="image">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -195,7 +194,7 @@
       height: 100vh;
       background: url('https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGw0bWJrMDQ0a2wzcXU0eWtsem1hOHhkZW11bmFlOTVrY3ZpZjFiZSZlcD2MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y8a0CT2xsbo9G/giphy.gif') center/cover no-repeat;
       opacity: 0;
-      z-index: 80; /* Increased to ensure visibility */
+      z-index: 80;
       transition: opacity .5s ease;
       pointer-events: none;
       display: none;
@@ -260,13 +259,13 @@
     }
     .particle {
       position: absolute;
-      width: 5px; /* Increased for visibility */
-      height: 5px; /* Increased for visibility */
+      width: 5px;
+      height: 5px;
       background: #ffaa00;
       border-radius: 50%;
       animation: floatUp 4s infinite ease-in-out;
-      opacity: 0.8; /* Increased opacity */
-      z-index: 3; /* Above light-ring */
+      opacity: 0.8;
+      z-index: 3;
     }
     @keyframes floatUp {
       0% {
@@ -373,7 +372,6 @@
       display: none;
       flex-direction: column;
       align-items: center;
-      gap: 30px;
       z-index: 99;
     }
     .dot-loader {
@@ -403,12 +401,6 @@
         transform: scale(1.2);
       }
     }
-    .text {
-      color: #00FFFF;
-      font-size: 2rem;
-      font-family: 'Noto Sans Bengali', sans-serif;
-      text-align: center;
-    }
   </style>
 </head>
 <body>
@@ -434,7 +426,6 @@
         <div></div>
         <div></div>
       </div>
-      <div class="text">লোড হচ্ছে...</div>
     </div>
     <audio id="noiseSound" src="https://cdn.pixabay.com/audio/2025/04/06/audio_513747fd8d.mp3" preload="auto" loop></audio>
     <audio id="typingSound" src="https://assets.mixkit.co/active_storage/sfx/1392/1392-preview.mp3" preload="auto"></audio>
@@ -599,16 +590,15 @@
                     document.getElementById("azinLogo").style.display = 'block';
                     if (typeof Hls === 'undefined' && typeof shaka === 'undefined') {
                       console.error("Streaming libraries failed to load");
-                      showErrorVisual("Streaming library failed to load");
+                      showErrorVisual();
                     } else {
                       console.log("Streaming libraries loaded successfully");
                       loadChannel(0, false);
-                      setTimeout(showPlayButton, 1000); // Ensure play button shows
                     }
                   }, 1000);
                 }, 4000);
               }, 1000);
-            }, 6000); // Minimum loading screen time
+            }, 6000);
           } else {
             setTimeout(waitForLogo, 100);
           }
@@ -637,12 +627,12 @@
       });
     }
 
-    function showErrorVisual(msg = "This channel is not available for now") {
-      console.log("Showing error:", msg);
+    function showErrorVisual() {
+      console.log("Showing error: This channel is not available for now");
       video.style.display = "none";
       staticNoise.style.display = "block";
       staticNoise.style.opacity = "1";
-      errorBox.innerText = msg;
+      errorBox.innerText = "This channel is not available for now";
       errorBox.style.display = "block";
       channelLoader.style.display = "none";
       function attemptPlayNoiseSound(retries = 3, delay = 500) {
@@ -663,7 +653,6 @@
       }
       attemptPlayNoiseSound();
       showPlayButton();
-      // Fallback for static GIF
       staticNoise.addEventListener('error', () => {
         console.error("Static GIF failed to load, using fallback");
         staticNoise.style.background = "url('https://i.postimg.cc/3Jq5Y5nZ/static-noise-fallback.gif') center/cover no-repeat";
@@ -706,17 +695,8 @@
           playButton.classList.add('fade-out');
         }, 3000);
       } else {
-        playButton.style.display = 'none'; // Hide during buffering
+        playButton.style.display = 'none';
       }
-      // Fallback to show play button if video doesn't load
-      setTimeout(() => {
-        if (video.paused && !isBuffering && playButton.style.display !== 'flex') {
-          console.log("Fallback: Showing play button due to no video load");
-          playButton.style.display = 'flex';
-          playButton.classList.remove('playing');
-          playButton.classList.remove('fade-out');
-        }
-      }, 5000);
     }
 
     setTimeout(() => {
@@ -800,7 +780,7 @@
               video.play().catch(err => {
                 console.error(`Native video play error for ${channelName}:`, err);
                 hideChannelLoader();
-                showErrorVisual(`Failed to load ${channelName}`);
+                showErrorVisual();
                 showPlayButton();
               });
             }
@@ -814,7 +794,7 @@
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`Native video play error for ${channelName}:`, err);
-                showErrorVisual(`Failed to load ${channelName}`);
+                showErrorVisual();
                 showPlayButton();
               });
             } else {
@@ -824,13 +804,13 @@
           video.onerror = () => {
             console.error(`Native video error for ${channelName}`);
             hideChannelLoader();
-            showErrorVisual(`Failed to load ${channelName}`);
+            showErrorVisual();
             showPlayButton();
           };
         } else {
           console.error(`HLS not supported for ${channelName}`);
           hideChannelLoader();
-          showErrorVisual(`HLS not supported for ${channelName}`);
+          showErrorVisual();
           showPlayButton();
         }
       } else if (isMPD(url)) {
@@ -852,13 +832,13 @@
           } catch (e) {
             console.error(`Error loading MPEG-DASH for ${channelName}:`, e);
             hideChannelLoader();
-            showErrorVisual(`Failed to load ${channelName}`);
+            showErrorVisual();
             showPlayButton();
           }
         } else {
           console.error(`Shaka Player not available for ${channelName}`);
           hideChannelLoader();
-          showErrorVisual(`MPEG-DASH not supported for ${channelName}`);
+          showErrorVisual();
           showPlayButton();
         }
       } else {
@@ -879,7 +859,7 @@
         video.onerror = () => {
           console.error(`Direct video error for ${channelName}`);
           hideChannelLoader();
-          showErrorVisual(`Failed to load ${channelName}`);
+          showErrorVisual();
           showPlayButton();
         };
       }
@@ -906,7 +886,10 @@
       updateUI();
       hideChannelList();
       showOverlay(String(index + 1));
-      setTimeout(showPlayButton, 500);
+      playButton.style.display = 'flex'; // Force play button to show
+      playButton.classList.remove('playing');
+      playButton.classList.remove('fade-out');
+      console.log("Play button forced visible for channel", index + 1);
     }
 
     function showChannelList() {
@@ -1027,7 +1010,7 @@
     video.addEventListener('waiting', () => {
       console.log("Video is buffering");
       showChannelLoader();
-      playButton.style.display = 'none'; // Explicitly hide play button during buffering
+      playButton.style.display = 'none';
     });
 
     shaka.polyfill.installAll();
