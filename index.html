@@ -376,12 +376,12 @@
     }
     .dot-loader {
       display: flex;
-      gap: 26px;
+      gap: 36px; /* Increased for TV visibility */
     }
     .dot-loader div {
-      width: 22px;
-      height: 22px;
-      background-color: #00FFFF;
+      width: 30px; /* Increased for TV screens */
+      height: 30px; /* Increased for TV screens */
+      background-image: linear-gradient(45deg, #FF4500, #FF0000); /* Orange to red gradient */
       border-radius: 50%;
       animation: blink 1.5s infinite ease-in-out;
     }
@@ -394,11 +394,11 @@
     @keyframes blink {
       0%, 80%, 100% {
         opacity: 0.2;
-        transform: scale(0.8);
+        transform: scale(0.7); /* Adjusted for larger dots */
       }
       40% {
         opacity: 1;
-        transform: scale(1.2);
+        transform: scale(1.3); /* Adjusted for larger dots */
       }
     }
   </style>
@@ -477,7 +477,7 @@
           loadingLogo = document.getElementById("loadingLogo"),
           greetingText = document.getElementById("greetingText"),
           channelLoader = document.getElementById("channelLoader");
-    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
+    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false, isInitialLoad = true;
 
     function typeText(element, text, duration) {
       console.log("Starting JavaScript typing animation");
@@ -594,7 +594,12 @@
                     } else {
                       console.log("Streaming libraries loaded successfully");
                       loadChannel(0, false);
+                      playButton.style.display = 'flex';
+                      playButton.classList.remove('playing');
+                      playButton.classList.remove('fade-out');
+                      console.log("Play button shown on initial load");
                     }
+                    isInitialLoad = false; // Mark initial load complete
                   }, 1000);
                 }, 4000);
               }, 1000);
@@ -652,7 +657,9 @@
         });
       }
       attemptPlayNoiseSound();
-      showPlayButton();
+      playButton.style.display = 'flex';
+      playButton.classList.remove('playing');
+      playButton.classList.remove('fade-out');
       staticNoise.addEventListener('error', () => {
         console.error("Static GIF failed to load, using fallback");
         staticNoise.style.background = "url('https://i.postimg.cc/3Jq5Y5nZ/static-noise-fallback.gif') center/cover no-repeat";
@@ -667,11 +674,13 @@
       errorBox.style.display = "none";
       noiseSound.pause();
       noiseSound.currentTime = 0;
+      playButton.style.display = 'none'; // Hide play button when error is cleared
     }
 
     function showChannelLoader() {
-      console.log("Showing channel loader");
+      console.log("Showing channel loader with orange-red gradient");
       channelLoader.style.display = "flex";
+      playButton.style.display = 'none'; // Hide play button during buffering
     }
 
     function hideChannelLoader() {
@@ -682,20 +691,23 @@
     function showPlayButton() {
       const isPlaying = !video.paused && !video.ended;
       const isBuffering = video.readyState < video.HAVE_FUTURE_DATA;
-      console.log("Showing play button, isPlaying:", isPlaying, "isBuffering:", isBuffering, "paused:", video.paused);
-      if (!isPlaying && !isBuffering) {
+      console.log("Checking play button, isPlaying:", isPlaying, "isBuffering:", isBuffering, "paused:", video.paused, "isInitialLoad:", isInitialLoad);
+      if (isInitialLoad || (!isPlaying && !isBuffering)) {
         playButton.style.display = 'flex';
         playButton.classList.remove('playing');
         playButton.classList.remove('fade-out');
-      } else if (isPlaying) {
+        console.log("Play button shown");
+      } else if (isPlaying && isInitialLoad) {
         playButton.style.display = 'flex';
         playButton.classList.add('playing');
         playButton.classList.remove('fade-out');
         setTimeout(() => {
           playButton.classList.add('fade-out');
         }, 3000);
+        console.log("Play button shown with playing state");
       } else {
         playButton.style.display = 'none';
+        console.log("Play button hidden");
       }
     }
 
@@ -767,10 +779,11 @@
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`HLS play error for ${channelName}:`, err);
-                showPlayButton();
+                if (isInitialLoad) showPlayButton();
               });
+            } else if (isInitialLoad) {
+              showPlayButton();
             }
-            showPlayButton();
           });
           hls.on(Hls.Events.ERROR, (_, data) => {
             console.error(`HLS error for ${channelName}:`, data);
@@ -781,7 +794,6 @@
                 console.error(`Native video play error for ${channelName}:`, err);
                 hideChannelLoader();
                 showErrorVisual();
-                showPlayButton();
               });
             }
           });
@@ -795,9 +807,8 @@
               video.play().catch(err => {
                 console.error(`Native video play error for ${channelName}:`, err);
                 showErrorVisual();
-                showPlayButton();
               });
-            } else {
+            } else if (isInitialLoad) {
               showPlayButton();
             }
           };
@@ -805,13 +816,11 @@
             console.error(`Native video error for ${channelName}`);
             hideChannelLoader();
             showErrorVisual();
-            showPlayButton();
           };
         } else {
           console.error(`HLS not supported for ${channelName}`);
           hideChannelLoader();
           showErrorVisual();
-          showPlayButton();
         }
       } else if (isMPD(url)) {
         if (typeof shaka !== 'undefined') {
@@ -824,22 +833,20 @@
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`MPEG-DASH play error for ${channelName}:`, err);
-                showPlayButton();
+                if (isInitialLoad) showPlayButton();
               });
-            } else {
+            } else if (isInitialLoad) {
               showPlayButton();
             }
           } catch (e) {
             console.error(`Error loading MPEG-DASH for ${channelName}:`, e);
             hideChannelLoader();
             showErrorVisual();
-            showPlayButton();
           }
         } else {
           console.error(`Shaka Player not available for ${channelName}`);
           hideChannelLoader();
           showErrorVisual();
-          showPlayButton();
         }
       } else {
         console.log(`Using direct video source for ${channelName}`);
@@ -850,9 +857,9 @@
           if (autoPlay && hasManuallyPlayed) {
             video.play().catch(err => {
               console.error(`Direct video play error for ${channelName}:`, err);
-              showPlayButton();
+              if (isInitialLoad) showPlayButton();
             });
-          } else {
+          } else if (isInitialLoad) {
             showPlayButton();
           }
         };
@@ -860,7 +867,6 @@
           console.error(`Direct video error for ${channelName}`);
           hideChannelLoader();
           showErrorVisual();
-          showPlayButton();
         };
       }
     }
@@ -877,7 +883,7 @@
         channelLoader.style.display = "none";
         return;
       }
-      console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
+      console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}, isInitialLoad: ${isInitialLoad}`);
       currentIndex = index;
       playingIndex = index;
       hideErrorVisual();
@@ -886,10 +892,12 @@
       updateUI();
       hideChannelList();
       showOverlay(String(index + 1));
-      playButton.style.display = 'flex'; // Force play button to show
-      playButton.classList.remove('playing');
-      playButton.classList.remove('fade-out');
-      console.log("Play button forced visible for channel", index + 1);
+      if (isInitialLoad) {
+        showPlayButton();
+      } else {
+        playButton.style.display = 'none';
+        console.log("Play button hidden during channel change");
+      }
     }
 
     function showChannelList() {
@@ -996,7 +1004,7 @@
     video.addEventListener('playing', () => {
       console.log("Video is playing");
       hideChannelLoader();
-      showPlayButton();
+      if (isInitialLoad) showPlayButton();
     });
     video.addEventListener('pause', () => {
       console.log("Video paused");
@@ -1005,12 +1013,11 @@
     video.addEventListener('error', () => {
       console.log("Video element error event");
       hideChannelLoader();
-      showPlayButton();
+      showErrorVisual();
     });
     video.addEventListener('waiting', () => {
       console.log("Video is buffering");
       showChannelLoader();
-      playButton.style.display = 'none';
     });
 
     shaka.polyfill.installAll();
