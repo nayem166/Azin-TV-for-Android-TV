@@ -201,8 +201,6 @@
     }
     #loadingScreen {
       position: fixed;
-    #loadingScreen {
-      position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
@@ -238,13 +236,13 @@
       position: relative;
       z-index: 2;
     }
-        .light-ring {
+    .light-ring {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 500px;
-      height: 500px;
+      width: 340px;
+      height: 340px;
       border-radius: 50%;
       border: 4px solid transparent;
       border-top: 4px solid #ff6600;
@@ -526,7 +524,7 @@
       console.log("Creating 50 particles for loading animation");
       for (let i = 0; i < 50; i++) {
         const p = document.createElement('div');
-        p.classList.add('particle');
+        p.className = 'particle';
         p.style.left = `${Math.random() * 100}vw`;
         p.style.top = `${Math.random() * 100}vh`;
         p.style.animationDelay = `${Math.random() * 4}s`;
@@ -548,7 +546,7 @@
           loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
           logoLoaded = true;
         }
-      }, 3000);
+      }, 5000);
       function checkInternet() {
         if (!navigator.onLine) {
           console.log("No internet connection detected");
@@ -601,7 +599,7 @@
                   }, 1000);
                 }, 4000);
               }, 1000);
-            }, 6000);
+            }, 3000); // Modified: Reduced from 6000ms to 3000ms for 3-second loading animation
           } else {
             setTimeout(waitForLogo, 100);
           }
@@ -631,7 +629,7 @@
     }
 
     function showErrorVisual(msg = "This channel is not available for now") {
-      console.log("Showing error:", msg);
+      console.log("Show error:", msg);
       video.style.display = "none";
       staticNoise.style.opacity = "1";
       staticNoise.style.display = "block";
