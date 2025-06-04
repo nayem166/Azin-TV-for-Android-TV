@@ -133,20 +133,20 @@
       transition: opacity .4s ease;
       will-change: opacity;
     }
-#azinLogo {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  width: 70px;
-  height: auto;
-  z-index: 0; /* ভিডিওর নিচে থাকার জন্য z-index কমানো */
-  opacity: 0.7;
-  filter: drop-shadow(0 1.5px 3px rgba(0,0,0,0.25));
-  transition: opacity 0.3s ease;
-  cursor: default;
-  user-select: none;
-  display: none; /* ডিফল্টভাবে লুকানো, জাভাস্ক্রিপ্ট দিয়ে প্রদর্শিত হবে */
-}
+    #azinLogo {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 70px;
+      height: auto;
+      z-index: 0;
+      opacity: 0.7;
+      filter: drop-shadow(0 1.5px 3px rgba(0,0,0,0.25));
+      transition: opacity 0.3s ease;
+      cursor: default;
+      user-select: none;
+      display: none;
+    }
     #errorBox {
       position: absolute;
       top: 50%;
@@ -235,7 +235,7 @@
       display: block;
       position: relative;
       z-index: 10;
-      Opacity: 10;
+      opacity: 10;
     }
     .light-ring {
       position: absolute;
@@ -363,7 +363,6 @@
       left: -9999px !important;
       top: -9999px !important;
     }
-    /* Adjusted Channel Loader Styles */
     .loader-container {
       position: absolute;
       top: 50%;
@@ -377,11 +376,11 @@
     }
     .dot-loader {
       display: flex;
-      gap: 20px; /* Adjusted for smaller size */
+      gap: 20px;
     }
     .dot-loader div {
-      width: 30px; /* Reduced from 24px */
-      height: 30px; /* Reduced from 24px */
+      width: 30px;
+      height: 30px;
       background-color: #FF6200;
       border-radius: 50%;
       animation: blink 1.2s infinite ease-in-out;
@@ -395,11 +394,11 @@
     @keyframes blink {
       0%, 80%, 100% {
         opacity: 0.2;
-        transform: scale(0.45); /* Adjusted for smaller size */
+        transform: scale(0.45);
       }
       40% {
         opacity: 1;
-        transform: scale(1.2); /* Reduced maximum scale */
+        transform: scale(1.2);
       }
     }
   </style>
@@ -535,13 +534,14 @@
         console.log("Loading logo loaded successfully");
         logoLoaded = true;
       });
-    
-  window.addEventListener('DOMContentLoaded', () => {
-    const loadingLogo = document.getElementById('loadingLogo');
-    setTimeout(() => {
-      loadingLogo.src = "https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png";
-    }, 1000); // 1000 মিলিসেকেন্ড = 1 সেকেন্ড
-  });
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const loadingLogo = document.getElementById('loadingLogo');
+        setTimeout(() => {
+          loadingLogo.src = "https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png";
+        }, 1000);
+      });
+
       function checkInternet() {
         if (!navigator.onLine) {
           console.log("No internet connection detected");
@@ -552,13 +552,14 @@
           document.getElementById("azinLogo").style.display = "none";
           document.getElementById("greetingScreen").style.display = "none";
           channelLoader.style.display = "none";
-          setTimeout(checkInternet, 2000); // Reduced from 5000ms to 2000ms
+          setTimeout(checkInternet, 2000);
         } else {
           console.log("Internet connection detected");
           document.getElementById("networkErrorBox").style.display = "none";
           proceedWithApp();
         }
       }
+
       function proceedWithApp() {
         function waitForLogo() {
           if (logoLoaded) {
@@ -934,6 +935,8 @@
     document.addEventListener('keydown', e => {
       const key = e.key, code = e.keyCode;
       console.log(`Key pressed: ${key} (code: ${code})`);
+
+      // Handle numeric input for direct channel selection
       if (key >= "0" && key <= "9") {
         numberInput += key;
         showOverlay(numberInput);
@@ -946,29 +949,25 @@
         e.preventDefault();
         return;
       }
+
+      // Handle Enter/OK key for channel selection when list is visible
       if (["Enter", "OK", "Accept", "SoftRight"].includes(key) || code === 13) {
         if (listVisible) {
+          console.log("OK pressed, changing channel to index:", currentIndex);
           loadChannel(currentIndex, hasManuallyPlayed);
-        } else {
-          if (video.paused) {
-            console.log("Attempting to play video");
-            hasManuallyPlayed = true;
-            video.play().catch(err => { console.log("Play error:", err); });
-            showPlayButton();
-          } else {
-            console.log("Pausing video");
-            video.pause();
-            showPlayButton();
-          }
         }
         e.preventDefault();
         return;
       }
+
+      // Toggle channel list visibility with left/right arrows
       if (["ArrowLeft", "ArrowRight"].includes(key)) {
         listVisible ? hideChannelList() : showChannelList();
         e.preventDefault();
         return;
       }
+
+      // Navigate channel list when visible
       if (listVisible) {
         if (key === "ArrowUp" || key === "PageUp" || key === "ChannelUp" || code === 33) {
           currentIndex = (currentIndex - 1 + channels.length) % channels.length;
@@ -983,6 +982,7 @@
           return;
         }
       } else {
+        // Change channel directly when list is not visible
         if (["ArrowUp", "ChannelUp"].includes(key) || code === 33) {
           changeChannelByStep("down");
           e.preventDefault();
@@ -994,6 +994,8 @@
           return;
         }
       }
+
+      // Handle play/pause with MediaPlayPause or spacebar
       if (["MediaPlayPause", " "].includes(key)) {
         if (video.paused) {
           console.log("Attempting to play video via MediaPlayPause");
