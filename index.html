@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart TV Live App</title>
   <link rel="preload" href="https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png" as="image">
-  <link rel="preload" href="https://i.giphy.com/media/3o7TKqoaCocZk6vXNK/giphy.gif" as="image">
   <style>
     * {
       margin: 0;
@@ -140,7 +139,7 @@
       left: 20px;
       width: 100px;
       height: auto;
-      z-index: 2;
+      z-index: 6;
       opacity: .7;
       filter: drop-shadow(0 1.5px 3px rgba(0,0,0,.25));
       transition: opacity .3s ease;
@@ -175,7 +174,7 @@
       background: #000;
       color: #fff;
       padding: 40px 60px;
-      font-size: 20px;
+      font-size: 28px;
       border: 4px solid #fff;
       border-radius: 16px;
       z-index: 100;
@@ -192,14 +191,13 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: url('https://i.giphy.com/media/3o7TKqoaCocZk6vXNK/giphy.gif') center/contain repeat;
+      background: url('https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGw0bWJrMDQ0a2wzcXU0eWtsem1hOHhkZW11bmFlOTVrY3ZpZjFiZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y8a0CT2xsbo9G/giphy.gif') center/cover no-repeat;
       opacity: 0;
-      z-index: 80;
+      z-index: 6;
       transition: opacity .5s ease;
       pointer-events: none;
       display: none;
       will-change: opacity;
-      object-fit: contain;
     }
     #loadingScreen {
       position: fixed;
@@ -260,18 +258,17 @@
     }
     .particle {
       position: absolute;
-      width: 5px;
-      height: 5px;
+      width: 3px;
+      height: 3px;
       background: #ffaa00;
       border-radius: 50%;
       animation: floatUp 4s infinite ease-in-out;
-      opacity: 0.8;
-      z-index: 3;
+      opacity: 0.6;
     }
     @keyframes floatUp {
       0% {
         transform: translateY(0) scale(1);
-        opacity: 0.3;
+        opacity: 0.1;
       }
       50% {
         transform: translateY(-40px) scale(1.3);
@@ -364,7 +361,7 @@
       left: -9999px !important;
       top: -9999px !important;
     }
-    /* Channel Loader Styles */
+    /* New Channel Loader Styles */
     .loader-container {
       position: absolute;
       top: 50%;
@@ -373,33 +370,35 @@
       display: none;
       flex-direction: column;
       align-items: center;
+      gap: 30px;
       z-index: 99;
     }
     .dot-loader {
       display: flex;
-      gap: 36px;
+      gap: 16px;
     }
     .dot-loader div {
-      width: 30px;
-      height: 30px;
-      background-image: linear-gradient(45deg, #FF4500, #FF0000);
+      width: 24px;
+      height: 24px;
+      background-color:#9b59b6;
+      rgb: (155, 89, 182);
       border-radius: 50%;
-      animation: blink 1.5s infinite ease-in-out;
+      animation: blink 1.2s infinite ease-in-out;
     }
     .dot-loader div:nth-child(2) {
-      animation-delay: 0.3s;
+      animation-delay: 0.2s;
     }
     .dot-loader div:nth-child(3) {
-      animation-delay: 0.6s;
+      animation-delay: 0.4s;
     }
     @keyframes blink {
       0%, 80%, 100% {
         opacity: 0.2;
-        transform: scale(0.7);
+        transform: scale(0.8);
       }
       40% {
         opacity: 1;
-        transform: scale(1.3);
+        transform: scale(1.2);
       }
     }
   </style>
@@ -427,8 +426,9 @@
         <div></div>
         <div></div>
       </div>
+      <div></div>
     </div>
-    <audio id="noiseSound" src="https://cdn.pixabay.com/audio/2023/08/07/audio_8f8b2e3e7f.mp3" preload="auto" loop></audio>
+    <audio id="noiseSound" src="https://cdn.pixabay.com/audio/2025/04/06/audio_513747fd8d.mp3" preload="auto" loop></audio>
     <audio id="typingSound" src="https://assets.mixkit.co/active_storage/sfx/1392/1392-preview.mp3" preload="auto"></audio>
     <video id="player" playsinline controlslist="nodownload noplaybackrate" disablePictureInPicture></video>
     <div id="playButton" tabindex="0"></div>
@@ -478,10 +478,10 @@
           loadingLogo = document.getElementById("loadingLogo"),
           greetingText = document.getElementById("greetingText"),
           channelLoader = document.getElementById("channelLoader");
-    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false, isInitialLoad = true;
+    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
 
     function typeText(element, text, duration) {
-      console.log("Starting typing animation");
+      console.log("Starting JavaScript typing animation");
       element.textContent = "";
       element.style.width = "auto";
       element.style.animation = "none";
@@ -489,23 +489,24 @@
       const charTime = duration / chars.length;
       let i = 0;
       typingSound.load();
-      typingSound.play().catch(err => console.error("Typing sound error:", err.message));
+      typingSound.play().catch(err => console.error("Typing sound play error:", err.message));
       function addChar() {
         if (i < chars.length) {
           element.textContent += chars[i];
           i++;
           setTimeout(addChar, charTime);
         } else {
-          console.log("Typing animation completed");
+          console.log("JavaScript typing animation completed");
           typingSound.pause();
           typingSound.currentTime = 0;
+          console.log("Typing sound stopped");
         }
       }
       addChar();
     }
 
     function initializeApp() {
-      console.log("Initializing app at", new Date().toLocaleString());
+      console.log("Initializing app...");
       const ua = navigator.userAgent,
             isSmartTV = /TV|BRAVIA|AFT|SmartTV|Tizen|Web0S|NetCast|AppleTV/i.test(ua);
       console.log("User Agent:", ua, "Is Smart TV:", isSmartTV);
@@ -530,73 +531,21 @@
       }
       let logoLoaded = false;
       loadingLogo.addEventListener('load', () => {
-        if (loadingLogo.src.includes("NjFKLSR9")) {
-          console.log("Primary logo loaded successfully");
-          logoLoaded = true;
-        }
+        console.log("Loading logo loaded successfully");
+        logoLoaded = true;
       });
       loadingLogo.addEventListener('error', () => {
-        console.log("Primary logo failed to load, proceeding without fallback");
+        console.error("Failed to load logo, using fallback");
+        loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
         logoLoaded = true;
       });
       setTimeout(() => {
         if (!logoLoaded) {
-          console.log("Logo loading timeout, proceeding");
+          console.warn("Logo loading timeout, switching to fallback");
+          loadingLogo.src = "https://i.postimg.cc/0jhLXm4f/IMG-20250522-163205-000-removebg-preview.png";
           logoLoaded = true;
         }
-      }, 8000);
-      function proceedWithApp() {
-        console.log("Proceeding with app transition");
-        setTimeout(() => {
-          console.log("Hiding loading screen");
-          loadingScreen.classList.add('hidden');
-          setTimeout(() => {
-            loadingScreen.style.display = 'none';
-            console.log("Showing greeting screen");
-            greetingScreen.style.display = 'flex';
-            greetingScreen.classList.remove('hidden');
-            greetingScreen.classList.add('visible');
-            const greetingMessage = "Assalamualaikum, Welcome to our App";
-            typeText(greetingText, greetingMessage, 4000);
-            setTimeout(() => {
-              console.log("Hiding greeting screen");
-              greetingScreen.classList.remove('visible');
-              greetingScreen.classList.add('hidden');
-              setTimeout(() => {
-                greetingScreen.style.display = 'none';
-                console.log("Showing main app");
-                document.getElementById("container").style.display = 'block';
-                document.getElementById("azinLogo").style.display = 'block';
-                if (typeof Hls === 'undefined' && typeof shaka === 'undefined') {
-                  console.error("Streaming libraries failed to load");
-                  showErrorVisual();
-                } else {
-                  console.log("Streaming libraries loaded, loading first channel");
-                  loadChannel(0, false);
-                  playButton.style.display = 'flex';
-                  playButton.classList.add('playing');
-                  playButton.classList.remove('fade-out');
-                  console.log("Play button shown with on state (pause icon)");
-                }
-                isInitialLoad = false;
-              }, 1000);
-            }, 4000);
-          }, 1000);
-        }, 8000);
-        setTimeout(() => {
-          if (loadingScreen.style.display !== 'none') {
-            console.warn("Failsafe triggered: forcing app to proceed");
-            loadingScreen.style.display = 'none';
-            greetingScreen.style.display = 'none';
-            document.getElementById("container").style.display = 'block';
-            document.getElementById("azinLogo").style.display = 'block';
-            loadChannel(0, false);
-            playButton.style.display = 'flex';
-            playButton.classList.add('playing');
-            isInitialLoad = false;
-          }
-        }, 10000);
-      }
+      }, 5000);
       function checkInternet() {
         if (!navigator.onLine) {
           console.log("No internet connection detected");
@@ -613,6 +562,48 @@
           document.getElementById("networkErrorBox").style.display = "none";
           proceedWithApp();
         }
+      }
+      function proceedWithApp() {
+        function waitForLogo() {
+          if (logoLoaded) {
+            console.log("Showing loading screen");
+            setTimeout(() => {
+              console.log("Hiding loading screen");
+              loadingScreen.classList.add('hidden');
+              setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                console.log("Showing greeting screen");
+                greetingScreen.style.display = 'flex';
+                greetingScreen.classList.remove('hidden');
+                greetingScreen.classList.add('visible');
+                const greetingMessage = "Assalamualaikum, Welcome to our App";
+                typeText(greetingText, greetingMessage, 4000);
+                setTimeout(() => {
+                  console.log("Hiding greeting screen");
+                  greetingScreen.classList.remove('visible');
+                  greetingScreen.classList.add('hidden');
+                  setTimeout(() => {
+                    greetingScreen.style.display = 'none';
+                    console.log("Showing main app");
+                    document.getElementById("container").style.display = 'block';
+                    document.getElementById("azinLogo").style.display = 'block';
+                    if (typeof Hls === 'undefined' && typeof shaka === 'undefined') {
+                      console.error("Streaming libraries failed to load");
+                      showErrorVisual("Streaming library failed to load");
+                    } else {
+                      console.log("Streaming libraries loaded successfully");
+                      loadChannel(0, false);
+                      showPlayButton();
+                    }
+                  }, 1000);
+                }, 4000);
+              }, 1000);
+            }, 6000);
+          } else {
+            setTimeout(waitForLogo, 100);
+          }
+        }
+        waitForLogo();
       }
       checkInternet();
       window.addEventListener('online', () => {
@@ -636,42 +627,32 @@
       });
     }
 
-    function showErrorVisual() {
-      console.log("Showing error: This channel is not available for now");
+    function showErrorVisual(msg = "This channel is not available for now") {
+      console.log("Showing error:", msg);
       video.style.display = "none";
-      staticNoise.style.display = "block";
       staticNoise.style.opacity = "1";
-      errorBox.innerText = "This channel is not available for now";
+      staticNoise.style.display = "block";
+      errorBox.innerText = msg;
       errorBox.style.display = "block";
       channelLoader.style.display = "none";
-      function attemptPlayNoiseSound(retries = 5, delay = 1000) {
-        console.log("Attempting noise sound playback...");
+      function attemptPlayNoiseSound(retries = 3, delay = 500) {
         noiseSound.pause();
         noiseSound.currentTime = 0;
         noiseSound.load();
-        setTimeout(() => {
-          noiseSound.play().then(() => {
-            console.log("Noise sound playing successfully");
-          }).catch(err => {
-            console.error("Noise sound play error:", err.message);
-            if (retries > 0) {
-              console.log(`Retrying noise sound, attempts left: ${retries}`);
-              attemptPlayNoiseSound(retries - 1, delay);
-            } else {
-              console.error("Failed to play noise sound after retries");
-            }
-          });
-        }, 100);
+        noiseSound.play().then(() => {
+          console.log("Noise sound playing successfully");
+        }).catch(err => {
+          console.error("Noise sound play error:", err.message);
+          if (retries > 0) {
+            console.log(`Retrying noise sound playback, attempts left: ${retries}`);
+            setTimeout(() => attemptPlayNoiseSound(retries - 1, delay), delay);
+          } else {
+            console.error("Failed to play noise sound after retries");
+          }
+        });
       }
       attemptPlayNoiseSound();
-      playButton.style.display = 'flex';
-      playButton.classList.add('playing');
-      playButton.classList.remove('fade-out');
-      console.log("Play button shown on error");
-      staticNoise.addEventListener('error', () => {
-        console.error("Static GIF failed to load, using fallback");
-        staticNoise.style.background = "url('https://i.postimg.cc/7YkW2qXz/static-noise-hq.gif') center/contain repeat";
-      }, { once: true });
+      showPlayButton();
     }
 
     function hideErrorVisual() {
@@ -682,33 +663,16 @@
       errorBox.style.display = "none";
       noiseSound.pause();
       noiseSound.currentTime = 0;
-      playButton.style.display = 'none';
     }
 
     function showChannelLoader() {
-      console.log("Showing channel loader with orange-red gradient");
+      console.log("Showing channel loader");
       channelLoader.style.display = "flex";
-      playButton.style.display = 'none';
     }
 
     function hideChannelLoader() {
       console.log("Hiding channel loader");
       channelLoader.style.display = "none";
-    }
-
-    function showPlayButton() {
-      const isPlaying = !video.paused && !video.ended;
-      const isBuffering = video.readyState < video.HAVE_FUTURE_DATA;
-      console.log("Checking play button: isPlaying =", isPlaying, "isBuffering =", isBuffering, "paused =", video.paused, "isInitialLoad =", isInitialLoad);
-      if (isInitialLoad || (!isPlaying && !isBuffering)) {
-        playButton.style.display = 'flex';
-        playButton.classList.add('playing');
-        playButton.classList.remove('fade-out');
-        console.log("Play button shown with pause icon");
-      } else {
-        playButton.style.display = 'none';
-        console.log("Play button hidden");
-      }
     }
 
     setTimeout(() => {
@@ -748,6 +712,24 @@
       return url.endsWith(".mpd");
     }
 
+    function showPlayButton() {
+      const isPlaying = !video.paused && !video.ended;
+      const isBuffering = video.readyState < video.HAVE_FUTURE_DATA;
+      console.log("Showing play button, isPlaying:", isPlaying, "isBuffering:", isBuffering);
+      if (!isBuffering) {
+        playButton.style.display = 'flex';
+        playButton.classList.toggle('playing', isPlaying);
+        playButton.classList.remove('fade-out');
+        if (isPlaying) {
+          setTimeout(() => {
+            playButton.classList.add('fade-out');
+          }, 3000);
+        }
+      } else {
+        playButton.style.display = 'none';
+      }
+    }
+
     async function loadVideo(url, autoPlay, channelName) {
       console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}`);
       showChannelLoader();
@@ -779,11 +761,10 @@
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`HLS play error for ${channelName}:`, err);
-                if (isInitialLoad) showPlayButton();
+                showPlayButton();
               });
-            } else if (isInitialLoad) {
-              showPlayButton();
             }
+            showPlayButton();
           });
           hls.on(Hls.Events.ERROR, (_, data) => {
             console.error(`HLS error for ${channelName}:`, data);
@@ -793,7 +774,8 @@
               video.play().catch(err => {
                 console.error(`Native video play error for ${channelName}:`, err);
                 hideChannelLoader();
-                showErrorVisual();
+                showErrorVisual(`Failed to load ${channelName}`);
+                showPlayButton();
               });
             }
           });
@@ -806,21 +788,24 @@
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`Native video play error for ${channelName}:`, err);
-                showErrorVisual();
+                showErrorVisual(`Failed to load ${channelName}`);
+                showPlayButton();
               });
-            } else if (isInitialLoad) {
+            } else {
               showPlayButton();
             }
           };
           video.onerror = () => {
             console.error(`Native video error for ${channelName}`);
             hideChannelLoader();
-            showErrorVisual();
+            showErrorVisual(`Failed to load ${channelName}`);
+            showPlayButton();
           };
         } else {
           console.error(`HLS not supported for ${channelName}`);
           hideChannelLoader();
-          showErrorVisual();
+          showErrorVisual(`HLS not supported for ${channelName}`);
+          showPlayButton();
         }
       } else if (isMPD(url)) {
         if (typeof shaka !== 'undefined') {
@@ -833,20 +818,22 @@
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`MPEG-DASH play error for ${channelName}:`, err);
-                if (isInitialLoad) showPlayButton();
+                showPlayButton();
               });
-            } else if (isInitialLoad) {
+            } else {
               showPlayButton();
             }
           } catch (e) {
             console.error(`Error loading MPEG-DASH for ${channelName}:`, e);
             hideChannelLoader();
-            showErrorVisual();
+            showErrorVisual(`Failed to load ${channelName}`);
+            showPlayButton();
           }
         } else {
           console.error(`Shaka Player not available for ${channelName}`);
           hideChannelLoader();
-          showErrorVisual();
+          showErrorVisual(`MPEG-DASH not supported for ${channelName}`);
+          showPlayButton();
         }
       } else {
         console.log(`Using direct video source for ${channelName}`);
@@ -857,16 +844,17 @@
           if (autoPlay && hasManuallyPlayed) {
             video.play().catch(err => {
               console.error(`Direct video play error for ${channelName}:`, err);
-              if (isInitialLoad) showPlayButton();
+              showPlayButton();
             });
-          } else if (isInitialLoad) {
+          } else {
             showPlayButton();
           }
         };
         video.onerror = () => {
           console.error(`Direct video error for ${channelName}`);
           hideChannelLoader();
-          showErrorVisual();
+          showErrorVisual(`Failed to load ${channelName}`);
+          showPlayButton();
         };
       }
     }
@@ -883,7 +871,7 @@
         channelLoader.style.display = "none";
         return;
       }
-      console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}, isInitialLoad: ${isInitialLoad}`);
+      console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
       currentIndex = index;
       playingIndex = index;
       hideErrorVisual();
@@ -892,12 +880,7 @@
       updateUI();
       hideChannelList();
       showOverlay(String(index + 1));
-      if (isInitialLoad) {
-        showPlayButton();
-      } else {
-        playButton.style.display = 'none';
-        console.log("Play button hidden during channel change");
-      }
+      setTimeout(showPlayButton, 500);
     }
 
     function showChannelList() {
@@ -1004,7 +987,7 @@
     video.addEventListener('playing', () => {
       console.log("Video is playing");
       hideChannelLoader();
-      if (isInitialLoad) showPlayButton();
+      showPlayButton();
     });
     video.addEventListener('pause', () => {
       console.log("Video paused");
@@ -1013,7 +996,7 @@
     video.addEventListener('error', () => {
       console.log("Video element error event");
       hideChannelLoader();
-      showErrorVisual();
+      showPlayButton();
     });
     video.addEventListener('waiting', () => {
       console.log("Video is buffering");
