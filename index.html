@@ -265,7 +265,7 @@
       border-radius: 50%;
       animation: floatUp 4s infinite ease-in-out;
       opacity: 0.8;
-      z-index: 0;
+      z-index: 3;
     }
     @keyframes floatUp {
       0% {
@@ -950,11 +950,39 @@
         return;
       }
 
-      // Handle Enter/OK key for channel selection when list is visible
+      // Handle Enter/OK key for multiple scenarios
       if (["Enter", "OK", "Accept", "SoftRight"].includes(key) || code === 13) {
+        // Scenario 1: Confirm numeric channel input
+        if (numberInput.length > 0) {
+          console.log("OK pressed, confirming channel number:", numberInput);
+          const num = parseInt(numberInput, 10);
+          if (num >= 1 && num <= channels.length) {
+            loadChannel(num - 1, hasManuallyPlayed);
+          }
+          numberInput = "";
+          clearTimeout(numberTimeout);
+          overlay.style.opacity = '0';
+          e.preventDefault();
+          return;
+        }
+        // Scenario 2: Select channel from list when visible
         if (listVisible) {
           console.log("OK pressed, changing channel to index:", currentIndex);
           loadChannel(currentIndex, hasManuallyPlayed);
+          e.preventDefault();
+          return;
+        }
+        // Scenario 3: Play video if paused and list is not visible
+        if (!listVisible && video.paused) {
+          console.log("OK pressed, attempting to play video");
+          hasManuallyPlayed = true;
+          video.play().catch(err => {
+            console.log("Play error:", err);
+            showErrorVisual();
+          });
+          showPlayButton();
+          e.preventDefault();
+          return;
         }
         e.preventDefault();
         return;
