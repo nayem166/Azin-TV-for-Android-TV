@@ -905,13 +905,13 @@
         playButton.classList.remove('playing');
         playButton.classList.remove('fade-out');
       } else {
-        setTimeout(showPlayButton, 500);
+        showPlayButton();
       }
     }
 
     function showChannelList() {
       console.log("Showing channel list");
-      list.style.display = "flex";
+      list.style.display = "block";
       listVisible = true;
       updateUI();
       clearTimeout(listTimeout);
@@ -926,7 +926,11 @@
       updateUI();
     }
 
-    function changeChannelByStep(direction) {
+    function changeChannelList() {
+      listVisible ? hideChannelList() : showChannelList();
+    }
+
+    function changeChannel(direction) {
       currentIndex = direction === "up" ? (currentIndex - 1 + channels.length) % channels.length : (currentIndex + 1) % channels.length;
       console.log(`Changing channel to index ${currentIndex}`);
       listVisible ? updateUI() : loadChannel(currentIndex, hasManuallyPlayed);
@@ -972,25 +976,28 @@
           e.preventDefault();
           return;
         }
-        // Scenario 3: Play video if paused and list is not visible
-        if (!listVisible && video.paused) {
-          console.log("OK pressed, attempting to play video");
-          hasManuallyPlayed = true;
-          video.play().catch(err => {
-            console.log("Play error:", err);
-            showErrorVisual();
-          });
+        // Scenario 3: Toggle play/pause when list is not visible
+        if (!listVisible) {
+          if (video.paused || video.ended) {
+            console.log("OK pressed, playing video");
+            hasManuallyPlayed = true;
+            video.play().catch(err => {
+              console.error("Play error:", err);
+              showErrorVisual();
+            });
+          } else {
+            console.log("OK pressed, pausing video");
+            video.pause();
+          }
           showPlayButton();
           e.preventDefault();
           return;
         }
-        e.preventDefault();
-        return;
       }
 
       // Toggle channel list visibility with left/right arrows
       if (["ArrowLeft", "ArrowRight"].includes(key)) {
-        listVisible ? hideChannelList() : showChannelList();
+        changeChannelList();
         e.preventDefault();
         return;
       }
@@ -1012,12 +1019,12 @@
       } else {
         // Change channel directly when list is not visible
         if (["ArrowUp", "ChannelUp"].includes(key) || code === 33) {
-          changeChannelByStep("down");
+          changeChannel("down");
           e.preventDefault();
           return;
         }
         if (["ArrowDown", "ChannelDown"].includes(key) || code === 34) {
-          changeChannelByStep("up");
+          changeChannel("up");
           e.preventDefault();
           return;
         }
@@ -1028,7 +1035,10 @@
         if (video.paused) {
           console.log("Attempting to play video via MediaPlayPause");
           hasManuallyPlayed = true;
-          video.play().catch(err => { console.log("Play error:", err); });
+          video.play().catch(err => {
+            console.error("Play error:", err);
+            showErrorVisual();
+          });
           showPlayButton();
         } else {
           console.log("Pausing video via MediaPlayPause");
@@ -1049,7 +1059,7 @@
       showPlayButton();
     });
     video.addEventListener('error', () => {
-      console.log("Video element error event");
+      console.log("Video element error");
       hideChannelLoader();
       showPlayButton();
     });
