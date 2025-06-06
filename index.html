@@ -267,7 +267,7 @@
       opacity: 0.8;
       z-index: 3;
     }
-    @keyframes floatнад {
+    @keyframes floatUp {
       0% {
         transform: translateY(0) scale(1);
         opacity: 0.1;
@@ -810,9 +810,9 @@
 
     function scheduleNextAd() {
       clearInterval(adInterval);
-      const randomInterval = Math.floor(Math.random() * (5 - 2 + 1) + 2) * 60 * 1000;
-      console.log(`Next ad scheduled in ${randomInterval / 1000} seconds`);
-      adInterval = setInterval(showAd, randomInterval);
+      const fixedInterval = 2 * 60 * 1000; // 2 minutes in milliseconds
+      console.log(`Next ad scheduled in ${fixedInterval / 1000} seconds`);
+      adInterval = setInterval(showAd, fixedInterval);
     }
 
     setTimeout(() => {
