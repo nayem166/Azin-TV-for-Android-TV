@@ -401,6 +401,36 @@
         transform: scale(1.2);
       }
     }
+    /* Ad Styles */
+    #adContainer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 1000;
+    }
+    #skipBtn {
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 18px;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      display: none;
+      cursor: pointer;
+    }
+    #countdown {
+      color: white;
+      font-size: 20px;
+      margin-top: 15px;
+    }
   </style>
 </head>
 <body>
@@ -437,6 +467,13 @@
   </div>
   <img id="azinLogo" src="https://i.postimg.cc/65q6CC2P/file-00000000201c61f6b67764f95c3588ed.png" alt="Azin TV Logo">
   <div id="incompatibleBox">Sorry, only Android TVs are supported for this app</div>
+  <div id="adContainer">
+    <video id="adVideo" autoplay>
+      <source src="halal-attar-ad.mp4" type="video/mp4">
+    </video>
+    <button id="skipBtn" tabindex="0">⏭ বিজ্ঞাপন স্কিপ করুন</button>
+    <div id="countdown">⏳ স্কিপ করার জন্য 240 সেকেন্ড অপেক্ষা করুন...</div>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.7/shaka-player.compiled.min.js"></script>
   <script>
@@ -477,8 +514,12 @@
           loadingScreen = document.getElementById("loadingScreen"),
           loadingLogo = document.getElementById("loadingLogo"),
           greetingText = document.getElementById("greetingText"),
-          channelLoader = document.getElementById("channelLoader");
-    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
+          channelLoader = document.getElementById("channelLoader"),
+          adContainer = document.getElementById("adContainer"),
+          adVideo = document.getElementById("adVideo"),
+          skipBtn = document.getElementById("skipBtn"),
+          countdown = document.getElementById("countdown");
+    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false, skipAfter = 240, adTimer = null, isAdPlaying = false;
 
     function typeText(element, text, duration) {
       console.log("Starting JavaScript typing animation");
@@ -518,6 +559,7 @@
         document.getElementById("greetingScreen").style.display = "none";
         document.getElementById("loadingScreen").style.display = "none";
         channelLoader.style.display = "none";
+        adContainer.style.display = "none";
         return;
       }
       console.log("Creating 50 particles for loading animation");
@@ -552,6 +594,7 @@
           document.getElementById("azinLogo").style.display = "none";
           document.getElementById("greetingScreen").style.display = "none";
           channelLoader.style.display = "none";
+          adContainer.style.display = "none";
           setTimeout(checkInternet, 2000);
         } else {
           console.log("Internet connection detected");
@@ -621,7 +664,9 @@
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
         channelLoader.style.display = "none";
+        adContainer.style.display = "none";
       });
+      adVideo.load(); // Preload ad video
     }
 
     function showErrorVisual() {
@@ -672,6 +717,53 @@
       channelLoader.style.display = "none";
     }
 
+    function showAd(nextChannelIndex, autoPlay) {
+      console.log("Showing ad before channel:", channels[nextChannelIndex].name);
+      isAdPlaying = true;
+      adContainer.style.display = "flex";
+      video.style.display = "none";
+      adVideo.currentTime = 0;
+      adVideo.play().catch(err => console.error("Ad video play error:", err.message));
+      skipAfter = 240;
+      skipBtn.style.display = "none";
+      countdown.style.display = "block";
+      countdown.innerText = `⏳ স্কিপ করার জন্য ${skipAfter} সেকেন্ড অপেক্ষা করুন...`;
+      clearInterval(adTimer);
+      adTimer = setInterval(() => {
+        skipAfter--;
+        if (skipAfter <= 0) {
+          clearInterval(adTimer);
+          skipBtn.style.display = "inline-block";
+          countdown.style.display = "none";
+          skipBtn.focus();
+        } else {
+          countdown.innerText = `⏳ স্কিপ করার জন্য ${skipAfter} সেকেন্ড অপেক্ষা করুন...`;
+        }
+      }, 1000);
+      skipBtn.onclick = () => {
+        console.log("Ad skipped by user");
+        playChannelAfterAd(nextChannelIndex, autoPlay);
+      };
+      adVideo.onended = () => {
+        console.log("Ad video ended naturally");
+        playChannelAfterAd(nextChannelIndex, autoPlay);
+      };
+      adVideo.onerror = () => {
+        console.error("Ad video load error");
+        playChannelAfterAd(nextChannelIndex, autoPlay);
+      };
+    }
+
+    function playChannelAfterAd(index, autoPlay) {
+      clearInterval(adTimer);
+      adContainer.style.display = "none";
+      adVideo.pause();
+      adVideo.currentTime = 0;
+      isAdPlaying = false;
+      video.style.display = "block";
+      loadVideo(channels[index].url, autoPlay, channels[index].name);
+    }
+
     setTimeout(() => {
       channels.forEach((ch, i) => {
         const div = document.createElement("div");
@@ -710,6 +802,7 @@
     }
 
     function showPlayButton() {
+      if (isAdPlaying) return;
       const isPlaying = !video.paused && !video.ended;
       const isBuffering = video.readyState < video.HAVE_FUTURE_DATA;
       console.log("Showing play button, isPlaying:", isPlaying, "isBuffering:", isBuffering, "currentIndex:", currentIndex);
@@ -889,29 +982,36 @@
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
         channelLoader.style.display = "none";
+        adContainer.style.display = "none";
         return;
       }
-      console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
+      console.log(`Attempting to load channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
       currentIndex = index;
       playingIndex = index;
       hideErrorVisual();
-      loadVideo(channels[index].url, autoPlay, channels[index].name);
-      video.muted = false;
       updateUI();
       hideChannelList();
       showOverlay(String(index + 1));
-      if (index === 0) {
-        playButton.style.display = 'flex';
-        playButton.classList.remove('playing');
-        playButton.classList.remove('fade-out');
+      const shouldShowAd = Math.random() < 0.3 || index === 0;
+      if (shouldShowAd && hasManuallyPlayed) {
+        showAd(index, autoPlay);
       } else {
-        showPlayButton();
+        video.style.display = "block";
+        loadVideo(channels[index].url, autoPlay, channels[index].name);
+      }
+      video.muted = false;
+      if (index === 0) {
+        playButton.style.display = "flex";
+        playButton.classList.remove("playing");
+        playButton.classList.remove("fade-out");
+      } else {
+        setTimeout(showPlayButton, 500);
       }
     }
 
     function showChannelList() {
       console.log("Showing channel list");
-      list.style.display = "block";
+      list.style.display = "flex";
       listVisible = true;
       updateUI();
       clearTimeout(listTimeout);
@@ -926,11 +1026,7 @@
       updateUI();
     }
 
-    function changeChannelList() {
-      listVisible ? hideChannelList() : showChannelList();
-    }
-
-    function changeChannel(direction) {
+    function changeChannelByStep(direction) {
       currentIndex = direction === "up" ? (currentIndex - 1 + channels.length) % channels.length : (currentIndex + 1) % channels.length;
       console.log(`Changing channel to index ${currentIndex}`);
       listVisible ? updateUI() : loadChannel(currentIndex, hasManuallyPlayed);
@@ -939,9 +1035,13 @@
     document.addEventListener('keydown', e => {
       const key = e.key, code = e.keyCode;
       console.log(`Key pressed: ${key} (code: ${code})`);
-
-      // Handle numeric input for direct channel selection
-      if (key >= "0" && key <= "9") {
+      if (isAdPlaying && skipBtn.style.display !== "none" && (key === "Enter" || code === 13)) {
+        console.log("Enter key pressed to skip ad");
+        playChannelAfterAd(currentIndex, hasManuallyPlayed);
+        e.preventDefault();
+        return;
+      }
+      if (key >= "0" && key <= "9" && !isAdPlaying) {
         numberInput += key;
         showOverlay(numberInput);
         clearTimeout(numberTimeout);
@@ -953,57 +1053,20 @@
         e.preventDefault();
         return;
       }
-
-      // Handle Enter/OK key for multiple scenarios
       if (["Enter", "OK", "Accept", "SoftRight"].includes(key) || code === 13) {
-        // Scenario 1: Confirm numeric channel input
-        if (numberInput.length > 0) {
-          console.log("OK pressed, confirming channel number:", numberInput);
-          const num = parseInt(numberInput, 10);
-          if (num >= 1 && num <= channels.length) {
-            loadChannel(num - 1, hasManuallyPlayed);
-          }
-          numberInput = "";
-          clearTimeout(numberTimeout);
-          overlay.style.opacity = '0';
-          e.preventDefault();
-          return;
-        }
-        // Scenario 2: Select channel from list when visible
-        if (listVisible) {
+        if (listVisible && !isAdPlaying) {
           console.log("OK pressed, changing channel to index:", currentIndex);
           loadChannel(currentIndex, hasManuallyPlayed);
-          e.preventDefault();
-          return;
         }
-        // Scenario 3: Toggle play/pause when list is not visible
-        if (!listVisible) {
-          if (video.paused || video.ended) {
-            console.log("OK pressed, playing video");
-            hasManuallyPlayed = true;
-            video.play().catch(err => {
-              console.error("Play error:", err);
-              showErrorVisual();
-            });
-          } else {
-            console.log("OK pressed, pausing video");
-            video.pause();
-          }
-          showPlayButton();
-          e.preventDefault();
-          return;
-        }
-      }
-
-      // Toggle channel list visibility with left/right arrows
-      if (["ArrowLeft", "ArrowRight"].includes(key)) {
-        changeChannelList();
         e.preventDefault();
         return;
       }
-
-      // Navigate channel list when visible
-      if (listVisible) {
+      if (["ArrowLeft", "ArrowRight"].includes(key) && !isAdPlaying) {
+        listVisible ? hideChannelList() : showChannelList();
+        e.preventDefault();
+        return;
+      }
+      if (listVisible && !isAdPlaying) {
         if (key === "ArrowUp" || key === "PageUp" || key === "ChannelUp" || code === 33) {
           currentIndex = (currentIndex - 1 + channels.length) % channels.length;
           updateUI();
@@ -1016,29 +1079,23 @@
           e.preventDefault();
           return;
         }
-      } else {
-        // Change channel directly when list is not visible
+      } else if (!isAdPlaying) {
         if (["ArrowUp", "ChannelUp"].includes(key) || code === 33) {
-          changeChannel("down");
+          changeChannelByStep("down");
           e.preventDefault();
           return;
         }
         if (["ArrowDown", "ChannelDown"].includes(key) || code === 34) {
-          changeChannel("up");
+          changeChannelByStep("up");
           e.preventDefault();
           return;
         }
       }
-
-      // Handle play/pause with MediaPlayPause or spacebar
-      if (["MediaPlayPause", " "].includes(key)) {
+      if (["MediaPlayPause", " "].includes(key) && !isAdPlaying) {
         if (video.paused) {
           console.log("Attempting to play video via MediaPlayPause");
           hasManuallyPlayed = true;
-          video.play().catch(err => {
-            console.error("Play error:", err);
-            showErrorVisual();
-          });
+          video.play().catch(err => { console.log("Play error:", err); });
           showPlayButton();
         } else {
           console.log("Pausing video via MediaPlayPause");
@@ -1059,7 +1116,7 @@
       showPlayButton();
     });
     video.addEventListener('error', () => {
-      console.log("Video element error");
+      console.log("Video element error event");
       hideChannelLoader();
       showPlayButton();
     });
