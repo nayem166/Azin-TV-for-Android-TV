@@ -6,7 +6,6 @@
   <title>Smart TV Live App</title>
   <link rel="preload" href="https://i.postimg.cc/NjFKLSR9/Chat-GPT-Image-May-28-2025-11-00-54-AM.png" as="image">
   <style>
-    /* Existing styles remain unchanged */
     * {
       margin: 0;
       padding: 0;
@@ -268,7 +267,7 @@
       opacity: 0.8;
       z-index: 3;
     }
-    @keyframes floatUp {
+    @keyframes floatнад {
       0% {
         transform: translateY(0) scale(1);
         opacity: 0.1;
@@ -402,47 +401,67 @@
         transform: scale(1.2);
       }
     }
-    /* New styles for ad integration */
-    #adContainer {
+    #adOverlay {
       position: absolute;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      z-index: 50;
+      background: rgba(0, 0, 0, 0.9);
       display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+      pointer-events: none;
+    }
+    #adContainer {
+      position: relative;
+      width: 80vw;
+      height: 80vh;
+      max-width: 1280px;
+      max-height: 720px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #adPlayer {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
       background: black;
     }
-    #adContainer.visible {
-      display: block;
-    }
-    #skipAdButton {
+    #adControls {
       position: absolute;
       bottom: 20px;
       right: 20px;
-      background: rgba(255, 255, 255, 0.8);
-      color: #000;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-size: 18px;
-      cursor: pointer;
-      display: none;
-      z-index: 60;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      pointer-events: auto;
     }
-    #skipAdButton.enabled {
-      background: #fff;
-      cursor: pointer;
-    }
-    #adTimer {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      background: rgba(0, 0, 0, 0.7);
+    #adCountdown {
+      font-size: 24px;
+      font-weight: 700;
       color: #fff;
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-size: 16px;
-      z-index: 60;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 8px 16px;
+      border-radius: 8px;
+    }
+    #skipAdButton {
+      font-size: 20px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border: 2px solid #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    #skipAdButton:disabled {
+      background: rgba(255, 255, 255, 0.1);
+      color: #666;
+      border-color: #666;
+      cursor: not-allowed;
     }
   </style>
 </head>
@@ -474,20 +493,21 @@
     <audio id="noiseSound" src="https://cdn.pixabay.com/audio/2025/04/06/audio_513747fd8d.mp3" preload="auto" loop></audio>
     <audio id="typingSound" src="https://assets.mixkit.co/active_storage/sfx/1392/1392-preview.mp3" preload="auto"></audio>
     <video id="player" playsinline controlslist="nodownload noplaybackrate" disablePictureInPicture></video>
+    <div id="adOverlay" style="display: none;">
+      <div id="adContainer">
+        <video id="adPlayer" playsinline controlslist="nodownload noplaybackrate" disablePictureInPicture></video>
+        <div id="adControls">
+          <div id="adCountdown">Ad: <span id="adTime"></span>s</div>
+          <button id="skipAdButton" disabled>Skip Ad</button>
+        </div>
+      </div>
+    </div>
     <div id="playButton" tabindex="0"></div>
     <div id="channelNumberOverlay"></div>
     <div id="errorBox">This channel is not available for now</div>
-    <!-- Ad container and controls -->
-    <div id="adContainer"></div>
-    <div id="skipAdButton">Skip Ad</div>
-    <div id="adTimer"></div>
   </div>
   <img id="azinLogo" src="https://i.postimg.cc/65q6CC2P/file-00000000201c61f6b67764f95c3588ed.png" alt="Azin TV Logo">
   <div id="incompatibleBox">Sorry, only Android TVs are supported for this app</div>
-  <!-- Load IMA SDK -->
-  <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
-  <!-- Load provided ad script for display ads (if applicable) -->
-  <script type='text/javascript' src='//pl26854482.profitableratecpm.com/da/8d/b6/da8db6f3917a725d75555e02d57ff8ba.js'></script>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.7/shaka-player.compiled.min.js"></script>
   <script>
@@ -515,6 +535,14 @@
       {name: "Channel 20 - Real Madrid TV", url: "https://rmtv.akamaized.net/hls/live/2043154/rmtv-en-web/bitrate_3.m3u8"}
     ];
 
+    // Sample ad videos with durations (replace with actual ad URLs)
+    const ads = [
+      { url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", duration: 15 },
+      { url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", duration: 15 },
+      { url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", duration: 60 },
+      { url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", duration: 60 }
+    ];
+
     const video = document.getElementById("player"),
           list = document.getElementById("channelList"),
           overlay = document.getElementById("channelNumberOverlay"),
@@ -529,11 +557,11 @@
           loadingLogo = document.getElementById("loadingLogo"),
           greetingText = document.getElementById("greetingText"),
           channelLoader = document.getElementById("channelLoader"),
-          adContainer = document.getElementById("adContainer"),
-          skipAdButton = document.getElementById("skipAdButton"),
-          adTimer = document.getElementById("adTimer");
-    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
-    let adManager, adDisplayContainer, adsLoader, adsRequest, isAdPlaying = false, adSkippable = false, adTimerInterval;
+          adPlayer = document.getElementById("adPlayer"),
+          adOverlay = document.getElementById("adOverlay"),
+          adCountdown = document.getElementById("adTime"),
+          skipAdButton = document.getElementById("skipAdButton");
+    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false, adInterval, adTimer, adTimeout;
 
     function typeText(element, text, duration) {
       console.log("Starting JavaScript typing animation");
@@ -597,9 +625,6 @@
         }, 1000);
       });
 
-      // Initialize IMA SDK
-      initializeAds();
-
       function checkInternet() {
         if (!navigator.onLine) {
           console.log("No internet connection detected");
@@ -610,7 +635,6 @@
           document.getElementById("azinLogo").style.display = "none";
           document.getElementById("greetingScreen").style.display = "none";
           channelLoader.style.display = "none";
-          adContainer.style.display = "none";
           setTimeout(checkInternet, 2000);
         } else {
           console.log("Internet connection detected");
@@ -680,148 +704,8 @@
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
         channelLoader.style.display = "none";
-        adContainer.style.display = "none";
+        clearInterval(adInterval);
       });
-    }
-
-    // Initialize Google IMA SDK
-    function initializeAds() {
-      console.log("Initializing Google IMA SDK");
-      adDisplayContainer = new google.ima.AdDisplayContainer(adContainer, video);
-      adsLoader = new google.ima.AdsLoader(adDisplayContainer);
-      adsLoader.addEventListener(
-        google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
-        onAdsManagerLoaded,
-        false
-      );
-      adsLoader.addEventListener(
-        google.ima.AdErrorEvent.Type.AD_ERROR,
-        onAdError,
-        false
-      );
-      // Initialize the ad container
-      adDisplayContainer.initialize();
-    }
-
-    function requestAds() {
-      console.log("Requesting video ads");
-      const adsRequest = new google.ima.AdsRequest();
-      // Use a test ad tag for demonstration; replace with your ad tag
-      adsRequest.adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator=' + Date.now();
-      adsRequest.linearAdSlotWidth = window.innerWidth;
-      adsRequest.linearAdSlotHeight = window.innerHeight;
-      adsRequest.setAdWillAutoPlay(true);
-      adsRequest.setAdWillPlayMuted(false);
-      adsLoader.requestAds(adsRequest);
-    }
-
-    function onAdsManagerLoaded(adsManagerLoadedEvent) {
-      console.log("Ads manager loaded");
-      adManager = adsManagerLoadedEvent.getAdsManager(video);
-      adManager.addEventListener(google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED, onContentPauseRequested);
-      adManager.addEventListener(google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED, onContentResumeRequested);
-      adManager.addEventListener(google.ima.AdEvent.Type.ALL_ADS_COMPLETED, onAdEvent);
-      adManager.addEventListener(google.ima.AdEvent.Type.LOADED, onAdEvent);
-      adManager.addEventListener(google.ima.AdEvent.Type.STARTED, onAdEvent);
-      adManager.addEventListener(google.ima.AdEvent.Type.SKIPPED, onAdEvent);
-      adManager.addEventListener(google.ima.AdEvent.Type.COMPLETE, onAdEvent);
-      adManager.addEventListener(google.ima.AdEvent.Type.SKIPPABLE_STATE_CHANGED, onAdEvent);
-      try {
-        adManager.init(window.innerWidth, window.innerHeight, google.ima.ViewMode.FULLSCREEN);
-        adManager.start();
-      } catch (adError) {
-        console.error("Ad manager start error:", adError);
-        resumeContent();
-      }
-    }
-
-    function onAdEvent(adEvent) {
-      console.log("Ad event:", adEvent.type);
-      switch (adEvent.type) {
-        case google.ima.AdEvent.Type.LOADED:
-          const ad = adEvent.getAd();
-          if (ad.isSkippable()) {
-            startAdTimer(30); // Show skip button after 30 seconds
-          }
-          break;
-        case google.ima.AdEvent.Type.STARTED:
-          isAdPlaying = true;
-          adContainer.classList.add('visible');
-          video.style.display = 'none';
-          break;
-        case google.ima.AdEvent.Type.SKIPPABLE_STATE_CHANGED:
-          adSkippable = adEvent.getAd().isSkippable();
-          if (adSkippable) {
-            skipAdButton.classList.add('enabled');
-            skipAdButton.style.display = 'block';
-          }
-          break;
-        case google.ima.AdEvent.Type.SKIPPED:
-        case google.ima.AdEvent.Type.COMPLETE:
-        case google.ima.AdEvent.Type.ALL_ADS_COMPLETED:
-          clearAdTimer();
-          resumeContent();
-          break;
-      }
-    }
-
-    function onAdError(adErrorEvent) {
-      console.error("Ad error:", adErrorEvent.getError());
-      clearAdTimer();
-      resumeContent();
-    }
-
-    function onContentPauseRequested() {
-      console.log("Pausing content for ad");
-      video.pause();
-      hideChannelLoader();
-      playButton.style.display = 'none';
-    }
-
-    function onContentResumeRequested() {
-      console.log("Resuming content after ad");
-      resumeContent();
-    }
-
-    function resumeContent() {
-      console.log("Resuming content");
-      isAdPlaying = false;
-      adContainer.classList.remove('visible');
-      video.style.display = 'block';
-      skipAdButton.style.display = 'none';
-      clearAdTimer();
-      if (hasManuallyPlayed) {
-        video.play().catch(err => {
-          console.error("Content play error after ad:", err);
-          showPlayButton();
-        });
-      }
-      showPlayButton();
-    }
-
-    function startAdTimer(seconds) {
-      let timeLeft = seconds;
-      adTimer.style.display = 'block';
-      adTimer.innerText = `Ad: ${timeLeft}s`;
-      adTimerInterval = setInterval(() => {
-        timeLeft--;
-        adTimer.innerText = `Ad: ${timeLeft}s`;
-        if (timeLeft <= 0) {
-          clearAdTimer();
-          if (adSkippable) {
-            skipAdButton.classList.add('enabled');
-            skipAdButton.style.display = 'block';
-          }
-        }
-      }, 1000);
-    }
-
-    function clearAdTimer() {
-      if (adTimerInterval) {
-        clearInterval(adTimerInterval);
-        adTimerInterval = null;
-      }
-      adTimer.style.display = 'none';
     }
 
     function showErrorVisual() {
@@ -870,6 +754,65 @@
     function hideChannelLoader() {
       console.log("Hiding channel loader");
       channelLoader.style.display = "none";
+    }
+
+    function showAd() {
+      console.log("Showing ad");
+      const ad = ads[Math.floor(Math.random() * ads.length)];
+      const adDuration = ad.duration;
+      adPlayer.src = ad.url;
+      adOverlay.style.display = "flex";
+      video.pause();
+      adPlayer.play().catch(err => {
+        console.error("Ad playback error:", err);
+        endAd();
+      });
+
+      let timeLeft = adDuration;
+      adCountdown.textContent = timeLeft;
+      clearInterval(adTimer);
+      adTimer = setInterval(() => {
+        timeLeft--;
+        adCountdown.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          endAd();
+        }
+      }, 1000);
+
+      if (adDuration > 30) {
+        adTimeout = setTimeout(() => {
+          console.log("Enabling skip button");
+          skipAdButton.disabled = false;
+        }, 5000);
+      } else {
+        skipAdButton.disabled = true;
+      }
+
+      adPlayer.onended = () => {
+        console.log("Ad ended naturally");
+        endAd();
+      };
+    }
+
+    function endAd() {
+      console.log("Ending ad");
+      clearInterval(adTimer);
+      clearTimeout(adTimeout);
+      adOverlay.style.display = "none";
+      adPlayer.src = "";
+      skipAdButton.disabled = true;
+      video.play().catch(err => {
+        console.error("Main video resume error:", err);
+        showErrorVisual();
+      });
+      scheduleNextAd();
+    }
+
+    function scheduleNextAd() {
+      clearInterval(adInterval);
+      const randomInterval = Math.floor(Math.random() * (5 - 2 + 1) + 2) * 60 * 1000;
+      console.log(`Next ad scheduled in ${randomInterval / 1000} seconds`);
+      adInterval = setInterval(showAd, randomInterval);
     }
 
     setTimeout(() => {
@@ -1089,19 +1032,14 @@
         document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
         channelLoader.style.display = "none";
-        adContainer.style.display = "none";
+        clearInterval(adInterval);
         return;
       }
       console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
       currentIndex = index;
       playingIndex = index;
       hideErrorVisual();
-      // Request ads before loading the channel
-      if (hasManuallyPlayed) {
-        requestAds();
-      } else {
-        loadVideo(channels[index].url, autoPlay, channels[index].name);
-      }
+      loadVideo(channels[index].url, autoPlay, channels[index].name);
       video.muted = false;
       updateUI();
       hideChannelList();
@@ -1113,6 +1051,7 @@
       } else {
         showPlayButton();
       }
+      scheduleNextAd();
     }
 
     function showChannelList() {
@@ -1142,29 +1081,19 @@
       listVisible ? updateUI() : loadChannel(currentIndex, hasManuallyPlayed);
     }
 
-    // Handle skip ad button click
-    skipAdButton.addEventListener('click', () => {
-      if (adSkippable && adManager) {
-        console.log("Skipping ad");
-        adManager.skip();
-      }
-    });
-
     document.addEventListener('keydown', e => {
       const key = e.key, code = e.keyCode;
       console.log(`Key pressed: ${key} (code: ${code})`);
 
-      // Prevent interaction during ad playback
-      if (isAdPlaying) {
-        if (key === "Enter" && adSkippable) {
-          console.log("Enter pressed during skippable ad, skipping");
-          adManager.skip();
+      if (adOverlay.style.display === "flex" && (["Enter", "OK", "Accept", "SoftRight"].includes(key) || code === 13)) {
+        if (!skipAdButton.disabled) {
+          console.log("Skipping ad");
+          endAd();
         }
         e.preventDefault();
         return;
       }
 
-      // Handle numeric input for direct channel selection
       if (key >= "0" && key <= "9") {
         numberInput += key;
         showOverlay(numberInput);
@@ -1178,9 +1107,7 @@
         return;
       }
 
-      // Handle Enter/OK key for multiple scenarios
       if (["Enter", "OK", "Accept", "SoftRight"].includes(key) || code === 13) {
-        // Scenario 1: Confirm numeric channel input
         if (numberInput.length > 0) {
           console.log("OK pressed, confirming channel number:", numberInput);
           const num = parseInt(numberInput, 10);
@@ -1193,21 +1120,20 @@
           e.preventDefault();
           return;
         }
-        // Scenario 2: Select channel from list when visible
         if (listVisible) {
           console.log("OK pressed, changing channel to index:", currentIndex);
           loadChannel(currentIndex, hasManuallyPlayed);
           e.preventDefault();
           return;
         }
-        // Scenario 3: Toggle play/pause when list is not visible
         if (!listVisible) {
           if (video.paused || video.ended) {
             console.log("OK pressed, playing video");
             hasManuallyPlayed = true;
-            requestAds(); // Play ad before content
-            e.preventDefault();
-            return;
+            video.play().catch(err => {
+              console.error("Play error:", err);
+              showErrorVisual();
+            });
           } else {
             console.log("OK pressed, pausing video");
             video.pause();
@@ -1218,14 +1144,12 @@
         }
       }
 
-      // Toggle channel list visibility with left/right arrows
       if (["ArrowLeft", "ArrowRight"].includes(key)) {
         changeChannelList();
         e.preventDefault();
         return;
       }
 
-      // Navigate channel list when visible
       if (listVisible) {
         if (key === "ArrowUp" || key === "PageUp" || key === "ChannelUp" || code === 33) {
           currentIndex = (currentIndex - 1 + channels.length) % channels.length;
@@ -1240,7 +1164,6 @@
           return;
         }
       } else {
-        // Change channel directly when list is not visible
         if (["ArrowUp", "ChannelUp"].includes(key) || code === 33) {
           changeChannel("down");
           e.preventDefault();
@@ -1253,12 +1176,14 @@
         }
       }
 
-      // Handle play/pause with MediaPlayPause or spacebar
       if (["MediaPlayPause", " "].includes(key)) {
         if (video.paused) {
           console.log("Attempting to play video via MediaPlayPause");
           hasManuallyPlayed = true;
-          requestAds(); // Play ad before content
+          video.play().catch(err => {
+            console.error("Play error:", err);
+            showErrorVisual();
+          });
           showPlayButton();
         } else {
           console.log("Pausing video via MediaPlayPause");
@@ -1273,6 +1198,7 @@
       console.log("Video is playing");
       hideChannelLoader();
       showPlayButton();
+      scheduleNextAd();
     });
     video.addEventListener('pause', () => {
       console.log("Video paused");
