@@ -89,7 +89,7 @@
       cursor: pointer;
       z-index: 100;
       will-change: transform,opacity;
-      transition: opacity 0.5s ease;
+      transition: opacity 0.2s ease; /* দ্রুত ট্রানজিশন */
     }
     #playButton.fade-out {
       opacity: 0;
@@ -130,7 +130,7 @@
       pointer-events: none;
       opacity: 0;
       color: #fff;
-      transition: opacity .4s ease;
+      transition: opacity 0.1s ease; /* দ্রুত ট্রানজিশন */
       will-change: opacity;
     }
     #azinLogo {
@@ -433,7 +433,7 @@
     <video id="player" playsinline controlslist="nodownload noplaybackrate" disablePictureInPicture></video>
     <div id="playButton" tabindex="0"></div>
     <div id="channelNumberOverlay"></div>
-    <div id="errorBox">This channel is currently offline.</div>
+    <div id="errorBox">This channel is not available for now</div>
   </div>
   <img id="azinLogo" src="https://i.postimg.cc/65q6CC2P/file-00000000201c61f6b67764f95c3588ed.png" alt="Azin TV Logo">
   <div id="incompatibleBox">Sorry, only Android TVs are supported for this app</div>
@@ -483,7 +483,7 @@
           loadingLogo = document.getElementById("loadingLogo"),
           greetingText = document.getElementById("greetingText"),
           channelLoader = document.getElementById("channelLoader");
-    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false, retryCount = 0, maxRetries = 3;
+    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false, retryCount = 0, maxRetries = 2, isChannelSwitching = false, currentRequest = null;
 
     function typeText(element, text, duration) {
       console.log("Starting JavaScript typing animation");
@@ -630,15 +630,22 @@
     }
 
     function showErrorVisual() {
-      console.log("Showing error: This channel is currently offline");
-      video.style.display = "none";
-      staticNoise.style.opacity = "1";
-      staticNoise.style.display = "block";
-      errorBox.innerText = "This channel is currently offline.";
-      errorBox.style.display = "block";
-      channelLoader.style.display = "none";
-      attemptPlayNoiseSound();
-      showPlayButton();
+      console.log("Scheduling error visual display");
+      setTimeout(() => {
+        if (!video.paused && video.readyState >= video.HAVE_FUTURE_DATA) {
+          console.log("Video is playing, skipping error visual");
+          return;
+        }
+        console.log("Showing error: This channel is currently offline");
+        video.style.display = "none";
+        staticNoise.style.opacity = "1";
+        staticNoise.style.display = "block";
+        errorBox.innerText = "This channel is not available for now";
+        errorBox.style.display = "block";
+        channelLoader.style.display = "none";
+        attemptPlayNoiseSound();
+        showPlayButton();
+      }, 2000);
     }
 
     function hideErrorVisual() {
@@ -653,12 +660,16 @@
 
     function showChannelLoader() {
       console.log("Showing channel loader");
-      channelLoader.style.display = "flex";
+      requestAnimationFrame(() => {
+        channelLoader.style.display = "flex";
+      });
     }
 
     function hideChannelLoader() {
       console.log("Hiding channel loader");
-      channelLoader.style.display = "none";
+      requestAnimationFrame(() => {
+        channelLoader.style.display = "none";
+      });
     }
 
     function attemptPlayNoiseSound(retries = 3, delay = 500) {
@@ -678,25 +689,33 @@
       });
     }
 
+    function checkNetworkStability(url) {
+      return fetch(url, { method: 'HEAD', timeout: 2000 })
+        .then(response => response.ok)
+        .catch(() => false);
+    }
+
     setTimeout(() => {
       channels.forEach((ch, i) => {
         const div = document.createElement("div");
         div.className = "channel";
         div.innerText = ch.name;
-        div.onclick = () => loadChannel(i, hasManuallyPlayed);
+        div.onclick = () => debounceChannelChange(i, hasManuallyPlayed);
         list.appendChild(div);
       });
     }, 0);
 
     function updateUI() {
-      document.querySelectorAll('.channel').forEach((el, i) => {
-        el.classList.toggle('active', i === currentIndex);
-        if (i === currentIndex && listVisible) el.scrollIntoView({ block: "nearest" });
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.channel').forEach((el, i) => {
+          el.classList.toggle('active', i === currentIndex);
+          if (i === currentIndex && listVisible) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        });
+        if (listVisible) {
+          clearTimeout(listTimeout);
+          listTimeout = setTimeout(hideChannelList, 7000);
+        }
       });
-      if (listVisible) {
-        clearTimeout(listTimeout);
-        listTimeout = setTimeout(hideChannelList, 7000);
-      }
     }
 
     function showOverlay(text) {
@@ -733,17 +752,48 @@
       }
     }
 
+    function prefetchChannels(currentIndex) {
+      const prevIndex = (currentIndex - 1 + channels.length) % channels.length;
+      const nextIndex = (currentIndex + 1) % channels.length;
+
+      [prevIndex, nextIndex].forEach(index => {
+        const url = channels[index].url;
+        if (isM3U8(url)) {
+          const prefetchHls = new Hls();
+          prefetchHls.loadSource(url);
+          prefetchHls.on(Hls.Events.ERROR, (_, data) => {
+            console.warn(`Prefetch error for ${channels[index].name}:`, data);
+          });
+          console.log(`Preloading HLS manifest for ${channels[index].name}`);
+        } else if (isMPD(url) && typeof shaka !== 'undefined') {
+          const prefetchShaka = new shaka.Player();
+          prefetchShaka.load(url).catch(err => {
+            console.warn(`Prefetch error for ${channels[index].name}:`, err);
+          });
+          console.log(`Preloading MPD manifest for ${channels[index].name}`);
+        }
+      });
+    }
+
     async function loadVideo(url, autoPlay, channelName) {
       console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}, Retry: ${retryCount}/${maxRetries}`);
       showChannelLoader();
+
+      if (currentRequest) {
+        currentRequest.abort();
+      }
+
       if (hls) {
-        hls.destroy();
-        hls = null;
+        hls.stopLoad();
+        hls.detachMedia();
       }
       if (shakaPlayer) {
-        await shakaPlayer.destroy();
-        shakaPlayer = null;
+        await shakaPlayer.unload();
       }
+
+      const controller = new AbortController();
+      currentRequest = controller;
+
       if (isM3U8(url)) {
         if (typeof Hls !== 'undefined' && Hls.isSupported()) {
           console.log(`HLS supported, initializing Hls.js for ${channelName}`);
@@ -751,15 +801,16 @@
             debug: false,
             enableWorker: true,
             lowLatencyMode: true,
-            backBufferLength: 30,
-            liveSyncDurationCount: 3,
-            liveMaxLatencyDurationCount: 6,
-            maxBufferLength: 15,
+            liveSyncDurationCount: 2,
+            liveMaxLatencyDurationCount: 4,
+            maxBufferLength: 10,
+            backBufferLength: 15,
             startLevel: -1,
-            abrEwmaFastLive: 3.0,
-            abrEwmaSlowLive: 8.0,
+            abrEwmaFastLive: 2.0,
+            abrEwmaSlowLive: 5.0,
             xhrSetup: function(xhr) {
               xhr.withCredentials = false;
+              xhr.signal = controller.signal;
             }
           });
           hls.loadSource(url);
@@ -770,60 +821,22 @@
             retryCount = 0;
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
+                if (err.name === 'AbortError') return;
                 console.error(`HLS play error for ${channelName}:`, err);
-                if (retryCount < maxRetries) {
-                  retryCount++;
-                  setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-                } else {
-                  showErrorVisual();
-                  showPlayButton();
-                }
+                handleError(url, autoPlay, channelName);
               });
             } else {
               showPlayButton();
             }
-            const nextIndex = (currentIndex + 1) % channels.length;
-            if (isM3U8(channels[nextIndex].url)) {
-              const prefetchHls = new Hls();
-              prefetchHls.loadSource(channels[nextIndex].url);
-              prefetchHls.on(Hls.Events.ERROR, (_, data) => {
-                console.warn(`Prefetch error for ${channels[nextIndex].name}:`, data);
-              });
-              console.log(`Preloading manifest for ${channels[nextIndex].name}`);
-            }
+            prefetchChannels(currentIndex);
           });
           hls.on(Hls.Events.ERROR, (_, data) => {
-            console.error(`HLS Error: Type=${data.type}, Details=${data.details}, Fatal=${data.fatal}, Response=${data.response ? data.response.status : 'N/A'}, VideoState=${video.readyState}, Network=${navigator.onLine}`);
             if (data.fatal && (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR || (data.response && [404, 403].includes(data.response.status)))) {
-              console.log(`Critical HLS error detected, channel likely offline: ${data.details}`);
-              if (retryCount < maxRetries) {
-                retryCount++;
-                setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-              } else {
-                hideChannelLoader();
-                showErrorVisual();
-                showPlayButton();
-              }
+              console.log(`Critical HLS error detected: ${data.details}`);
+              handleError(url, autoPlay, channelName);
             } else if (data.fatal) {
               console.log(`Fatal HLS error, retrying (${retryCount + 1}/${maxRetries})`);
-              if (retryCount < maxRetries) {
-                retryCount++;
-                setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-              } else {
-                console.log(`Falling back to native video for ${channelName}`);
-                video.src = url;
-                video.play().catch(err => {
-                  console.error(`Native video play error for ${channelName}:`, err);
-                  if (retryCount < maxRetries) {
-                    retryCount++;
-                    setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-                  } else {
-                    hideChannelLoader();
-                    showErrorVisual();
-                    showPlayButton();
-                  }
-                });
-              }
+              handleError(url, autoPlay, channelName);
             } else {
               console.log(`Non-fatal HLS error, ignoring: ${data.type}, ${data.details}`);
             }
@@ -837,62 +850,18 @@
             retryCount = 0;
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
+                if (err.name === 'AbortError') return;
                 console.error(`Native video play error for ${channelName}:`, err);
-                if (retryCount < maxRetries) {
-                  retryCount++;
-                  setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-                } else {
-                  showErrorVisual();
-                  showPlayButton();
-                }
+                handleError(url, autoPlay, channelName);
               });
             } else {
               showPlayButton();
             }
           };
-          video.onerror = () => {
-            console.error(`Native video error for ${channelName}`);
-            fetch(url, { method: 'HEAD' })
-              .then(response => {
-                if ([404, 403].includes(response.status)) {
-                  console.log(`Channel offline, status: ${response.status}`);
-                  if (retryCount < maxRetries) {
-                    retryCount++;
-                    setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-                  } else {
-                    hideChannelLoader();
-                    showErrorVisual();
-                    showPlayButton();
-                  }
-                } else {
-                  console.log(`Retrying due to non-critical error, retry: ${retryCount + 1}/${maxRetries}`);
-                  if (retryCount < maxRetries) {
-                    retryCount++;
-                    setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-                  }
-                }
-              })
-              .catch(() => {
-                if (retryCount < maxRetries) {
-                  retryCount++;
-                  setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-                } else {
-                  hideChannelLoader();
-                  showErrorVisual();
-                  showPlayButton();
-                }
-              });
-          };
+          video.onerror = () => handleVideoError(url, autoPlay, channelName);
         } else {
           console.error(`HLS not supported for ${channelName}`);
-          if (retryCount < maxRetries) {
-            retryCount++;
-            setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-          } else {
-            hideChannelLoader();
-            showErrorVisual();
-            showPlayButton();
-          }
+          handleError(url, autoPlay, channelName);
         }
       } else if (isMPD(url)) {
         if (typeof shaka !== 'undefined') {
@@ -900,9 +869,9 @@
           shakaPlayer = new shaka.Player(video);
           shakaPlayer.configure({
             streaming: {
-              bufferingGoal: 15,
-              rebufferingGoal: 2,
-              bufferBehind: 30,
+              bufferingGoal: 10,
+              rebufferingGoal: 1,
+              bufferBehind: 15,
               lowLatencyMode: true
             }
           });
@@ -913,51 +882,21 @@
             retryCount = 0;
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
+                if (err.name === 'AbortError') return;
                 console.error(`MPEG-DASH play error for ${channelName}:`, err);
-                if (retryCount < maxRetries) {
-                  retryCount++;
-                  setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-                } else {
-                  showErrorVisual();
-                  showPlayButton();
-                }
+                handleError(url, autoPlay, channelName);
               });
             } else {
               showPlayButton();
             }
           } catch (e) {
+            if (e.name === 'AbortError') return;
             console.error(`Error loading MPEG-DASH for ${channelName}:`, e);
-            if (e.code === shaka.util.Error.Code.HTTP_ERROR && [404, 403].includes(e.data[1])) {
-              console.log(`Channel offline, HTTP status: ${e.data[1]}`);
-              if (retryCount < maxRetries) {
-                retryCount++;
-                setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-              } else {
-                hideChannelLoader();
-                showErrorVisual();
-                showPlayButton();
-              }
-            } else {
-              if (retryCount < maxRetries) {
-                retryCount++;
-                setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-              } else {
-                hideChannelLoader();
-                showErrorVisual();
-                showPlayButton();
-              }
-            }
+            handleError(url, autoPlay, channelName);
           }
         } else {
           console.error(`Shaka Player not available for ${channelName}`);
-          if (retryCount < maxRetries) {
-            retryCount++;
-            setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-          } else {
-            hideChannelLoader();
-            showErrorVisual();
-            showPlayButton();
-          }
+          handleError(url, autoPlay, channelName);
         }
       } else {
         console.log(`Using direct video source for ${channelName}`);
@@ -968,84 +907,87 @@
           retryCount = 0;
           if (autoPlay && hasManuallyPlayed) {
             video.play().catch(err => {
+              if (err.name === 'AbortError') return;
               console.error(`Direct video play error for ${channelName}:`, err);
-              if (retryCount < maxRetries) {
-                retryCount++;
-                setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-              } else {
-                showErrorVisual();
-                showPlayButton();
-              }
+              handleError(url, autoPlay, channelName);
             });
           } else {
             showPlayButton();
           }
         };
-        video.onerror = () => {
-          console.error(`Direct video error for ${channelName}`);
-          fetch(url, { method: 'HEAD' })
-            .then(response => {
-              if ([404, 403].includes(response.status)) {
-                console.log(`Channel offline, status: ${response.status}`);
-                if (retryCount < maxRetries) {
-                  retryCount++;
-                  setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-                } else {
-                  hideChannelLoader();
-                  showErrorVisual();
-                  showPlayButton();
-                }
-              } else {
-                console.log(`Retrying due to non-critical error, retry: ${retryCount + 1}/${maxRetries}`);
-                if (retryCount < maxRetries) {
-                  retryCount++;
-                  setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-                }
-              }
-            })
-            .catch(() => {
-              if (retryCount < maxRetries) {
-                retryCount++;
-                setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-              } else {
-                hideChannelLoader();
-                showErrorVisual();
-                showPlayButton();
-              }
-            });
-        };
+        video.onerror = () => handleVideoError(url, autoPlay, channelName);
+      }
+      return Promise.resolve();
+    }
+
+    function handleError(url, autoPlay, channelName) {
+      if (retryCount < maxRetries) {
+        retryCount++;
+        console.log(`Retrying (${retryCount}/${maxRetries}) for ${channelName}`);
+        setTimeout(() => loadVideo(url, autoPlay, channelName), 1000);
+      } else {
+        console.log(`Channel ${channelName} offline after ${maxRetries} retries`);
+        hideChannelLoader();
+        showErrorVisual();
+        showPlayButton();
       }
     }
 
-    function loadChannel(index, autoPlay = false) {
-      if (!navigator.onLine) {
-        console.log("No internet connection, showing network error");
-        document.getElementById("loadingScreen").style.display = "flex";
-        document.getElementById("loadingScreen").classList.remove("hidden");
-        document.getElementById("networkErrorBox").style.display = "block";
-        document.getElementById("container").style.display = "none";
-        document.getElementById("azinLogo").style.display = "none";
-        document.getElementById("greetingScreen").style.display = "none";
-        channelLoader.style.display = "none";
+    function handleVideoError(url, autoPlay, channelName) {
+      if (isChannelSwitching) {
+        console.log("Ignoring video error during channel switch");
         return;
+      }
+      console.error(`Video error for ${channelName}`);
+      fetch(url, { method: 'HEAD', signal: currentRequest ? currentRequest.signal : null })
+        .then(response => {
+          if ([404, 403].includes(response.status)) {
+            console.log(`Channel offline, status: ${response.status}`);
+            handleError(url, autoPlay, channelName);
+          } else if (retryCount < maxRetries) {
+            retryCount++;
+            console.log(`Retrying due to non-critical error, retry: ${retryCount}/${maxRetries}`);
+            setTimeout(() => loadVideo(url, autoPlay, channelName), 1000);
+          } else {
+            handleError(url, autoPlay, channelName);
+          }
+        })
+        .catch(err => {
+          if (err.name === 'AbortError') return;
+          handleError(url, autoPlay, channelName);
+        });
+    }
+
+    function debounceChannelChange(index, autoPlay) {
+      if (isChannelSwitching) {
+        console.log("Channel switch in progress, ignoring request");
+        return;
+      }
+      isChannelSwitching = true;
+      loadChannel(index, autoPlay).finally(() => {
+        isChannelSwitching = false;
+      });
+    }
+
+    async function loadChannel(index, autoPlay = false) {
+      if (!navigator.onLine || !(await checkNetworkStability(channels[index].url))) {
+        console.log("Network unstable or channel unavailable");
+        showErrorVisual();
+        return Promise.resolve();
       }
       console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
       currentIndex = index;
       playingIndex = index;
       retryCount = 0;
       hideErrorVisual();
-      loadVideo(channels[index].url, autoPlay, channels[index].name);
-      video.muted = false;
-      updateUI();
-      hideChannelList();
-      showOverlay(String(index + 1));
-      if (index === 0) {
-        playButton.style.display = 'flex';
-        playButton.classList.remove('playing');
-        playButton.classList.remove('fade-out');
-      } else {
+      prefetchChannels(index);
+      return loadVideo(channels[index].url, autoPlay, channels[index].name).finally(() => {
+        video.muted = false;
+        updateUI();
+        hideChannelList();
+        showOverlay(String(index + 1));
         showPlayButton();
-      }
+      });
     }
 
     function showChannelList() {
@@ -1070,9 +1012,9 @@
     }
 
     function changeChannel(direction) {
-      currentIndex = direction === "up" ? (currentIndex - 1 + channels.length) % channels.length : (currentIndex + 1) % channels.length;
-      console.log(`Changing channel to index ${currentIndex}`);
-      listVisible ? updateUI() : loadChannel(currentIndex, hasManuallyPlayed);
+      const newIndex = direction === "up" ? (currentIndex - 1 + channels.length) % channels.length : (currentIndex + 1) % channels.length;
+      console.log(`Changing channel to index ${newIndex}`);
+      listVisible ? updateUI() : debounceChannelChange(newIndex, hasManuallyPlayed);
     }
 
     document.addEventListener('keydown', e => {
@@ -1085,7 +1027,7 @@
         clearTimeout(numberTimeout);
         numberTimeout = setTimeout(() => {
           const num = parseInt(numberInput, 10);
-          if (num >= 1 && num <= channels.length) loadChannel(num - 1, hasManuallyPlayed);
+          if (num >= 1 && num <= channels.length) debounceChannelChange(num - 1, hasManuallyPlayed);
           numberInput = "";
         }, 2000);
         e.preventDefault();
@@ -1097,7 +1039,7 @@
           console.log("OK pressed, confirming channel number:", numberInput);
           const num = parseInt(numberInput, 10);
           if (num >= 1 && num <= channels.length) {
-            loadChannel(num - 1, hasManuallyPlayed);
+            debounceChannelChange(num - 1, hasManuallyPlayed);
           }
           numberInput = "";
           clearTimeout(numberTimeout);
@@ -1107,7 +1049,7 @@
         }
         if (listVisible) {
           console.log("OK pressed, changing channel to index:", currentIndex);
-          loadChannel(currentIndex, hasManuallyPlayed);
+          debounceChannelChange(currentIndex, hasManuallyPlayed);
           e.preventDefault();
           return;
         }
@@ -1119,7 +1061,7 @@
               console.error("Play error:", err);
               if (retryCount < maxRetries) {
                 retryCount++;
-                setTimeout(() => loadChannel(currentIndex, hasManuallyPlayed), 2000);
+                setTimeout(() => debounceChannelChange(currentIndex, hasManuallyPlayed), 1000);
               } else {
                 fetch(channels[currentIndex].url, { method: 'HEAD' })
                   .then(response => {
@@ -1183,7 +1125,7 @@
             console.error("Play error:", err);
             if (retryCount < maxRetries) {
               retryCount++;
-              setTimeout(() => loadChannel(currentIndex, hasManuallyPlayed), 2000);
+              setTimeout(() => debounceChannelChange(currentIndex, hasManuallyPlayed), 1000);
             } else {
               fetch(channels[currentIndex].url, { method: 'HEAD' })
                 .then(response => {
@@ -1219,37 +1161,17 @@
     });
     video.addEventListener('error', () => {
       console.log("Video element error detected");
-      setTimeout(() => {
-        if (video.error) {
-          console.error("Persistent video error:", video.error.message);
-          fetch(channels[currentIndex].url, { method: 'HEAD' })
-            .then(response => {
-              if ([404, 403].includes(response.status)) {
-                console.log(`Channel offline, status: ${response.status}`);
-                hideChannelLoader();
-                showErrorVisual();
-                showPlayButton();
-              } else if (retryCount < maxRetries) {
-                retryCount++;
-                setTimeout(() => loadChannel(currentIndex, hasManuallyPlayed), 2000);
-              }
-            })
-            .catch(() => {
-              if (retryCount < maxRetries) {
-                retryCount++;
-                setTimeout(() => loadChannel(currentIndex, hasManuallyPlayed), 2000);
-              } else {
-                hideChannelLoader();
-                showErrorVisual();
-                showPlayButton();
-              }
-            });
-        } else {
-          console.log("Video error resolved automatically");
-        }
-      }, 2000);
+      if (isChannelSwitching) {
+        console.log("Ignoring video error during channel switch");
+        return;
+      }
+      handleVideoError(channels[currentIndex].url, hasManuallyPlayed, channels[currentIndex].name);
     });
     video.addEventListener('waiting', () => {
+      if (isChannelSwitching) {
+        console.log("Ignoring buffering during channel switch");
+        return;
+      }
       console.log("Video is buffering");
       showChannelLoader();
     });
