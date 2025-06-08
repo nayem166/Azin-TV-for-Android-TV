@@ -13,7 +13,7 @@
     }
     body {
       height: 100vh;
-      background: black !important;
+      background: black;
       color: #fff;
       font-family: 'Segoe UI', Arial, sans-serif;
       overflow: hidden;
@@ -23,7 +23,7 @@
       position: relative;
       height: 100vh;
       width: 100vw;
-      background: black !important;
+      background: transparent;
       display: none;
     }
     .channel-list {
@@ -69,7 +69,7 @@
     video {
       width: 100vw;
       height: 100vh;
-      background: black !important;
+      background: transparent;
       z-index: 1;
       object-fit: fill;
     }
@@ -89,7 +89,7 @@
       cursor: pointer;
       z-index: 100;
       will-change: transform,opacity;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.5s ease;
     }
     #playButton.fade-out {
       opacity: 0;
@@ -130,7 +130,7 @@
       pointer-events: none;
       opacity: 0;
       color: #fff;
-      transition: opacity 0.1s ease;
+      transition: opacity .4s ease;
       will-change: opacity;
     }
     #azinLogo {
@@ -163,7 +163,7 @@
       text-align: center;
       box-sizing: border-box;
       min-width: 360px;
-      max-widthanean: 95vw;
+      max-width: 95vw;
       will-change: transform,opacity;
     }
     #networkErrorBox {
@@ -184,56 +184,6 @@
       min-width: 360px;
       max-width: 95vw;
       will-change: transform,opacity;
-    }
-    #mxPlayerErrorBox {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #000;
-      color: #fff;
-      padding: 40px 60px;
-      font-size: 28px;
-      border: 4px solid #fff;
-      border-radius: 16px;
-      z-index: 100;
-      display: none;
-      text-align: center;
-      box-sizing: border-box;
-      min-width: 360px;
-      max-width: 95vw;
-      will-change: transform, opacity;
-    }
-    #mxPlayerErrorBox .error-message {
-      margin-bottom: 20px;
-      font-size: 28px;
-    }
-    #mxPlayerErrorBox .button-container {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
-    #mxPlayerErrorBox .option-button {
-      background: #333;
-      color: #fff;
-      border: 2px solid #fff;
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-size: 20px;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.2s ease;
-      outline: none;
-    }
-    #mxPlayerErrorBox .option-button:hover,
-    #mxPlayerErrorBox .option-button:focus,
-    #mxPlayerErrorBox .option-button.focus {
-      background: #555;
-      transform: scale(1.05);
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-    }
-    #mxPlayerErrorBox .option-button:active {
-      background: #666;
-      transform: scale(0.95);
     }
     #staticNoise {
       position: absolute;
@@ -285,7 +235,7 @@
       display: block;
       position: relative;
       z-index: 10;
-      opacity: 1;
+      opacity: 10;
     }
     .light-ring {
       position: absolute;
@@ -309,7 +259,7 @@
     }
     .particle {
       position: absolute;
-     Hannah: 5px;
+      width: 5px;
       height: 5px;
       background: #ffaa00;
       border-radius: 50%;
@@ -484,13 +434,6 @@
     <div id="playButton" tabindex="0"></div>
     <div id="channelNumberOverlay"></div>
     <div id="errorBox">This channel is not available for now</div>
-    <div id="mxPlayerErrorBox">
-      <div class="error-message">This channel cannot play in this player</div>
-      <div class="button-container">
-        <button id="openMXPlayer" class="option-button">Open in MX Player</button>
-        <button id="cancelMXPlayer" class="option-button">Cancel</button>
-      </div>
-    </div>
   </div>
   <img id="azinLogo" src="https://i.postimg.cc/65q6CC2P/file-00000000201c61f6b67764f95c3588ed.png" alt="Azin TV Logo">
   <div id="incompatibleBox">Sorry, only Android TVs are supported for this app</div>
@@ -509,7 +452,7 @@
       {name: "Channel 8 - Jamuna TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1701/output/1701-audio_113312_eng=113200-video=1692000.m3u8"},
       {name: "Channel 9 - Channel 24", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1703/output/1703-audio_113332_eng=113200-video=1692000.m3u8"},
       {name: "Channel 10 - Ekushey ETV", url: "http://210.4.72.204/hls-live/livepkgr/_definst_/liveevent/livestream3.m3u8"},
-      {name: "Channel 11 - Massranga TV", url: "https://tataplay.slivcdn.com//hls/live/2011747/TEN1HD/master.m3u8"},
+      {name: "Channel 11 - Massranga TV", url: "https://live-test.tsports.com/live-01/master_480.m3u8?hdntl=Expires=1749072547~_GO=Generated~URLPrefix=aHR0cHM6Ly9saXZlLXRlc3QudHNwb3J0cy5jb20v~Signature=Ad7AwZ9aTn8lAzKWpU33-lMtq1DRPBZ_uN8NDGcbh9kBPJDjwPJyWPS1gjxMZvJ6tM_DHqcTaCwwET4mQLT5sQ37nUYG"},
       {name: "Channel 12 - Bangla Waz", url: "https://live20.bozztv.com/giatvplayout7/giatv-209617/tracks-v1a1/mono.ts.m3u8"},
       {name: "Channel 13 - Peace TV Bangla", url: "https://dzkyvlfyge.erbvr.com/PeaceTvBangla/index.m3u8"},
       {name: "Channel 14 - Al Istiqima", url: "http://jmc-live.ercdn.net/alistiqama/alistiqama_576p.m3u8"},
@@ -518,13 +461,19 @@
       {name: "Channel 17 - PBS Kids", url: "https://2-fss-2.streamhoster.com/pl_140/amlst:200914-1298290/playlist.m3u8"},
       {name: "Channel 18 - TV9 Bangla", url: "https://dyjmyiv3bp2ez.cloudfront.net/pub-iotv9banaen8yq/liveabr/playlist.m3u8"},
       {name: "Channel 19 - FIFA+", url: "https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8"},
-      {name: "Channel 20 - Real Madrid TV", url: "https://rmtv.akamaized.net/hls/live/2043154/rmtv-en-web/bitrate_3.m3u8"},
-      {name: "Channel 21 - Massranga TV", url: "https://mtv.sunplex.live/MAASRANGA-TV/index.m3u8"},
-      {name: "Channel 22 - Jungle Book", url: "https://cc-4bhi5osabejc9.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-4bhi5osabejc9/junglebook.m3u8"},
-      {name: "Channel 23 - Star Jalsha", url: "http://38.96.178.201/live/STARJALSHA/index.m3u8"},
-      {name: "Channel 24 - Gazi TV", url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/gazibdz.stream/tracks-v1a1/mono.ts.m3u8"},
-      {name: "Channel 25 - Duronto TV", url: "https://aynapubluc.vercel.app/api/stream/9ab9aa29-3d3b-4527-ab47-d9b69f0ea80c.m3u8"}
+   
+     {name: "Channel 20 - Real Madrid TV", url: "https://rmtv.akamaized.net/hls/live/2043154/rmtv-en-web/bitrate_3.m3u8"},
+{name: "Channel 21 - Massranga TV", url: "https://mtv.sunplex.live/MAASRANGA-TV/index.m3u8"},
+    
+{name: "Channel 22 - Jungle Book", url: "https://cc-4bhi5osabejc9.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-4bhi5osabejc9/junglebook.m3u8"},
+
+
+ {name: "Channel 23 - Star Jalsha", url: "http://38.96.178.201/live/STARJALSHA/index.m3u8"},
+
+    {name: "Channel 24 - Gazi TV", url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/gazibdz.stream/tracks-v1a1/mono.ts.m3u8"}
+         
     ];
+    
 
     const video = document.getElementById("player"),
           list = document.getElementById("channelList"),
@@ -539,11 +488,8 @@
           loadingScreen = document.getElementById("loadingScreen"),
           loadingLogo = document.getElementById("loadingLogo"),
           greetingText = document.getElementById("greetingText"),
-          channelLoader = document.getElementById("channelLoader"),
-          mxPlayerErrorBox = document.getElementById("mxPlayerErrorBox"),
-          openMXPlayerButton = document.getElementById("openMXPlayer"),
-          cancelMXPlayerButton = document.getElementById("cancelMXPlayer");
-    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false, retryCount = 0, maxRetries = 2, isChannelSwitching = false, currentRequest = null, selectedButtonIndex = 0;
+          channelLoader = document.getElementById("channelLoader");
+    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false;
 
     function typeText(element, text, duration) {
       console.log("Starting JavaScript typing animation");
@@ -690,22 +636,31 @@
     }
 
     function showErrorVisual() {
-      console.log("Scheduling error visual display");
-      setTimeout(() => {
-        if (!video.paused && video.readyState >= video.HAVE_FUTURE_DATA) {
-          console.log("Video is playing, skipping error visual");
-          return;
-        }
-        console.log("Showing error: This channel is currently offline");
-        video.style.display = "none";
-        staticNoise.style.opacity = "1";
-        staticNoise.style.display = "block";
-        errorBox.innerText = "This channel is not available for now";
-        errorBox.style.display = "block";
-        channelLoader.style.display = "none";
-        attemptPlayNoiseSound();
-        showPlayButton();
-      }, 2000);
+      console.log("Showing error: This channel is not available for now");
+      video.style.display = "none";
+      staticNoise.style.opacity = "1";
+      staticNoise.style.display = "block";
+      errorBox.innerText = "This channel is not available for now";
+      errorBox.style.display = "block";
+      channelLoader.style.display = "none";
+      function attemptPlayNoiseSound(retries = 3, delay = 500) {
+        noiseSound.pause();
+        noiseSound.currentTime = 0;
+        noiseSound.load();
+        noiseSound.play().then(() => {
+          console.log("Noise sound playing successfully");
+        }).catch(err => {
+          console.error("Noise sound play error:", err.message);
+          if (retries > 0) {
+            console.log(`Retrying noise sound playback, attempts left: ${retries}`);
+            setTimeout(() => attemptPlayNoiseSound(retries - 1, delay), delay);
+          } else {
+            console.error("Failed to play noise sound after retries");
+          }
+        });
+      }
+      attemptPlayNoiseSound();
+      showPlayButton();
     }
 
     function hideErrorVisual() {
@@ -720,70 +675,12 @@
 
     function showChannelLoader() {
       console.log("Showing channel loader");
-      requestAnimationFrame(() => {
-        channelLoader.style.display = "flex";
-      });
+      channelLoader.style.display = "flex";
     }
 
     function hideChannelLoader() {
       console.log("Hiding channel loader");
-      requestAnimationFrame(() => {
-        channelLoader.style.display = "none";
-      });
-    }
-
-    function attemptPlayNoiseSound(retries = 3, delay = 500) {
-      noiseSound.pause();
-      noiseSound.currentTime = 0;
-      noiseSound.load();
-      noiseSound.play().then(() => {
-        console.log("Noise sound playing successfully");
-      }).catch(err => {
-        console.error("Noise sound play error:", err.message);
-        if (retries > 0) {
-          console.log(`Retrying noise sound playback, attempts left: ${retries}`);
-          setTimeout(() => attemptPlayNoiseSound(retries - 1, delay), delay);
-        } else {
-          console.error("Failed to play noise sound after retries");
-        }
-      });
-    }
-
-    function showMXPlayerError() {
-      console.log("Showing MX Player error box");
-      video.style.display = "none";
-      video.style.background = "black";
-      staticNoise.style.opacity = "0";
-      staticNoise.style.display = "none";
-      errorBox.style.display = "none";
-      mxPlayerErrorBox.style.display = "block";
       channelLoader.style.display = "none";
-      noiseSound.pause();
-      noiseSound.currentTime = 0;
-      selectedButtonIndex = 0;
-      updateButtonFocus();
-    }
-
-    function hideMXPlayerError() {
-      console.log("Hiding MX Player error box");
-      mxPlayerErrorBox.style.display = "none";
-      video.style.display = "block";
-    }
-
-    function updateButtonFocus() {
-      openMXPlayerButton.classList.toggle('focus', selectedButtonIndex === 0);
-      cancelMXPlayerButton.classList.toggle('focus', selectedButtonIndex === 1);
-      if (selectedButtonIndex === 0) {
-        openMXPlayerButton.focus();
-      } else {
-        cancelMXPlayerButton.focus();
-      }
-    }
-
-    function checkNetworkStability(url) {
-      return fetch(url, { method: 'HEAD', timeout: 2000 })
-        .then(response => response.ok)
-        .catch(() => false);
     }
 
     setTimeout(() => {
@@ -791,22 +688,20 @@
         const div = document.createElement("div");
         div.className = "channel";
         div.innerText = ch.name;
-        div.onclick = () => debounceChannelChange(i, hasManuallyPlayed);
+        div.onclick = () => loadChannel(i, hasManuallyPlayed);
         list.appendChild(div);
       });
     }, 0);
 
     function updateUI() {
-      requestAnimationFrame(() => {
-        document.querySelectorAll('.channel').forEach((el, i) => {
-          el.classList.toggle('active', i === currentIndex);
-          if (i === currentIndex && listVisible) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
-        });
-        if (listVisible) {
-          clearTimeout(listTimeout);
-          listTimeout = setTimeout(hideChannelList, 7000);
-        }
+      document.querySelectorAll('.channel').forEach((el, i) => {
+        el.classList.toggle('active', i === currentIndex);
+        if (i === currentIndex && listVisible) el.scrollIntoView({ block: "nearest" });
       });
+      if (listVisible) {
+        clearTimeout(listTimeout);
+        listTimeout = setTimeout(hideChannelList, 7000);
+      }
     }
 
     function showOverlay(text) {
@@ -843,65 +738,33 @@
       }
     }
 
-    function prefetchChannels(currentIndex) {
-      const prevIndex = (currentIndex - 1 + channels.length) % channels.length;
-      const nextIndex = (currentIndex + 1) % channels.length;
-
-      [prevIndex, nextIndex].forEach(index => {
-        const url = channels[index].url;
-        if (isM3U8(url)) {
-          const prefetchHls = new Hls();
-          prefetchHls.loadSource(url);
-          prefetchHls.on(Hls.Events.ERROR, (_, data) => {
-            console.warn(`Prefetch error for ${channels[index].name}:`, data);
-          });
-          console.log(`Preloading HLS manifest for ${channels[index].name}`);
-        } else if (isMPD(url) && typeof shaka !== 'undefined') {
-          const prefetchShaka = new shaka.Player();
-          prefetchShaka.load(url).catch(err => {
-            console.warn(`Prefetch error for ${channels[index].name}:`, err);
-          });
-          console.log(`Preloading MPD manifest for ${channels[index].name}`);
-        }
-      });
-    }
-
     async function loadVideo(url, autoPlay, channelName) {
-      console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}, Retry: ${retryCount}/${maxRetries}`);
+      console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}`);
       showChannelLoader();
-
-      if (currentRequest) {
-        currentRequest.abort();
-      }
-
       if (hls) {
-        hls.stopLoad();
-        hls.detachMedia();
+        hls.destroy();
+        hls = null;
       }
       if (shakaPlayer) {
-        await shakaPlayer.unload();
+        await shakaPlayer.destroy();
+        shakaPlayer = null;
       }
-
-      const controller = new AbortController();
-      currentRequest = controller;
-
       if (isM3U8(url)) {
         if (typeof Hls !== 'undefined' && Hls.isSupported()) {
           console.log(`HLS supported, initializing Hls.js for ${channelName}`);
           hls = new Hls({
-            debug: true, // Enabled debug for troubleshooting
+            debug: false,
             enableWorker: true,
             lowLatencyMode: true,
-            liveSyncDurationCount: 2,
-            liveMaxLatencyDurationCount: 4,
-            maxBufferLength: 10,
-            backBufferLength: 15,
+            backBufferLength: 30,
+            liveSyncDurationCount: 3,
+            liveMaxLatencyDurationCount: 6,
+            maxBufferLength: 15,
             startLevel: -1,
-            abrEwmaFastLive: 2.0,
-            abrEwmaSlowLive: 5.0,
+            abrEwmaFastLive: 3.0,
+            abrEwmaSlowLive: 8.0,
             xhrSetup: function(xhr) {
               xhr.withCredentials = false;
-              xhr.signal = controller.signal;
             }
           });
           hls.loadSource(url);
@@ -909,27 +772,33 @@
           hls.on(Hls.Events.MANIFEST_PARSED, () => {
             console.log(`HLS manifest parsed for ${channelName}`);
             hideChannelLoader();
-            retryCount = 0;
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
-                if (err.name === 'AbortError') return;
                 console.error(`HLS play error for ${channelName}:`, err);
-                handleError(url, autoPlay, channelName);
+                showErrorVisual();
+                showPlayButton();
               });
             } else {
               showPlayButton();
             }
-            prefetchChannels(currentIndex);
+            const nextIndex = (currentIndex + 1) % channels.length;
+            if (isM3U8(channels[nextIndex].url)) {
+              const prefetchHls = new Hls();
+              prefetchHls.loadSource(channels[nextIndex].url);
+              console.log(`Preloading manifest for ${channels[nextIndex].name}`);
+            }
           });
           hls.on(Hls.Events.ERROR, (_, data) => {
-            if (data.fatal && (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR || (data.response && [404, 403].includes(data.response.status)))) {
-              console.log(`Critical HLS error detected: ${data.details}`);
-              handleError(url, autoPlay, channelName);
-            } else if (data.fatal) {
-              console.log(`Fatal HLS error, retrying (${retryCount + 1}/${maxRetries})`);
-              handleError(url, autoPlay, channelName);
-            } else {
-              console.log(`Non-fatal HLS error, ignoring: ${data.type}, ${data.details}`);
+            console.error(`HLS error for ${channelName}:`, data);
+            if (data.fatal) {
+              console.log(`Falling back to native video for ${channelName}`);
+              video.src = url;
+              video.play().catch(err => {
+                console.error(`Native video play error for ${channelName}:`, err);
+                hideChannelLoader();
+                showErrorVisual();
+                showPlayButton();
+              });
             }
           });
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
@@ -938,21 +807,27 @@
           video.onloadeddata = () => {
             console.log(`Native video data loaded for ${channelName}`);
             hideChannelLoader();
-            retryCount = 0;
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
-                if (err.name === 'AbortError') return;
                 console.error(`Native video play error for ${channelName}:`, err);
-                handleError(url, autoPlay, channelName);
+                showErrorVisual();
+                showPlayButton();
               });
             } else {
               showPlayButton();
             }
           };
-          video.onerror = () => handleVideoError(url, autoPlay, channelName);
+          video.onerror = () => {
+            console.error(`Native video error for ${channelName}`);
+            hideChannelLoader();
+            showErrorVisual();
+            showPlayButton();
+          };
         } else {
           console.error(`HLS not supported for ${channelName}`);
-          handleError(url, autoPlay, channelName);
+          hideChannelLoader();
+          showErrorVisual();
+          showPlayButton();
         }
       } else if (isMPD(url)) {
         if (typeof shaka !== 'undefined') {
@@ -960,9 +835,9 @@
           shakaPlayer = new shaka.Player(video);
           shakaPlayer.configure({
             streaming: {
-              bufferingGoal: 10,
-              rebufferingGoal: 1,
-              bufferBehind: 15,
+              bufferingGoal: 15,
+              rebufferingGoal: 2,
+              bufferBehind: 30,
               lowLatencyMode: true
             }
           });
@@ -970,24 +845,26 @@
             await shakaPlayer.load(url);
             console.log(`MPEG-DASH loaded for ${channelName}`);
             hideChannelLoader();
-            retryCount = 0;
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
-                if (err.name === 'AbortError') return;
                 console.error(`MPEG-DASH play error for ${channelName}:`, err);
-                handleError(url, autoPlay, channelName);
+                showErrorVisual();
+                showPlayButton();
               });
             } else {
               showPlayButton();
             }
           } catch (e) {
-            if (e.name === 'AbortError') return;
             console.error(`Error loading MPEG-DASH for ${channelName}:`, e);
-            handleError(url, autoPlay, channelName);
+            hideChannelLoader();
+            showErrorVisual();
+            showPlayButton();
           }
         } else {
           console.error(`Shaka Player not available for ${channelName}`);
-          handleError(url, autoPlay, channelName);
+          hideChannelLoader();
+          showErrorVisual();
+          showPlayButton();
         }
       } else {
         console.log(`Using direct video source for ${channelName}`);
@@ -995,146 +872,52 @@
         video.onloadeddata = () => {
           console.log(`Video data loaded for ${channelName}`);
           hideChannelLoader();
-          retryCount = 0;
           if (autoPlay && hasManuallyPlayed) {
             video.play().catch(err => {
-              if (err.name === 'AbortError') return;
               console.error(`Direct video play error for ${channelName}:`, err);
-              handleError(url, autoPlay, channelName);
+              showPlayButton();
             });
           } else {
             showPlayButton();
           }
         };
-        video.onerror = () => handleVideoError(url, autoPlay, channelName);
-      }
-      return Promise.resolve();
-    }
-
-    function handleError(url, autoPlay, channelName) {
-      if (retryCount < maxRetries) {
-        retryCount++;
-        console.log(`Retrying (${retryCount}/${maxRetries}) for ${channelName}`);
-        setTimeout(() => loadVideo(url, autoPlay, channelName), 1000);
-      } else {
-        console.log(`Channel ${channelName} offline after ${maxRetries} retries`);
-        hideChannelLoader();
-        fetch(url, { method: 'HEAD' })
-          .then(response => {
-            if (response.ok) {
-              console.log(`Channel ${channelName} is accessible but not playable, showing MX Player option`);
-              showMXPlayerError();
-            } else {
-              console.log(`Channel offline, status: ${response.status}`);
-              showErrorVisual();
-            }
-          })
-          .catch(() => {
-            showErrorVisual();
-          });
-        showPlayButton();
+        video.onerror = () => {
+          console.error(`Direct video error for ${channelName}`);
+          hideChannelLoader();
+          showErrorVisual();
+          showPlayButton();
+        };
       }
     }
 
-    function handleVideoError(url, autoPlay, channelName) {
-      if (isChannelSwitching) {
-        console.log("Ignoring video error during channel switch");
+    function loadChannel(index, autoPlay = false) {
+      if (!navigator.onLine) {
+        console.log("No internet connection, showing network error");
+        document.getElementById("loadingScreen").style.display = "flex";
+        document.getElementById("loadingScreen").classList.remove("hidden");
+        document.getElementById("networkErrorBox").style.display = "block";
+        document.getElementById("container").style.display = "none";
+        document.getElementById("azinLogo").style.display = "none";
+        document.getElementById("greetingScreen").style.display = "none";
+        channelLoader.style.display = "none";
         return;
-      }
-      console.error(`Video error for ${channelName}`);
-      fetch(url, { method: 'HEAD', signal: currentRequest ? currentRequest.signal : null })
-        .then(response => {
-          if (response.ok) {
-            console.log(`Channel ${channelName} is accessible but not playable, showing MX Player option`);
-            showMXPlayerError();
-          } else if ([404, 403].includes(response.status)) {
-            console.log(`Channel offline, status: ${response.status}`);
-            handleError(url, autoPlay, channelName);
-          } else if (retryCount < maxRetries) {
-            retryCount++;
-            console.log(`Retrying due to non-critical error, retry: ${retryCount}/${maxRetries}`);
-            setTimeout(() => loadVideo(url, autoPlay, channelName), 1000);
-          } else {
-            handleError(url, autoPlay, channelName);
-          }
-        })
-        .catch(err => {
-          if (err.name === 'AbortError') return;
-          handleError(url, autoPlay, channelName);
-        });
-    }
-
-    function setupMXPlayerButtons() {
-      openMXPlayerButton.addEventListener('click', () => {
-        console.log("Attempting to open channel in MX Player");
-        const url = channels[currentIndex].url;
-        // Primary intent format for MX Player
-        const intentUrl = `intent://${encodeURIComponent(url)}#Intent;package=com.mxtech.videoplayer.ad;action=android.intent.action.VIEW;type=video/*;end`;
-        // Alternative intent format
-        const altIntentUrl = `intent://${encodeURIComponent(url)}#Intent;package=com.mxtech.videoplayer.pro;action=android.intent.action.VIEW;type=video/*;end`;
-        try {
-          console.log(`Trying primary MX Player intent: ${intentUrl}`);
-          window.location.href = intentUrl;
-          // Fallback to alternative intent after a short delay
-          setTimeout(() => {
-            console.log("Checking if primary intent succeeded");
-            // If still here, try alternative intent
-            console.log(`Trying alternative MX Player intent: ${altIntentUrl}`);
-            window.location.href = altIntentUrl;
-            // Final fallback to next channel
-            setTimeout(() => {
-              console.log("MX Player launch failed, moving to next channel");
-              showOverlay("MX Player not installed or failed to open");
-              hideMXPlayerError();
-              debounceChannelChange((currentIndex + 1) % channels.length, hasManuallyPlayed);
-            }, 2000);
-          }, 2000);
-        } catch (err) {
-          console.error("Error launching MX Player:", err);
-          showOverlay("Failed to open MX Player");
-          hideMXPlayerError();
-          debounceChannelChange((currentIndex + 1) % channels.length, hasManuallyPlayed);
-        }
-      });
-
-      cancelMXPlayerButton.addEventListener('click', () => {
-        console.log("MX Player option cancelled, moving to next channel");
-        hideMXPlayerError();
-        debounceChannelChange((currentIndex + 1) % channels.length, hasManuallyPlayed);
-      });
-    }
-
-    function debounceChannelChange(index, autoPlay) {
-      if (isChannelSwitching) {
-        console.log("Channel switch in progress, ignoring request");
-        return;
-      }
-      isChannelSwitching = true;
-      loadChannel(index, autoPlay).finally(() => {
-        isChannelSwitching = false;
-      });
-    }
-
-    async function loadChannel(index, autoPlay = false) {
-      if (!navigator.onLine || !(await checkNetworkStability(channels[index].url))) {
-        console.log("Network unstable or channel unavailable");
-        showErrorVisual();
-        return Promise.resolve();
       }
       console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
       currentIndex = index;
       playingIndex = index;
-      retryCount = 0;
       hideErrorVisual();
-      hideMXPlayerError();
-      prefetchChannels(index);
-      return loadVideo(channels[index].url, autoPlay, channels[index].name).finally(() => {
-        video.muted = false;
-        updateUI();
-        hideChannelList();
-        showOverlay(String(index + 1));
+      loadVideo(channels[index].url, autoPlay, channels[index].name);
+      video.muted = false;
+      updateUI();
+      hideChannelList();
+      showOverlay(String(index + 1));
+      if (index === 0) {
+        playButton.style.display = 'flex';
+        playButton.classList.remove('playing');
+        playButton.classList.remove('fade-out');
+      } else {
         showPlayButton();
-      });
+      }
     }
 
     function showChannelList() {
@@ -1159,51 +942,37 @@
     }
 
     function changeChannel(direction) {
-      const newIndex = direction === "up" ? (currentIndex - 1 + channels.length) % channels.length : (currentIndex + 1) % channels.length;
-      console.log(`Changing channel to index ${newIndex}`);
-      listVisible ? updateUI() : debounceChannelChange(newIndex, hasManuallyPlayed);
+      currentIndex = direction === "up" ? (currentIndex - 1 + channels.length) % channels.length : (currentIndex + 1) % channels.length;
+      console.log(`Changing channel to index ${currentIndex}`);
+      listVisible ? updateUI() : loadChannel(currentIndex, hasManuallyPlayed);
     }
 
     document.addEventListener('keydown', e => {
       const key = e.key, code = e.keyCode;
       console.log(`Key pressed: ${key} (code: ${code})`);
 
-      if (mxPlayerErrorBox.style.display === 'block') {
-        if (key === 'ArrowLeft' || key === 'ArrowRight') {
-          selectedButtonIndex = (selectedButtonIndex + 1) % 2;
-          updateButtonFocus();
-          e.preventDefault();
-          return;
-        } else if (key === 'Enter' || code === 13) {
-          if (selectedButtonIndex === 0) {
-            openMXPlayerButton.click();
-          } else {
-            cancelMXPlayerButton.click();
-          }
-          e.preventDefault();
-          return;
-        }
-      }
-
+      // Handle numeric input for direct channel selection
       if (key >= "0" && key <= "9") {
         numberInput += key;
         showOverlay(numberInput);
         clearTimeout(numberTimeout);
         numberTimeout = setTimeout(() => {
           const num = parseInt(numberInput, 10);
-          if (num >= 1 && num <= channels.length) debounceChannelChange(num - 1, hasManuallyPlayed);
+          if (num >= 1 && num <= channels.length) loadChannel(num - 1, hasManuallyPlayed);
           numberInput = "";
         }, 2000);
         e.preventDefault();
         return;
       }
 
+      // Handle Enter/OK key for multiple scenarios
       if (["Enter", "OK", "Accept", "SoftRight"].includes(key) || code === 13) {
+        // Scenario 1: Confirm numeric channel input
         if (numberInput.length > 0) {
           console.log("OK pressed, confirming channel number:", numberInput);
           const num = parseInt(numberInput, 10);
           if (num >= 1 && num <= channels.length) {
-            debounceChannelChange(num - 1, hasManuallyPlayed);
+            loadChannel(num - 1, hasManuallyPlayed);
           }
           numberInput = "";
           clearTimeout(numberTimeout);
@@ -1211,33 +980,21 @@
           e.preventDefault();
           return;
         }
+        // Scenario 2: Select channel from list when visible
         if (listVisible) {
           console.log("OK pressed, changing channel to index:", currentIndex);
-          debounceChannelChange(currentIndex, hasManuallyPlayed);
+          loadChannel(currentIndex, hasManuallyPlayed);
           e.preventDefault();
           return;
         }
+        // Scenario 3: Toggle play/pause when list is not visible
         if (!listVisible) {
           if (video.paused || video.ended) {
             console.log("OK pressed, playing video");
             hasManuallyPlayed = true;
             video.play().catch(err => {
               console.error("Play error:", err);
-              if (retryCount < maxRetries) {
-                retryCount++;
-                setTimeout(() => debounceChannelChange(currentIndex, hasManuallyPlayed), 1000);
-              } else {
-                fetch(channels[currentIndex].url, { method: 'HEAD' })
-                  .then(response => {
-                    if ([404, 403].includes(response.status)) {
-                      console.log(`Channel offline, status: ${response.status}`);
-                      showErrorVisual();
-                    }
-                  })
-                  .catch(() => {
-                    showErrorVisual();
-                  });
-              }
+              showErrorVisual();
             });
           } else {
             console.log("OK pressed, pausing video");
@@ -1249,12 +1006,14 @@
         }
       }
 
+      // Toggle channel list visibility with left/right arrows
       if (["ArrowLeft", "ArrowRight"].includes(key)) {
         changeChannelList();
         e.preventDefault();
         return;
       }
 
+      // Navigate channel list when visible
       if (listVisible) {
         if (key === "ArrowUp" || key === "PageUp" || key === "ChannelUp" || code === 33) {
           currentIndex = (currentIndex - 1 + channels.length) % channels.length;
@@ -1269,6 +1028,7 @@
           return;
         }
       } else {
+        // Change channel directly when list is not visible
         if (["ArrowUp", "ChannelUp"].includes(key) || code === 33) {
           changeChannel("down");
           e.preventDefault();
@@ -1281,27 +1041,14 @@
         }
       }
 
+      // Handle play/pause with MediaPlayPause or spacebar
       if (["MediaPlayPause", " "].includes(key)) {
         if (video.paused) {
           console.log("Attempting to play video via MediaPlayPause");
           hasManuallyPlayed = true;
           video.play().catch(err => {
             console.error("Play error:", err);
-            if (retryCount < maxRetries) {
-              retryCount++;
-              setTimeout(() => debounceChannelChange(currentIndex, hasManuallyPlayed), 1000);
-            } else {
-              fetch(channels[currentIndex].url, { method: 'HEAD' })
-                .then(response => {
-                  if ([404, 403].includes(response.status)) {
-                    console.log(`Channel offline, status: ${response.status}`);
-                    showErrorVisual();
-                  }
-                })
-                .catch(() => {
-                  showErrorVisual();
-                });
-            }
+            showErrorVisual();
           });
           showPlayButton();
         } else {
@@ -1316,8 +1063,6 @@
     video.addEventListener('playing', () => {
       console.log("Video is playing");
       hideChannelLoader();
-      hideErrorVisual();
-      hideMXPlayerError();
       showPlayButton();
     });
     video.addEventListener('pause', () => {
@@ -1325,18 +1070,11 @@
       showPlayButton();
     });
     video.addEventListener('error', () => {
-      console.log("Video element error detected");
-      if (isChannelSwitching) {
-        console.log("Ignoring video error during channel switch");
-        return;
-      }
-      handleVideoError(channels[currentIndex].url, hasManuallyPlayed, channels[currentIndex].name);
+      console.log("Video element error");
+      hideChannelLoader();
+      showPlayButton();
     });
     video.addEventListener('waiting', () => {
-      if (isChannelSwitching) {
-        console.log("Ignoring buffering during channel switch");
-        return;
-      }
       console.log("Video is buffering");
       showChannelLoader();
     });
@@ -1348,7 +1086,6 @@
       console.error("Shaka Player is not supported");
     }
 
-    setupMXPlayerButtons();
     initializeApp();
   </script>
 </body>
