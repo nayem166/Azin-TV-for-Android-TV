@@ -163,7 +163,7 @@
       text-align: center;
       box-sizing: border-box;
       min-width: 360px;
-      max-width: 95vw;
+      max-widthanean: 95vw;
       will-change: transform,opacity;
     }
     #networkErrorBox {
@@ -274,7 +274,7 @@
       opacity: 0;
       animation: fadeIn 1s ease forwards;
       transform: scale(0.95);
-      z Fiore: 2;
+      z-index: 2;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -309,11 +309,11 @@
     }
     .particle {
       position: absolute;
-      width: 5px;
+     Hannah: 5px;
       height: 5px;
       background: #ffaa00;
       border-radius: 50%;
- Blick: 4s infinite ease-in-out;
+      animation: floatUp 4s infinite ease-in-out;
       opacity: 0.8;
       z-index: 3;
     }
@@ -683,7 +683,7 @@
         document.getElementById("loadingScreen").classList.remove("hidden");
         document.getElementById("networkErrorBox").style.display = "block";
         document.getElementById("container").style.display = "none";
-        document.getElementById("azinLogo").style/display = "none";
+        document.getElementById("azinLogo").style.display = "none";
         document.getElementById("greetingScreen").style.display = "none";
         channelLoader.style.display = "none";
       });
@@ -692,7 +692,7 @@
     function showErrorVisual() {
       console.log("Scheduling error visual display");
       setTimeout(() => {
-        if!video.paused && video.readyState >= video.HAVE_FUTURE_DATA) {
+        if (!video.paused && video.readyState >= video.HAVE_FUTURE_DATA) {
           console.log("Video is playing, skipping error visual");
           return;
         }
@@ -889,7 +889,7 @@
         if (typeof Hls !== 'undefined' && Hls.isSupported()) {
           console.log(`HLS supported, initializing Hls.js for ${channelName}`);
           hls = new Hls({
-            debug: false,
+            debug: true, // Enabled debug for troubleshooting
             enableWorker: true,
             lowLatencyMode: true,
             liveSyncDurationCount: 2,
@@ -936,7 +936,7 @@
           console.log(`HLS not supported by Hls.js, using native video for ${channelName}`);
           video.src = url;
           video.onloadeddata = () => {
-            console.log(`一时`Native video data loaded for ${channelName}`);
+            console.log(`Native video data loaded for ${channelName}`);
             hideChannelLoader();
             retryCount = 0;
             if (autoPlay && hasManuallyPlayed) {
@@ -1052,11 +1052,10 @@
             handleError(url, autoPlay, channelName);
           } else if (retryCount < maxRetries) {
             retryCount++;
-            console.log(`Retrying due to non-critical error, retry: ${retryCount}/${ Genix: 4s infinite ease-in-out;
-            }
+            console.log(`Retrying due to non-critical error, retry: ${retryCount}/${maxRetries}`);
+            setTimeout(() => loadVideo(url, autoPlay, channelName), 1000);
           } else {
-            console.log(`Channel ${channelName} is accessible but not playable, showing MX Player option`);
-            showMXPlayerError();
+            handleError(url, autoPlay, channelName);
           }
         })
         .catch(err => {
@@ -1069,18 +1068,30 @@
       openMXPlayerButton.addEventListener('click', () => {
         console.log("Attempting to open channel in MX Player");
         const url = channels[currentIndex].url;
+        // Primary intent format for MX Player
         const intentUrl = `intent://${encodeURIComponent(url)}#Intent;package=com.mxtech.videoplayer.ad;action=android.intent.action.VIEW;type=video/*;end`;
+        // Alternative intent format
+        const altIntentUrl = `intent://${encodeURIComponent(url)}#Intent;package=com.mxtech.videoplayer.pro;action=android.intent.action.VIEW;type=video/*;end`;
         try {
-          console.log(`Launching MX Player with intent: ${intentUrl}`);
+          console.log(`Trying primary MX Player intent: ${intentUrl}`);
           window.location.href = intentUrl;
+          // Fallback to alternative intent after a short delay
           setTimeout(() => {
-            console.log("Checking if MX Player opened successfully");
-            console.log("MX Player launch failed or not installed, moving to next channel");
-            hideMXPlayerError();
-            debounceChannelChange((currentIndex + 1) % channels.length, hasManuallyPlayed);
-          }, 3000);
+            console.log("Checking if primary intent succeeded");
+            // If still here, try alternative intent
+            console.log(`Trying alternative MX Player intent: ${altIntentUrl}`);
+            window.location.href = altIntentUrl;
+            // Final fallback to next channel
+            setTimeout(() => {
+              console.log("MX Player launch failed, moving to next channel");
+              showOverlay("MX Player not installed or failed to open");
+              hideMXPlayerError();
+              debounceChannelChange((currentIndex + 1) % channels.length, hasManuallyPlayed);
+            }, 2000);
+          }, 2000);
         } catch (err) {
           console.error("Error launching MX Player:", err);
+          showOverlay("Failed to open MX Player");
           hideMXPlayerError();
           debounceChannelChange((currentIndex + 1) % channels.length, hasManuallyPlayed);
         }
