@@ -132,7 +132,7 @@
       color: #fff;
       transition: opacity .4s ease;
       will-change: opacity;
-    rinunciare
+    }
     #azinLogo {
       position: absolute;
       top: 20px;
@@ -165,43 +165,6 @@
       min-width: 360px;
       max-width: 95vw;
       will-change: transform,opacity;
-    }
-    #corsErrorBox {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%,-50%);
-      background: #000;
-      color: #fff;
-      padding: 40px 60px;
-      font-size: 28px;
-      border: 4px solid #fff;
-      border-radius: 16px;
-      z-index: 100;
-      display: none;
-      text-align: center;
-      box-sizing: border-box;
-      min-width: 360px;
-      max-width: 95vw;
-      will-change: transform,opacity;
-    }
-    #corsErrorBox .button-container {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-    }
-    #corsErrorBox button {
-      background: none;
-      border: 2px solid #fff;
-      color: #fff;
-      padding: 10px 20px;
-      font-size: 20px;
-      cursor: pointer;
-      border-radius: 8px;
-      transition: background-color 0.3s ease;
-    }
-    #corsErrorBox button:hover, #corsErrorBox button:focus {
-      background-color: #4a90e2; /* হালকা নীল */
     }
     #networkErrorBox {
       position: absolute;
@@ -471,13 +434,6 @@
     <div id="playButton" tabindex="0"></div>
     <div id="channelNumberOverlay"></div>
     <div id="errorBox">This channel is currently offline.</div>
-    <div id="corsErrorBox">
-      This channel cannot be played in this player.
-      <div class="button-container">
-        <button id="useMXPlayer">Use MX Player</button>
-        <button id="cancelCorsError">Cancel</button>
-      </div>
-    </div>
   </div>
   <img id="azinLogo" src="https://i.postimg.cc/65q6CC2P/file-00000000201c61f6b67764f95c3588ed.png" alt="Azin TV Logo">
   <div id="incompatibleBox">Sorry, only Android TVs are supported for this app</div>
@@ -517,7 +473,6 @@
           list = document.getElementById("channelList"),
           overlay = document.getElementById("channelNumberOverlay"),
           errorBox = document.getElementById("errorBox"),
-          corsErrorBox = document.getElementById("corsErrorBox"),
           networkErrorBox = document.getElementById("networkErrorBox"),
           staticNoise = document.getElementById("staticNoise"),
           noiseSound = document.getElementById("noiseSound"),
@@ -696,28 +651,6 @@
       noiseSound.currentTime = 0;
     }
 
-    function showCorsErrorBox(url) {
-      console.log("Showing CORS error box");
-      video.style.display = "none";
-      channelLoader.style.display = "none";
-      corsErrorBox.style.display = "block";
-      document.getElementById("useMXPlayer").onclick = () => openInMXPlayer(url);
-      document.getElementById("cancelCorsError").onclick = hideCorsErrorBox;
-    }
-
-    function hideCorsErrorBox() {
-      console.log("Hiding CORS error box");
-      corsErrorBox.style.display = "none";
-      showPlayButton();
-    }
-
-    function openInMXPlayer(url) {
-      console.log(`Opening URL in MX Player: ${url}`);
-      const mxPlayerIntent = `mxplayer://play?url=${encodeURIComponent(url)}`;
-      window.location.href = mxPlayerIntent;
-      setTimeout(hideCorsErrorBox, 2000); // ফলব্যাক হিসেবে বক্স বন্ধ করা
-    }
-
     function showChannelLoader() {
       console.log("Showing channel loader");
       channelLoader.style.display = "flex";
@@ -803,34 +736,6 @@
     async function loadVideo(url, autoPlay, channelName) {
       console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}, Retry: ${retryCount}/${maxRetries}`);
       showChannelLoader();
-      hideErrorVisual();
-      hideCorsErrorBox();
-
-      // প্রাথমিকভাবে URL চেক করা
-      try {
-        const response = await fetch(url, { method: 'HEAD', mode: 'cors' });
-        if (!response.ok && [404, 403].includes(response.status)) {
-          console.log(`Channel offline, status: ${response.status}`);
-          if (retryCount < maxRetries) {
-            retryCount++;
-            setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
-            return;
-          } else {
-            hideChannelLoader();
-            showErrorVisual();
-            showPlayButton();
-            return;
-          }
-        }
-      } catch (err) {
-        if (err.message.includes("CORS") || err.message.includes("cross-origin")) {
-          console.log(`CORS error detected for ${channelName}`);
-          hideChannelLoader();
-          showCorsErrorBox(url);
-          return;
-        }
-      }
-
       if (hls) {
         hls.destroy();
         hls = null;
@@ -866,10 +771,7 @@
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`HLS play error for ${channelName}:`, err);
-                if (err.message.includes("CORS") || err.message.includes("cross-origin")) {
-                  console.log(`CORS error detected during playback for ${channelName}`);
-                  showCorsErrorBox(url);
-                } else if (retryCount < maxRetries) {
+                if (retryCount < maxRetries) {
                   retryCount++;
                   setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
                 } else {
@@ -892,7 +794,7 @@
           });
           hls.on(Hls.Events.ERROR, (_, data) => {
             console.error(`HLS Error: Type=${data.type}, Details=${data.details}, Fatal=${data.fatal}, Response=${data.response ? data.response.status : 'N/A'}, VideoState=${video.readyState}, Network=${navigator.onLine}`);
-            if (data.fatal && (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR || (data.response && [404].includes(data.response.status)))) {
+            if (data.fatal && (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR || (data.response && [404, 403].includes(data.response.status)))) {
               console.log(`Critical HLS error detected, channel likely offline: ${data.details}`);
               if (retryCount < maxRetries) {
                 retryCount++;
@@ -902,10 +804,6 @@
                 showErrorVisual();
                 showPlayButton();
               }
-            } else if (data.fatal && (data.response && data.response.status === 403)) {
-              console.log(`CORS or access error detected for ${channelName}`);
-              hideChannelLoader();
-              showCorsErrorBox(url);
             } else if (data.fatal) {
               console.log(`Fatal HLS error, retrying (${retryCount + 1}/${maxRetries})`);
               if (retryCount < maxRetries) {
@@ -916,10 +814,7 @@
                 video.src = url;
                 video.play().catch(err => {
                   console.error(`Native video play error for ${channelName}:`, err);
-                  if (err.message.includes("CORS") || err.message.includes("cross-origin")) {
-                    console.log(`CORS error detected during native playback for ${channelName}`);
-                    showCorsErrorBox(url);
-                  } else if (retryCount < maxRetries) {
+                  if (retryCount < maxRetries) {
                     retryCount++;
                     setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
                   } else {
@@ -943,10 +838,7 @@
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`Native video play error for ${channelName}:`, err);
-                if (err.message.includes("CORS") || err.message.includes("cross-origin")) {
-                  console.log(`CORS error detected during native playback for ${channelName}`);
-                  showCorsErrorBox(url);
-                } else if (retryCount < maxRetries) {
+                if (retryCount < maxRetries) {
                   retryCount++;
                   setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
                 } else {
@@ -962,7 +854,7 @@
             console.error(`Native video error for ${channelName}`);
             fetch(url, { method: 'HEAD' })
               .then(response => {
-                if ([404].includes(response.status)) {
+                if ([404, 403].includes(response.status)) {
                   console.log(`Channel offline, status: ${response.status}`);
                   if (retryCount < maxRetries) {
                     retryCount++;
@@ -972,10 +864,6 @@
                     showErrorVisual();
                     showPlayButton();
                   }
-                } else if (response.status === 403) {
-                  console.log(`CORS or access error detected for ${channelName}`);
-                  hideChannelLoader();
-                  showCorsErrorBox(url);
                 } else {
                   console.log(`Retrying due to non-critical error, retry: ${retryCount + 1}/${maxRetries}`);
                   if (retryCount < maxRetries) {
@@ -984,12 +872,8 @@
                   }
                 }
               })
-              .catch(err => {
-                if (err.message.includes("CORS") || err.message.includes("cross-origin")) {
-                  console.log(`CORS error detected for ${channelName}`);
-                  hideChannelLoader();
-                  showCorsErrorBox(url);
-                } else if (retryCount < maxRetries) {
+              .catch(() => {
+                if (retryCount < maxRetries) {
                   retryCount++;
                   setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
                 } else {
@@ -1030,10 +914,7 @@
             if (autoPlay && hasManuallyPlayed) {
               video.play().catch(err => {
                 console.error(`MPEG-DASH play error for ${channelName}:`, err);
-                if (err.message.includes("CORS") || err.message.includes("cross-origin")) {
-                  console.log(`CORS error detected during MPEG-DASH playback for ${channelName}`);
-                  showCorsErrorBox(url);
-                } else if (retryCount < maxRetries) {
+                if (retryCount < maxRetries) {
                   retryCount++;
                   setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
                 } else {
@@ -1046,7 +927,7 @@
             }
           } catch (e) {
             console.error(`Error loading MPEG-DASH for ${channelName}:`, e);
-            if (e.code === shaka.util.Error.Code.HTTP_ERROR && [404].includes(e.data[1])) {
+            if (e.code === shaka.util.Error.Code.HTTP_ERROR && [404, 403].includes(e.data[1])) {
               console.log(`Channel offline, HTTP status: ${e.data[1]}`);
               if (retryCount < maxRetries) {
                 retryCount++;
@@ -1056,10 +937,6 @@
                 showErrorVisual();
                 showPlayButton();
               }
-            } else if (e.code === shaka.util.Error.Code.HTTP_ERROR && e.data[1] === 403) {
-              console.log(`CORS or access error detected for ${channelName}`);
-              hideChannelLoader();
-              showCorsErrorBox(url);
             } else {
               if (retryCount < maxRetries) {
                 retryCount++;
@@ -1092,10 +969,7 @@
           if (autoPlay && hasManuallyPlayed) {
             video.play().catch(err => {
               console.error(`Direct video play error for ${channelName}:`, err);
-              if (err.message.includes("CORS") || err.message.includes("cross-origin")) {
-                console.log(`CORS error detected during direct playback for ${channelName}`);
-                showCorsErrorBox(url);
-              } else if (retryCount < maxRetries) {
+              if (retryCount < maxRetries) {
                 retryCount++;
                 setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
               } else {
@@ -1111,7 +985,7 @@
           console.error(`Direct video error for ${channelName}`);
           fetch(url, { method: 'HEAD' })
             .then(response => {
-              if ([404].includes(response.status)) {
+              if ([404, 403].includes(response.status)) {
                 console.log(`Channel offline, status: ${response.status}`);
                 if (retryCount < maxRetries) {
                   retryCount++;
@@ -1121,10 +995,6 @@
                   showErrorVisual();
                   showPlayButton();
                 }
-              } else if (response.status === 403) {
-                console.log(`CORS or access error detected for ${channelName}`);
-                hideChannelLoader();
-                showCorsErrorBox(url);
               } else {
                 console.log(`Retrying due to non-critical error, retry: ${retryCount + 1}/${maxRetries}`);
                 if (retryCount < maxRetries) {
@@ -1133,12 +1003,8 @@
                 }
               }
             })
-            .catch(err => {
-              if (err.message.includes("CORS") || err.message.includes("cross-origin")) {
-                console.log(`CORS error detected for ${channelName}`);
-                hideChannelLoader();
-                showCorsErrorBox(url);
-              } else if (retryCount < maxRetries) {
+            .catch(() => {
+              if (retryCount < maxRetries) {
                 retryCount++;
                 setTimeout(() => loadVideo(url, autoPlay, channelName), 2000);
               } else {
@@ -1168,7 +1034,6 @@
       playingIndex = index;
       retryCount = 0;
       hideErrorVisual();
-      hideCorsErrorBox();
       loadVideo(channels[index].url, autoPlay, channels[index].name);
       video.muted = false;
       updateUI();
@@ -1252,30 +1117,19 @@
             hasManuallyPlayed = true;
             video.play().catch(err => {
               console.error("Play error:", err);
-              if (err.message.includes("CORS") || err.message.includes("cross-origin")) {
-                console.log(`CORS error detected during playback`);
-                showCorsErrorBox(channels[currentIndex].url);
-              } else if (retryCount < maxRetries) {
+              if (retryCount < maxRetries) {
                 retryCount++;
                 setTimeout(() => loadChannel(currentIndex, hasManuallyPlayed), 2000);
               } else {
                 fetch(channels[currentIndex].url, { method: 'HEAD' })
                   .then(response => {
-                    if ([404].includes(response.status)) {
+                    if ([404, 403].includes(response.status)) {
                       console.log(`Channel offline, status: ${response.status}`);
                       showErrorVisual();
-                    } else if (response.status === 403) {
-                      console.log(`CORS or access error detected`);
-                      showCorsErrorBox(channels[currentIndex].url);
                     }
                   })
-                  .catch(err => {
-                    if (err.message.includes("CORS") || err.message.includes("cross-origin")) {
-                      console.log(`CORS error detected`);
-                      showCorsErrorBox(channels[currentIndex].url);
-                    } else {
-                      showErrorVisual();
-                    }
+                  .catch(() => {
+                    showErrorVisual();
                   });
               }
             });
@@ -1327,30 +1181,19 @@
           hasManuallyPlayed = true;
           video.play().catch(err => {
             console.error("Play error:", err);
-            if (err.message.includes("CORS") || err.message.includes("cross-origin")) {
-              console.log(`CORS error detected during playback`);
-              showCorsErrorBox(channels[currentIndex].url);
-            } else if (retryCount < maxRetries) {
+            if (retryCount < maxRetries) {
               retryCount++;
               setTimeout(() => loadChannel(currentIndex, hasManuallyPlayed), 2000);
             } else {
               fetch(channels[currentIndex].url, { method: 'HEAD' })
                 .then(response => {
-                  if ([404].includes(response.status)) {
+                  if ([404, 403].includes(response.status)) {
                     console.log(`Channel offline, status: ${response.status}`);
                     showErrorVisual();
-                  } else if (response.status === 403) {
-                    console.log(`CORS or access error detected`);
-                    showCorsErrorBox(channels[currentIndex].url);
                   }
                 })
-                .catch(err => {
-                  if (err.message.includes("CORS") || err.message.includes("cross-origin")) {
-                    console.log(`CORS error detected`);
-                    showCorsErrorBox(channels[currentIndex].url);
-                  } else {
-                    showErrorVisual();
-                  }
+                .catch(() => {
+                  showErrorVisual();
                 });
             }
           });
@@ -1368,7 +1211,6 @@
       console.log("Video is playing");
       hideChannelLoader();
       hideErrorVisual();
-      hideCorsErrorBox();
       showPlayButton();
     });
     video.addEventListener('pause', () => {
@@ -1382,26 +1224,18 @@
           console.error("Persistent video error:", video.error.message);
           fetch(channels[currentIndex].url, { method: 'HEAD' })
             .then(response => {
-              if ([404].includes(response.status)) {
+              if ([404, 403].includes(response.status)) {
                 console.log(`Channel offline, status: ${response.status}`);
                 hideChannelLoader();
                 showErrorVisual();
                 showPlayButton();
-              } else if (response.status === 403) {
-                console.log(`CORS or access error detected`);
-                hideChannelLoader();
-                showCorsErrorBox(channels[currentIndex].url);
               } else if (retryCount < maxRetries) {
                 retryCount++;
                 setTimeout(() => loadChannel(currentIndex, hasManuallyPlayed), 2000);
               }
             })
-            .catch(err => {
-              if (err.message.includes("CORS") || err.message.includes("cross-origin")) {
-                console.log(`CORS error detected`);
-                hideChannelLoader();
-                showCorsErrorBox(channels[currentIndex].url);
-              } else if (retryCount < maxRetries) {
+            .catch(() => {
+              if (retryCount < maxRetries) {
                 retryCount++;
                 setTimeout(() => loadChannel(currentIndex, hasManuallyPlayed), 2000);
               } else {
