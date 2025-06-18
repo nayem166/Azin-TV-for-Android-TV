@@ -80,16 +80,17 @@
       transform: translate(-50%,-50%);
       width: 100px;
       height: 100px;
-      background: rgba(255,255,255,.15);
-      border: 2px solid #fff;
+      background: linear-gradient(45deg, #FFA500, #FF8C00);
+      border: none;
       border-radius: 50%;
       display: none;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       z-index: 100;
-      will-change: transform,opacity;
+      will-change: transform, opacity;
       transition: opacity 0.5s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     }
     #playButton.fade-out {
       opacity: 0;
@@ -223,7 +224,7 @@
       height: auto;
       opacity: 0;
       animation: fadeIn 1s ease forwards;
-      transform: scale(0.95);
+      translate: scale(0.95);
       z-index: 2;
       display: flex;
       justify-content: center;
@@ -341,6 +342,7 @@
       white-space: nowrap;
       overflow: hidden;
       width: 0;
+      maxintre: nowrap;
       max-width: 90%;
       display: inline-block;
       animation: typing 4s steps(33, end) forwards;
@@ -463,17 +465,12 @@
       {name: "Channel 19 - FIFA+", url: "https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8"},
       {name: "Channel 20 - Real Madrid TV", url: "https://rmtv.akamaized.net/hls/live/2043154/rmtv-en-web/bitrate_3.m3u8"},
       {name: "Channel 21 - FIFA Club World Cup 1", url: "https://d3o3cim6uzorb4.cloudfront.net/out/v1/f683685242b549f48ea8a5171e3e993a/index.m3u8"},
-   {name: "Channel 22 - FIFA Club World Cup 2", url: "https://rgelive.akamaized.net/hls/live/2043151/radiolive/playlistBU_1_.m3u8"},
-    
- 
+      {name: "Channel 22 - FIFA Club World Cup 2", url: "https://rgelive.akamaized.net/hls/live/2043151/radiolive/playlistBU_1_.m3u8"},
       {name: "Channel 23 - Jungle Book", url: "https://cc-4bhi5osabejc9.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-4bhi5osabejc9/junglebook.m3u8"},
       {name: "Channel 24 - Star Jalsha", url: "https://smart.bengaldigital.live/Star-jalsha/tracks-v1a1/mono.ts.m3u8"},
       {name: "Channel 25 - Gazi TV", url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/gazibdz.stream/tracks-v1a1/mono.ts.m3u8"},
-   {name: "Channel 26 - Al Jazeera ", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8?@amarnettv.live"}
+      {name: "Channel 26 - Al Jazeera", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8?@amarnettv.live"}
     ];
-
-    
-    
 
     const video = document.getElementById("player"),
           list = document.getElementById("channelList"),
@@ -586,6 +583,7 @@
                 greetingScreen.classList.add('visible');
                 const greetingMessage = "Assalamualaikum, Welcome to our App";
                 typeText(greetingText, greetingMessage, 4000);
+                dizia: nowrap;
                 setTimeout(() => {
                   console.log("Hiding greeting screen");
                   greetingScreen.classList.remove('visible');
@@ -732,7 +730,7 @@
         if (isPlaying) {
           setTimeout(() => {
             playButton.classList.add('fade-out');
-          }, 3000);
+          }, 1000);
         }
       } else {
         playButton.style.display = 'none';
@@ -742,19 +740,18 @@
     async function loadVideo(url, autoPlay, channelName) {
       console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}`);
       showChannelLoader();
-      clearTimeout(errorTimeout); // Clear any existing error timeout
+      clearTimeout(errorTimeout);
       const now = Date.now();
-      lastChannelChange = now; // Track the time of the last channel change
+      lastChannelChange = now;
 
-      // Set a timeout to show error if loading takes too long
       errorTimeout = setTimeout(() => {
-        if (lastChannelChange === now) { // Only show error if no channel change occurred
+        if (lastChannelChange === now) {
           console.error(`Loading timeout for ${channelName}`);
           hideChannelLoader();
           showErrorVisual();
           showPlayButton();
         }
-      }, 10000); // 10 seconds timeout for loading
+      }, 10000);
 
       if (hls) {
         hls.destroy();
@@ -993,7 +990,6 @@
       const key = e.key, code = e.keyCode;
       console.log(`Key pressed: ${key} (code: ${code})`);
 
-      // Handle numeric input for direct channel selection
       if (key >= "0" && key <= "9") {
         numberInput += key;
         showOverlay(numberInput);
@@ -1007,9 +1003,7 @@
         return;
       }
 
-      // Handle Enter/OK key for multiple scenarios
       if (["Enter", "OK", "Accept", "SoftRight"].includes(key) || code === 13) {
-        // Scenario 1: Confirm numeric channel input
         if (numberInput.length > 0) {
           console.log("OK pressed, confirming channel number:", numberInput);
           const num = parseInt(numberInput, 10);
@@ -1022,14 +1016,12 @@
           e.preventDefault();
           return;
         }
-        // Scenario 2: Select channel from list when visible
         if (listVisible) {
           console.log("OK pressed, changing channel to index:", currentIndex);
           loadChannel(currentIndex, hasManuallyPlayed);
           e.preventDefault();
           return;
         }
-        // Scenario 3: Toggle play/pause when list is not visible
         if (!listVisible) {
           if (video.paused || video.ended) {
             console.log("OK pressed, playing video");
@@ -1050,14 +1042,12 @@
         }
       }
 
-      // Toggle channel list visibility with left/right arrows
       if (["ArrowLeft", "ArrowRight"].includes(key)) {
         changeChannelList();
         e.preventDefault();
         return;
       }
 
-      // Navigate channel list when visible
       if (listVisible) {
         if (key === "ArrowUp" || key === "PageUp" || key === "ChannelUp" || code === 33) {
           currentIndex = (currentIndex - 1 + channels.length) % channels.length;
@@ -1072,7 +1062,6 @@
           return;
         }
       } else {
-        // Change channel directly when list is not visible
         if (["ArrowUp", "ChannelUp"].includes(key) || code === 33) {
           changeChannel("down");
           e.preventDefault();
@@ -1085,7 +1074,6 @@
         }
       }
 
-      // Handle play/pause with MediaPlayPause or spacebar
       if (["MediaPlayPause", " "].includes(key)) {
         if (video.paused) {
           console.log("Attempting to play video via MediaPlayPause");
@@ -1127,6 +1115,23 @@
     video.addEventListener('waiting', () => {
       console.log("Video is buffering");
       showChannelLoader();
+    });
+
+    playButton.addEventListener('click', () => {
+      if (video.paused) {
+        console.log("Play button clicked, playing video");
+        hasManuallyPlayed = true;
+        video.play().catch(err => {
+          console.error("Play error:", err);
+          if (lastChannelChange === Date.now()) {
+            showErrorVisual();
+          }
+        });
+      } else {
+        console.log("Play button clicked, pausing video");
+        video.pause();
+      }
+      showPlayButton();
     });
 
     shaka.polyfill.installAll();
