@@ -513,7 +513,7 @@
           channelLoader = document.getElementById("channelLoader"),
           qualitySelector = document.getElementById("qualitySelector"),
           qualitySelect = document.getElementById("qualitySelect");
-    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false, errorTimeout, lastChannelChange = 0;
+    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, qualitySelectorVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, qualityTimeout, hasManuallyPlayed = false, errorTimeout, lastChannelChange = 0;
 
     function typeText(element, text, duration) {
       console.log("Starting JavaScript typing animation");
@@ -671,6 +671,7 @@
       errorBox.style.display = "block";
       channelLoader.style.display = "none";
       qualitySelector.style.display = "none";
+      qualitySelectorVisible = false;
       function attemptPlayNoiseSound(retries = 3, delay = 500) {
         noiseSound.pause();
         noiseSound.currentTime = 0;
@@ -710,6 +711,20 @@
     function hideChannelLoader() {
       console.log("Hiding channel loader");
       channelLoader.style.display = "none";
+    }
+
+    function showQualitySelector() {
+      console.log("Showing quality selector");
+      qualitySelector.style.display = "block";
+      qualitySelectorVisible = true;
+      clearTimeout(qualityTimeout);
+      qualityTimeout = setTimeout(hideQualitySelector, 7000);
+    }
+
+    function hideQualitySelector() {
+      console.log("Hiding quality selector");
+      qualitySelector.style.display = "none";
+      qualitySelectorVisible = false;
     }
 
     setTimeout(() => {
@@ -781,6 +796,8 @@
             console.log(`Switched to manual quality level ${level}`);
           }
         }
+        clearTimeout(qualityTimeout);
+        qualityTimeout = setTimeout(hideQualitySelector, 7000);
       }
     });
 
@@ -788,6 +805,7 @@
       console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}`);
       showChannelLoader();
       qualitySelector.style.display = 'none';
+      qualitySelectorVisible = false;
       clearTimeout(errorTimeout);
       const now = Date.now();
       lastChannelChange = now;
@@ -863,7 +881,6 @@
               });
             }
             qualitySelect.selectedIndex = 0;
-            qualitySelector.style.display = 'block';
           });
           hls.on(Hls.Events.ERROR, (_, data) => {
             console.error(`HLS error for ${channelName}:`, data);
@@ -1001,6 +1018,7 @@
         document.getElementById("greetingScreen").style.display = "none";
         channelLoader.style.display = "none";
         qualitySelector.style.display = "none";
+        qualitySelectorVisible = false;
         return;
       }
       console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
@@ -1019,6 +1037,7 @@
       } else {
         showPlayButton();
       }
+      hideQualitySelector();
     }
 
     function showChannelList() {
@@ -1052,6 +1071,14 @@
       const key = e.key, code = e.keyCode;
       console.log(`Key pressed: ${key} (code: ${code})`);
 
+      if (key === "q" || key === "Q" || key === "Info" || code === 73) {
+        if (isM3U8(channels[currentIndex].url)) {
+          qualitySelectorVisible ? hideQualitySelector() : showQualitySelector();
+        }
+        e.preventDefault();
+        return;
+      }
+
       if (key >= "0" && key <= "9") {
         numberInput += key;
         showOverlay(numberInput);
@@ -1081,6 +1108,12 @@
         if (listVisible) {
           console.log("OK pressed, changing channel to index:", currentIndex);
           loadChannel(currentIndex, hasManuallyPlayed);
+          e.preventDefault();
+          return;
+        }
+        if (qualitySelectorVisible) {
+          console.log("OK pressed, selecting quality");
+          qualitySelect.dispatchEvent(new Event('change'));
           e.preventDefault();
           return;
         }
