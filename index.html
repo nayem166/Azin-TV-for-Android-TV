@@ -540,31 +540,6 @@
       addChar();
     }
 
-    async function checkChannelAvailability(url, channelName) {
-      console.log(`Checking availability for ${channelName}: ${url}`);
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-      try {
-        const response = await fetch(url, {
-          method: 'HEAD',
-          signal: controller.signal,
-          headers: { 'Range': 'bytes=0-1023' }
-        });
-        clearTimeout(timeoutId);
-        if (response.ok) {
-          console.log(`Channel ${channelName} is available (status: ${response.status})`);
-          return true;
-        } else {
-          console.error(`Channel ${channelName} is not available (status: ${response.status})`);
-          return false;
-        }
-      } catch (err) {
-        clearTimeout(timeoutId);
-        console.error(`Error checking availability for ${channelName}:`, err.message);
-        return false;
-      }
-    }
-
     function initializeApp() {
       console.log("Initializing app...");
       const ua = navigator.userAgent,
@@ -828,23 +803,13 @@
 
     async function loadVideo(url, autoPlay, channelName) {
       console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}`);
+      showChannelLoader();
       qualitySelector.style.display = 'none';
       qualitySelectorVisible = false;
       clearTimeout(errorTimeout);
       const now = Date.now();
       lastChannelChange = now;
 
-      const isAvailable = await checkChannelAvailability(url, channelName);
-      if (!isAvailable) {
-        console.error(`Channel ${channelName} is not available, skipping buffering`);
-        if (lastChannelChange === now) {
-          showErrorVisual();
-          showPlayButton();
-        }
-        return;
-      }
-
-      showChannelLoader();
       errorTimeout = setTimeout(() => {
         if (lastChannelChange === now) {
           console.error(`Loading timeout for ${channelName}`);
