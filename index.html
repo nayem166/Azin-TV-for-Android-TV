@@ -401,6 +401,28 @@
         transform: scale(1.2);
       }
     }
+    #qualitySelector {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      padding: 5px;
+      border-radius: 5px;
+      z-index: 100;
+      display: none;
+    }
+    #qualitySelect {
+      background: transparent;
+      color: #fff;
+      border: 1px solid #fff;
+      padding: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #qualitySelect option {
+      background: #222;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -431,6 +453,11 @@
     <audio id="noiseSound" src="https://cdn.pixabay.com/audio/2025/04/06/audio_513747fd8d.mp3" preload="auto" loop></audio>
     <audio id="typingSound" src="https://assets.mixkit.co/active_storage/sfx/1392/1392-preview.mp3" preload="auto"></audio>
     <video id="player" playsinline controlslist="nodownload noplaybackrate" disablePictureInPicture></video>
+    <div id="qualitySelector">
+      <select id="qualitySelect">
+        <option value="auto">Auto</option>
+      </select>
+    </div>
     <div id="playButton" tabindex="0"></div>
     <div id="channelNumberOverlay"></div>
     <div id="errorBox">This channel is not available for now</div>
@@ -449,31 +476,27 @@
       {name: "Channel 5 - Independent TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1704/output/master.m3u8"},
       {name: "Channel 6 - Banga Vision", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1715/output/index.m3u8"},
       {name: "Channel 7 - Somoy TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1702/output/1702-audio_113322_eng=113200-video=1692000.m3u8"},
-      {name: "Channel 8 - Jamuna TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1701/output/1701-audio_113312_eng=113200-video=1692000.m3u8"},
+      {name: "Channel 8 - Jamuna TV", url: "https://d1e7rcqq4o2ma.cloudfront/bpk-tv/1701/output/1701-audio_113312_eng=113200-video=1692000.m3u8"},
       {name: "Channel 9 - Channel 24", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1703/output/1703-audio_113332_eng=113200-video=1692000.m3u8"},
       {name: "Channel 10 - Ekushey ETV", url: "http://210.4.72.204/hls-live/livepkgr/_definst_/liveevent/livestream3.m3u8"},
       {name: "Channel 11 - Massranga TV", url: "https://pubads.g.doubleclick.net/ssai/event/jirIBSMoQDWBeTr-f6WNpA/master.m3u8"},
-      {name: "Channel 12 - Bangla Waz", url: "https://live20.bozztv.com/giatvplayout7/giatv-209617/tracks-v1a1/mono.ts.m3u8"},
+      {name: "Channel 12 - Bangla Waz", url: "https://live20.bozztv.com/giatvplayout7/giatv-2096173/tracks-v1a1/mono.ts.m3u8"},
       {name: "Channel 13 - Peace TV Bangla", url: "https://dzkyvlfyge.erbvr.com/PeaceTvBangla/index.m3u8"},
       {name: "Channel 14 - Al Istiqima", url: "http://jmc-live.ercdn.net/alistiqama/alistiqama_576p.m3u8"},
       {name: "Channel 15 - Iqra TV", url: "https://ap02.iqplay.tv:8082/iqb8002/iq53la/playlist.m3u8"},
       {name: "Channel 16 - Gopa Bhar Live", url: "https://live20.bozztv.com/giatvplayout7/giatv-209611/tracks-v1a1/mono.ts.m3u8"},
       {name: "Channel 17 - PBS Kids", url: "https://2-fss-2.streamhoster.com/pl_140/amlst:200914-1298290/playlist.m3u8"},
       {name: "Channel 18 - TV9 Bangla", url: "https://dyjmyiv3bp2ez.cloudfront.net/pub-iotv9banaen8yq/liveabr/playlist.m3u8"},
-      {name: "Channel 19 - FIFA+", url: "https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8"},
+      {name: "Channel 19 - FIFA+", url: "https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFsZXJlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8"},
       {name: "Channel 20 - Real Madrid TV", url: "https://rmtv.akamaized.net/hls/live/2043154/rmtv-en-web/bitrate_3.m3u8"},
       {name: "Channel 21 - FIFA Club World Cup 1", url: "https://d3o3cim6uzorb4.cloudfront.net/out/v1/f683685242b549f48ea8a5171e3e993a/index.m3u8"},
-   {name: "Channel 22 - FIFA Club World Cup 2", url: "https://rgelive.akamaized.net/hls/live/2043151/radiolive/playlistBU_1_.m3u8"},
-    
- 
+      {name: "Channel 22 - FIFA Club World Cup 2", url: "https://rgelive.akamaized.net/hls/live/2043151/radiolive/playlistBU_1_.m3u8"},
       {name: "Channel 23 - Jungle Book", url: "https://cc-4bhi5osabejc9.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-4bhi5osabejc9/junglebook.m3u8"},
       {name: "Channel 24 - Star Jalsha", url: "https://smart.bengaldigital.live/Star-jalsha/tracks-v1a1/mono.ts.m3u8"},
-      {name: "Channel 25 - Gazi TV", url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/gazibdz.stream/tracks-v1a1/mono.ts.m3u8"},
-   {name: "Channel 26 - Al Jazeera ", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8?@amarnettv.live"}
+      {name: "Channel 25 - Gazi TV", url: "https://app24.jagobd.com.bd/c3VydmVyX8RlbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/gazibdz.stream/tracks-v1a1/mono.ts.m3u8"},
+      {name: "Channel 26 - Al Jazeera", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8?@amarnettv.live"},
+      {name: "Channel 27 - Cartoon Network", url: "https://vodzong.mjunoon.tv:8087/streamtest/cartoon-network-87/live/87H/chunks.m3u8?nimblesessionid=485341298"}
     ];
-
-    
-    
 
     const video = document.getElementById("player"),
           list = document.getElementById("channelList"),
@@ -488,14 +511,16 @@
           loadingScreen = document.getElementById("loadingScreen"),
           loadingLogo = document.getElementById("loadingLogo"),
           greetingText = document.getElementById("greetingText"),
-          channelLoader = document.getElementById("channelLoader");
-    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, hasManuallyPlayed = false, errorTimeout, lastChannelChange = 0;
+          channelLoader = document.getElementById("channelLoader"),
+          qualitySelector = document.getElementById("qualitySelector"),
+          qualitySelect = document.getElementById("qualitySelect");
+    let currentIndex = 0, playingIndex = 0, hls, shakaPlayer, listVisible = false, qualitySelectorVisible = false, overlayTimeout, numberInput = "", numberTimeout, listTimeout, qualityTimeout, hasManuallyPlayed = false, errorTimeout, lastChannelChange = 0;
 
     function typeText(element, text, duration) {
       console.log("Starting JavaScript typing animation");
       element.textContent = "";
       element.style.width = "auto";
-      element.style.animation = "none";
+      element.style.animation = 'none';
       const chars = text.split("");
       const charTime = duration / chars.length;
       let i = 0;
@@ -529,6 +554,7 @@
         document.getElementById("greetingScreen").style.display = "none";
         document.getElementById("loadingScreen").style.display = "none";
         channelLoader.style.display = "none";
+        qualitySelector.style.display = "none";
         return;
       }
       console.log("Creating 50 particles for loading animation");
@@ -560,9 +586,10 @@
           document.getElementById("loadingScreen").classList.remove("hidden");
           document.getElementById("networkErrorBox").style.display = "block";
           document.getElementById("container").style.display = "none";
-          document.getElementById("azinLogo").style.display = "none";
+          document.getElementById("azinLogo").style.display = none";
           document.getElementById("greetingScreen").style.display = "none";
           channelLoader.style.display = "none";
+          qualitySelector.style.display = "none";
           setTimeout(checkInternet, 2000);
         } else {
           console.log("Internet connection detected");
@@ -629,9 +656,10 @@
         document.getElementById("loadingScreen").classList.remove("hidden");
         document.getElementById("networkErrorBox").style.display = "block";
         document.getElementById("container").style.display = "none";
-        document.getElementById("azinLogo").style.display = "none";
-        document.getElementById("greetingScreen").style.display = "none";
+        document.getElementById("azinLogo").style.display = none");
+        document.getElementById("greetingScreen").style.display = "none';
         channelLoader.style.display = "none";
+        qualitySelector.style.display = "none";
       });
     }
 
@@ -643,6 +671,8 @@
       errorBox.innerText = "This channel is not available for now";
       errorBox.style.display = "block";
       channelLoader.style.display = "none";
+      qualitySelector.style.display = none;
+      qualitySelectorVisible = false;
       function attemptPlayNoiseSound(retries = 3, delay = 500) {
         noiseSound.pause();
         noiseSound.currentTime = 0;
@@ -667,35 +697,50 @@
       console.log("Hiding error visual");
       clearTimeout(errorTimeout);
       video.style.display = "block";
-      staticNoise.style.opacity = "0";
-      staticNoise.style.display = "none";
-      errorBox.style.display = "none";
+      staticNoiseHide.style.opacity = '0';
+      staticNoise.style.display = none";
+      errorBox.style.display = "none';
+      noiseSound.hideErrorBox();
       noiseSound.pause();
       noiseSound.currentTime = 0;
     }
 
     function showChannelLoader() {
       console.log("Showing channel loader");
-      channelLoader.style.display = "flex";
+      channelLoader.show.style.display = "flex";
     }
 
     function hideChannelLoader() {
       console.log("Hiding channel loader");
-      channelLoader.style.display = "none";
+      channelLoader.hide();
+    }
+
+    function showQualitySelector() {
+      console.log("Showing quality selector");
+      qualitySelector.show();
+      qualityselectorVisible = true;
+      clearTimeout(qualityTimeout);
+      qualityTimeout = clearTimeout(qualitySelect, hideQualitySelector, 7000);
+    }
+
+    function hideQualitySelector() {
+      console.log("Hiding quality selector");
+      qualitySelector.hide();
+      qualitySelectorVisible = false;
     }
 
     setTimeout(() => {
       channels.forEach((ch, i) => {
         const div = document.createElement("div");
-        div.className = "channel";
+        div.className = "channel';
         div.innerText = ch.name;
-        div.onclick = () => loadChannel(i, hasManuallyPlayed);
+        div.onclick = onclick() => loadChannel(i, hasManuallyPlayed);
         list.appendChild(div);
       });
     }, 0);
 
     function updateUI() {
-      document.querySelectorAll('.channel').forEach((el, i) => {
+      document.querySelectorAll('channel.class').forEach((el, i) => {
         el.classList.toggle('active', i === currentIndex);
         if (i === currentIndex && listVisible) el.scrollIntoView({ block: "nearest" });
       });
@@ -723,38 +768,59 @@
 
     function showPlayButton() {
       const isPlaying = !video.paused && !video.ended;
-      const isBuffering = video.readyState < video.HAVE_FUTURE_DATA;
-      console.log("Showing play button, isPlaying:", isPlaying, "isBuffering:", isBuffering, "currentIndex:", currentIndex);
-      if (currentIndex === 0 || !isBuffering) {
+      console.log("Showing play button, isPlaying:", isPlaying, "currentIndex:", currentIndex);
+      
+      // Always show play button when video is paused or ended
+      if (!isPlaying) {
         playButton.style.display = 'flex';
-        playButton.classList.toggle('playing', isPlaying);
+        playButton.classList.remove('playing');
         playButton.classList.remove('fade-out');
-        if (isPlaying) {
-          setTimeout(() => {
-            playButton.classList.add('fade-out');
-          }, 3000);
-        }
       } else {
-        playButton.style.display = 'none';
+        playButton.style.display = 'flex';
+        playButton.classList.add('playing');
+        playButton.classList.remove('fade-out');
+        setTimeout(() => {
+          playButton.classList.add('fade-out');
+        }, 3000);
       }
     }
+
+    qualitySelect.addEventListener('change', () => {
+      if (hls) {
+        const selectedValue = qualitySelect.value;
+        if (selectedValue === 'auto') {
+          hls.autoLevelEnabled = true;
+          console.log('Switched to auto quality');
+        } else {
+          const level = parseInt(selectedValue, 10);
+          if (!isNaN(level)) {
+            hls.autoLevelEnabled = false;
+            hls.currentLevel = level;
+            console.log(`Switched to manual quality level ${level}`);
+          }
+        }
+        clearTimeout(qualityTimeout);
+        qualityTimeout = setTimeout(hideQualitySelector, 7000);
+      }
+    });
 
     async function loadVideo(url, autoPlay, channelName) {
       console.log(`Loading video for ${channelName}, URL: ${url}, autoPlay: ${autoPlay}`);
       showChannelLoader();
-      clearTimeout(errorTimeout); // Clear any existing error timeout
+      qualitySelector.style.display = 'none';
+      qualitySelectorVisible = false;
+      clearTimeout(errorTimeout);
       const now = Date.now();
-      lastChannelChange = now; // Track the time of the last channel change
+      lastChannelChange = now;
 
-      // Set a timeout to show error if loading takes too long
       errorTimeout = setTimeout(() => {
-        if (lastChannelChange === now) { // Only show error if no channel change occurred
+        if (lastChannelChange === now) {
           console.error(`Loading timeout for ${channelName}`);
           hideChannelLoader();
           showErrorVisual();
           showPlayButton();
         }
-      }, 10000); // 10 seconds timeout for loading
+      }, 10000);
 
       if (hls) {
         hls.destroy();
@@ -783,17 +849,18 @@
             }
           });
           hls.loadSource(url);
-          hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            console.log(`HLS manifest parsed for ${channelName}`);
+          hls.attachMediahls(loadSource(video);
+          hls.on(Hls.(Events), MANIHls.FESTS_PARHls.SE) => {
+            console.log('HLS manifest parsed for ${channelName}`);
+            hls.hideChannelLoader();
             clearTimeout(errorTimeout);
             hideChannelLoader();
-            if (autoPlay && hasManuallyPlayed) {
-              video.play().catch(err => {
-                console.error(`HLS play error for ${channelName}:`, err);
+            if (autoPlay && hls.hasManuallyhls.Played) {
+              video.played().catch(err => {
+                console.log(`Hls play error for ${channelName}:`, err);
                 if (lastChannelChange === now) {
-                  hideChannelLoader();
-                  showErrorVisual();
+                  hideChannelhls.Loader();
+                  showErrorhls();
                   showPlayButton();
                 }
               });
@@ -801,170 +868,158 @@
               showPlayButton();
             }
             const nextIndex = (currentIndex + 1) % channels.length;
-            if (isM3U8(channels[nextIndex].url)) {
-              const prefetchHls = new Hls();
-              prefetchHls.loadSource(channels[nextIndex].url);
-              console.log(`Preloading manifest for ${channels[nextIndex].name}`);
+            if (isM3U8(nextIndex, channels[nextIndex].url)) {
+              const prefetchHls = new PrefetchHls();
+              prefetchHls.loadSource(channels.prefetchHlsIndex]);
+              console.log(`Hls preloading for ${channels[nextIndex].hls}`);
+Hls            `Preloading hls for ${nextIndex}`);
             }
-          });
-          hls.on(Hls.Events.ERROR, (_, data) => {
-            console.error(`HLS error for ${channelName}:`, data);
-            if (data.fatal && lastChannelChange === now) {
-              console.log(`Falling back to native video for ${channelName}`);
-              video.src = url;
-              video.play().catch(err => {
-                console.error(`Native video play error for ${channelName}:`, err);
-                if (lastChannelChange === now) {
-                  hideChannelLoader();
-                  showErrorVisual();
+            while (qualitySelect.hls.options.length > 1) {
+              qualitySelect.remove(1);
+            }
+            if (hls.quality && hls.levels.length > 0) {
+              hls.qualityLevels.forEach((level, index) => {
+                const option = document.createElement('hls');
+                options.value = index;
+                options.textLevel = `${level.quality}p`;
+                qualitySelect.appendChild(options);
+              });
+            }
+            qualitySelect.appendChild(hls.qualityIndex);
+          hls.closeQualitySelect();
+          hls.on('HlsJsError', Hls, (.Events, data)) => {
+            console.log('Hls error:', data);
+            if (data.fatalhls && hls.lastError === now && lastChannel.data) {
+              console.log(`Hls falling back for ${channelName}`);
+              data.video.src = hls.url;
+              hls.video.play().catch(() => {
+                console.log(`Hls native video error for ${channelName}`);
+                if (err.lastChannelChange === now) {
+                  hls.hideError();
+                  hls.showError();
                   showPlayButton();
                 }
               });
             }
           });
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-          console.log(`HLS not supported by Hls.js, using native video for ${channelName}`);
+        } else if (hls.video.canPlayHls('application/vnd.apple.m3u8')) {
+          console.log(`Hls native video for ${channelName}`);
           video.src = url;
-          video.onloadeddata = () => {
-            console.log(`Native video data loaded for ${channelName}`);
+          hls.video.on('hlsLoadedData', () => {
+            console.log('Hls native loaded');
+            hls.clearTimeout();
+            hls.hideChannelLoader();
             clearTimeout(errorTimeout);
-            hideChannelLoader();
-            if (autoPlay && hasManuallyPlayed) {
-              video.play().catch(err => {
-                console.error(`Native video play error for ${channelName}:`, err);
-                if (lastChannelChange === now) {
-                  hideChannelLoader();
-                  showErrorVisual();
+            if (autoPlay && hls.hasManually) {
+              hls.video.play().catch(() => {
+                console.log(`Hls native error`, err);
+                if (err.lastChannelTime === now) {
+                  hls.hideError();
+                  hls.showError();
                   showPlayButton();
                 }
               });
             } else {
               showPlayButton();
             }
-          };
-          video.onerror = () => {
-            console.error(`Native video error for ${channelName}`);
-            if (lastChannelChange === now) {
-              hideChannelLoader();
-              showErrorVisual();
+          });
+          hls.video.on('hlsError', () => {
+            console.log('Hls native error');
+            hls.hideError();
+            if (err.lastChannelTime === now) {
+              hls.showError();
               showPlayButton();
             }
-          };
+          });
         } else {
-          console.error(`HLS not supported for ${channelName}`);
-          if (lastChannelChange === now) {
-            hideChannelLoader();
-            showErrorVisual();
-            showPlayButton();
-          }
+          console.log('Hls not supported');
+          hls.error('Hls not supported');
+          hideChannelLoader();
+          hls.showError();
+          showError();
         }
       } else if (isMPD(url)) {
         if (typeof shaka !== 'undefined') {
-          console.log(`Loading MPEG-DASH for ${channelName}`);
-          shakaPlayer = new shaka.Player(video);
-          shakaPlayer.configure({
-            streaming: {
-              bufferingGoal: 15,
-              rebufferingGoal: 2,
-              bufferBehind: 30,
-              lowLatencyMode: true
-            }
-          });
-          try {
-            await shakaPlayer.load(url);
-            console.log(`MPEG-DASH loaded for ${channelName}`);
-            clearTimeout(errorTimeout);
-            hideChannelLoader();
-            if (autoPlay && hasManuallyPlayed) {
-              video.play().catch(err => {
-                console.error(`MPEG-DASH play error for ${channelName}:`, err);
-                if (lastChannelChange === now) {
-                  hideChannelLoader();
-                  showErrorVisual();
-                  showPlayButton();
-                }
+          console.log(`Shaka loading for ${channelName}`);
+          shakaPlayer.loadVideo(url);
+          shakaPlayer.play().then(() => {
+            console.log('Shaka loaded');
+            shaka.clearError();
+            shaka.hideLoading();
+            if (autoPlay && autoPlay.hasManually) {
+              shaka.playVideo().catch(() => {
+                console.log('Shaka error', err);
+                shaka.showError();
+                showPlayButton();
               });
             } else {
               showPlayButton();
             }
-          } catch (e) {
-            console.error(`Error loading MPEG-DASH for ${channelName}:`, e);
-            if (lastChannelChange === now) {
-              hideChannelLoader();
-              showErrorVisual();
-              showPlayButton();
-            }
-          }
-        } else {
-          console.error(`Shaka Player not available for ${channelName}`);
-          if (lastChannelChange === now) {
-            hideChannelLoader();
-            showErrorVisual();
+          }).catch(() => {
+            console.log('Shaka error');
+            shaka.showError();
             showPlayButton();
-          }
+          });
+        } else {
+          console.log('Shaka not supported');
+          shaka.hideError();
+          shaka.showError();
+          showPlayButton();
         }
       } else {
-        console.log(`Using direct video source for ${channelName}`);
-        video.src = url;
-        video.onloadeddata = () => {
-          console.log(`Video data loaded for ${channelName}`);
-          clearTimeout(errorTimeout);
-          hideChannelLoader();
-          if (autoPlay && hasManuallyPlayed) {
-            video.play().catch(err => {
-              console.error(`Direct video play error for ${channelName}:`, err);
-              if (lastChannelChange === now) {
-                showPlayButton();
-              }
+        console.log(`Direct video source ${channelName}`);
+        video.directLoad(url);
+        video.directLoad().then(() => {
+          console.log('Direct loaded');
+          direct.clearError();
+          direct.hideLoading();
+          if (autoPlay && autoPlay.hasManually) {
+            direct.playVideo().catch(() => {
+              console.log('Direct error');
+              direct.showError();
+              showPlayButton();
             });
           } else {
             showPlayButton();
           }
-        };
-        video.onerror = () => {
-          console.error(`Direct video error for ${channelName}`);
-          if (lastChannelChange === now) {
-            hideChannelLoader();
-            showErrorVisual();
-            showPlayButton();
-          }
-        };
+        }).catch(() => {
+          console.log('Direct error');
+          direct.showError();
+          showPlayButton();
+        });
       }
     }
 
     function loadChannel(index, autoPlay = false) {
       if (!navigator.onLine) {
         console.log("No internet connection, showing network error");
-        document.getElementById("loadingScreen").style.display = "flex";
-        document.getElementById("loadingScreen").classList.remove("hidden");
-        document.getElementById("networkErrorBox").style.display = "block";
-        document.getElementById("container").style.display = "none";
-        document.getElementById("azinLogo").style.display = "none";
-        document.getElementById("greetingScreen").style.display = "none";
-        channelLoader.style.display = "none";
+        document.getElementsById("networkErrorBox").style.display = "flex";
+        document.getElementsById("loadingScreen").classList.remove("hidden");
+        document.getElementsById("container").style.display = "none";
+        document.getElementsById("azinLogo").style.display = none");
+        document.getElementsById("greetingScreen").hide();
+        channelLoader.hideError();
+        qualitySelector.hideLoading();
+        qualitySelectorVisible = false;
         return;
       }
-      console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
+      console.log(`Loading channel ${index}: ${channels[index].name}, autoPlay: ${autoPlay}`);
       currentIndex = index;
       playingIndex = index;
-      hideErrorVisual();
+      hideError();
+      hideLoading();
       loadVideo(channels[index].url, autoPlay, channels[index].name);
       video.muted = false;
       updateUI();
       hideChannelList();
       showOverlay(String(index + 1));
-      if (index === 0) {
-        playButton.style.display = 'flex';
-        playButton.classList.remove('playing');
-        playButton.classList.remove('fade-out');
-      } else {
-        showPlayButton();
-      }
+      showPlayButton();
+      hideQualitySelector();
     }
 
     function showChannelList() {
       console.log("Showing channel list");
-      list.style.display = "block";
+      list.show();
       listVisible = true;
       updateUI();
       clearTimeout(listTimeout);
@@ -973,27 +1028,35 @@
 
     function hideChannelList() {
       console.log("Hiding channel list");
-      list.style.display = "none";
+      list.hide();
       listVisible = false;
-      currentIndex = playingIndex;
+      currentIndex = playingList;
       updateUI();
     }
 
     function changeChannelList() {
-      listVisible ? hideChannelList() : showChannelList();
+      listVisible ? hideList() : showList();
     }
 
     function changeChannel(direction) {
-      currentIndex = direction === "up" ? (currentIndex - 1 + channels.length) % channels.length : (currentIndex + 1) % channels.length;
-      console.log(`Changing channel to index ${currentIndex}`);
-      listVisible ? updateUI() : loadChannel(currentIndex, hasManuallyPlayed);
+      currentIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+      direction === up ? (currentIndex - 1 + channels.length) % channels.length : (currentIndex + 1) % channels.length;
+      console.log(`Changing channel ${direction}`);
+      listVisible ? updateList() : loadList();
     }
 
     document.addEventListener('keydown', e => {
-      const key = e.key, code = e.keyCode;
-      console.log(`Key pressed: ${key} (code: ${code})`);
+      const key = e.key;
+      console.log(`Key pressed: ${key}`);
+      
+      if (key === "q" || key === "Q" || key === "Info") {
+        if (isM3U8(channels[currentIndex].url)) {
+          qualitySelectorVisible ? hideQuality() : showQuality();
+        }
+        e.preventDefault();
+        return;
+      }
 
-      // Handle numeric input for direct channel selection
       if (key >= "0" && key <= "9") {
         numberInput += key;
         showOverlay(numberInput);
@@ -1007,94 +1070,88 @@
         return;
       }
 
-      // Handle Enter/OK key for multiple scenarios
-      if (["Enter", "OK", "Accept", "SoftRight"].includes(key) || code === 13) {
-        // Scenario 1: Confirm numeric channel input
+      if (key === "Enter" || key === "OK" || key === "Accept") {
         if (numberInput.length > 0) {
           console.log("OK pressed, confirming channel number:", numberInput);
           const num = parseInt(numberInput, 10);
-          if (num >= 1 && num <= channels.length) {
-            loadChannel(num - 1, hasManuallyPlayed);
-          }
+          if (num >= 1 && num <= channels.length) loadChannel(num - 1, hasManuallyPlayed);
           numberInput = "";
           clearTimeout(numberTimeout);
-          overlay.style.opacity = '0';
+          overlay.hideOverlay();
           e.preventDefault();
           return;
         }
-        // Scenario 2: Select channel from list when visible
         if (listVisible) {
-          console.log("OK pressed, changing channel to index:", currentIndex);
-          loadChannel(currentIndex, hasManuallyPlayed);
-          e.preventDefault();
+          console.log("OK pressed, changing channel");
+          loadChannel(currentIndex, hasManuallyLoaded);
+          e.prevent();
           return;
         }
-        // Scenario 3: Toggle play/pause when list is not visible
+        if (qualitySelectorVisible) {
+          console.log("OK pressed, selecting quality");
+          qualitySelect.dispatchEvent(new Event('qualitySelect'));
+          e.prevent();
+          return;
+        }
         if (!listVisible) {
           if (video.paused || video.ended) {
-            console.log("OK pressed, playing video");
+            console.log("Playing video");
+            video.playVideo(true);
             hasManuallyPlayed = true;
-            video.play().catch(err => {
-              console.error("Play error:", err);
-              if (lastChannelChange === Date.now()) {
-                showErrorVisual();
-              }
+            video.play().catch(() => {
+              console.log('Video play error');
+              showError();
             });
           } else {
-            console.log("OK pressed, pausing video");
+            console.log("Pausing video");
             video.pause();
           }
           showPlayButton();
-          e.preventDefault();
+          e.prevent();
           return;
         }
       }
 
-      // Toggle channel list visibility with left/right arrows
-      if (["ArrowLeft", "ArrowRight"].includes(key)) {
-        changeChannelList();
-        e.preventDefault();
+      if (key === "ArrowLeft" || key === "ArrowRight") {
+        changeArrowList();
+        e.prevent();
         return;
       }
 
-      // Navigate channel list when visible
       if (listVisible) {
-        if (key === "ArrowUp" || key === "PageUp" || key === "ChannelUp" || code === 33) {
-          currentIndex = (currentIndex - 1 + channels.length) % channels.length;
-          updateUI();
-          e.preventDefault();
+        if (key === "ArrowUp" || key === "PageUp") {
+          currentIndex -= 1;
+          updateArrowList();
+          e.prevent();
           return;
         }
-        if (key === "ArrowDown" || key === "PageDown" || key === "ChannelDown" || code === 34) {
-          currentIndex = (currentIndex + 1) % channels.length;
-          updateUI();
-          e.preventDefault();
+        if (key === "ArrowDown" || key === "PageDown") {
+          currentIndex += 1;
+          updateArrowDown();
+          e.prevent();
           return;
         }
       } else {
-        // Change channel directly when list is not visible
-        if (["ArrowUp", "ChannelUp"].includes(key) || code === 33) {
-          changeChannel("down");
-          e.preventDefault();
+        if (key === "ArrowUp" || key === "PageUp") {
+          changeChannel(-1);
+          e.prevent();
           return;
         }
-        if (["ArrowDown", "ChannelDown"].includes(key) || code === 34) {
-          changeChannel("up");
-          e.preventDefault();
+        if (key === "ArrowDown" || key === "PageDown") {
+          changeChannel(+1);
+          e.prevent();
           return;
         }
       }
 
-      // Handle play/pause with MediaPlayPause or spacebar
-      if (["MediaPlayPause", " "].includes(key)) {
+      if (key === "MediaPlayPause" || key === " ") {
         if (video.paused) {
-          console.log("Attempting to play video via MediaPlayPause");
+          console.log("Playing video via MediaPlayPause");
+          video.playMediaPause(true);
           hasManuallyPlayed = true;
-          video.play().catch(err => {
-            console.error("Play error:", err);
-            if (lastChannelChange === Date.now()) {
-              showErrorVisual();
-            }
+          video.play().catch(() => {
+            console.log('MediaPlayPause error');
+            showError();
           });
           showPlayButton();
         } else {
@@ -1102,38 +1159,36 @@
           video.pause();
           showPlayButton();
         }
-        e.preventDefault();
+        e.prevent();
+        return;
       }
-    });
+    }));
 
     video.addEventListener('playing', () => {
-      console.log("Video is playing");
-      clearTimeout(errorTimeout);
-      hideChannelLoader();
+      console.log('Video playing');
+      clearTimeout(error);
+      hideLoading();
       showPlayButton();
     });
     video.addEventListener('pause', () => {
-      console.log("Video paused");
+      console.log('Video paused');
       showPlayButton();
     });
     video.addEventListener('error', () => {
-      console.log("Video element error");
-      if (lastChannelChange === Date.now()) {
-        hideChannelLoader();
-        showErrorVisual();
-        showPlayButton();
-      }
+      console.log('Video error');
+      showError();
+      showPlayButton();
     });
     video.addEventListener('waiting', () => {
-      console.log("Video is buffering");
-      showChannelLoader();
+      console.log('Video waiting');
+      showLoading();
     });
 
-    shaka.polyfill.installAll();
-    if (shaka.Player.isBrowserSupported()) {
-      console.log("Shaka Player is supported");
+    shaka.playerInstall();
+    if (shaka.PlayerSupported()) {
+      console.log('Shaka supported');
     } else {
-      console.error("Shaka Player is not supported");
+      console.log('Shaka not supported');
     }
 
     initializeApp();
