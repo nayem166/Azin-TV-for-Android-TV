@@ -1010,6 +1010,7 @@
     }
 
     function loadChannel(index, autoPlay = false) {
+  iffunction loadChannel(index, autoPlay = false) {
   if (!navigator.onLine) {
     console.log("No internet connection, showing network error");
     document.getElementById("loadingScreen").style.display = "flex";
@@ -1032,27 +1033,40 @@
   updateUI();
   hideChannelList();
   showOverlay(String(index + 1));
-  showPlayButton(); // সব ক্ষেত্রে showPlayButton কল করা হচ্ছে
+  // Remove immediate showPlayButton call to avoid premature hiding
+  // showPlayButton(); // Moved to event listeners
   hideQualitySelector();
+
+  // Add event listeners to handle video state changes
+  video.addEventListener('canplay', showPlayButton, { once: true }); // Show button when video is ready
+  video.addEventListener('playing', showPlayButton, { once: true }); // Show button when playback starts
+  video.addEventListener('waiting', () => {
+    playButton.style.display = 'none'; // Hide button during buffering
+  }, { once: true });
 }
 
 function showPlayButton() {
   const isPlaying = !video.paused && !video.ended;
   const isBuffering = video.readyState < video.HAVE_FUTURE_DATA;
   console.log("Showing play button, isPlaying:", isPlaying, "isBuffering:", isBuffering, "currentIndex:", currentIndex);
-  if (!isBuffering) { // currentIndex === 0 শর্তটি সরানো হয়েছে
-    playButton.style.display = 'flex';
-    playButton.classList.toggle('playing', isPlaying);
-    playButton.classList.remove('fade-out');
-    if (isPlaying) {
-      setTimeout(() => {
-        playButton.classList.add('fade-out');
-      }, 3000);
-    }
-  } else {
-    playButton.style.display = 'none';
+
+  if (isBuffering) {
+    playButton.style.display = 'none'; // Hide during buffering
+    return;
   }
-}
+
+  // Show button when not buffering
+  playButton.style.display = 'flex';
+  playButton.classList.toggle('playing', isPlaying);
+  playButton.classList.remove('fade-out');
+
+  if (isPlaying) {
+    // Add fade-out after 3 seconds if playing
+    setTimeout(() => {
+      playButton.classList.add('fade-out');
+    }, 3000);
+  }
+}  
 
     function showChannelList() {
       console.log("Showing channel list");
