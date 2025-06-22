@@ -235,7 +235,7 @@
       display: block;
       position: relative;
       z-index: 10;
-      opacity: 1;
+      opacity: 10;
     }
     .light-ring {
       position: absolute;
@@ -474,7 +474,7 @@
       {name: "Channel 3 - Channel I", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1723/output/index.m3u8"},
       {name: "Channel 4 - Ekattor TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1705/output/1705-audio_113352_eng=113200-video=1692000.m3u8"},
       {name: "Channel 5 - Independent TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1704/output/master.m3u8"},
-      {name: "Channel 6 - Bangla Vision", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1715/output/index.m3u8"},
+      {name: "Channel 6 - Banga Vision", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1715/output/index.m3u8"},
       {name: "Channel 7 - Somoy TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1702/output/1702-audio_113322_eng=113200-video=1692000.m3u8"},
       {name: "Channel 8 - Jamuna TV", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1701/output/1701-audio_113312_eng=113200-video=1692000.m3u8"},
       {name: "Channel 9 - Channel 24", url: "https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1703/output/1703-audio_113332_eng=113200-video=1692000.m3u8"},
@@ -495,7 +495,8 @@
       {name: "Channel 24 - Star Jalsha", url: "https://smart.bengaldigital.live/Star-jalsha/tracks-v1a1/mono.ts.m3u8"},
       {name: "Channel 25 - Gazi TV", url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/gazibdz.stream/tracks-v1a1/mono.ts.m3u8"},
       {name: "Channel 26 - Al Jazeera", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8?@amarnettv.live"},
-      {name: "Channel 27 - Cartoon Network", url: "https://vodzong.mjunoon.tv:8087/streamtest/cartoon-network-87/live/87H/chunks.m3u8?nimblesessionid=485341298"}
+     {name: "Channel 27 - Cartoon Network", url: "https://vodzong.mjunoon.tv:8087/streamtest/cartoon-network-87/live/87H/chunks.m3u8?nimblesessionid=485341298"}
+      
     ];
 
     const video = document.getElementById("player"),
@@ -572,6 +573,13 @@
         logoLoaded = true;
       });
 
+      window.addEventListener('DOMContentLoaded', () => {
+        const loadingLogo = document.getElementById('loadingLogo');
+        setTimeout(() => {
+          loadingLogo.src = "https://i.postimg.cc/yW4t2K7P/file-0000000095f461f68b9b01fc40148050-1.png";
+        }, 1000);
+      });
+
       function checkInternet() {
         if (!navigator.onLine) {
           console.log("No internet connection detected");
@@ -604,7 +612,7 @@
                 greetingScreen.style.display = 'flex';
                 greetingScreen.classList.remove('hidden');
                 greetingScreen.classList.add('visible');
-                const greetingMessage = "Assalamualaikum CFO, Welcome to our App";
+                const greetingMessage = "Assalamualaikum, Welcome to our App";
                 typeText(greetingText, greetingMessage, 4000);
                 setTimeout(() => {
                   console.log("Hiding greeting screen");
@@ -762,7 +770,7 @@
       const isPlaying = !video.paused && !video.ended;
       const isBuffering = video.readyState < video.HAVE_FUTURE_DATA;
       console.log("Showing play button, isPlaying:", isPlaying, "isBuffering:", isBuffering, "currentIndex:", currentIndex);
-      if (!isBuffering) {
+      if (currentIndex === 0 || !isBuffering) {
         playButton.style.display = 'flex';
         playButton.classList.toggle('playing', isPlaying);
         playButton.classList.remove('fade-out');
@@ -1002,31 +1010,49 @@
     }
 
     function loadChannel(index, autoPlay = false) {
-      if (!navigator.onLine) {
-        console.log("No internet connection, showing network error");
-        document.getElementById("loadingScreen").style.display = "flex";
-        document.getElementById("loadingScreen").classList.remove("hidden");
-        document.getElementById("networkErrorBox").style.display = "block";
-        document.getElementById("container").style.display = "none";
-        document.getElementById("azinLogo").style.display = "none";
-        document.getElementById("greetingScreen").style.display = "none";
-        channelLoader.style.display = "none";
-        qualitySelector.style.display = "none";
-        qualitySelectorVisible = false;
-        return;
-      }
-      console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
-      currentIndex = index;
-      playingIndex = index;
-      hideErrorVisual();
-      loadVideo(channels[index].url, autoPlay, channels[index].name);
-      video.muted = false;
-      updateUI();
-      hideChannelList();
-      showOverlay(String(index + 1));
-      showPlayButton();
-      hideQualitySelector();
+  if (!navigator.onLine) {
+    console.log("No internet connection, showing network error");
+    document.getElementById("loadingScreen").style.display = "flex";
+    document.getElementById("loadingScreen").classList.remove("hidden");
+    document.getElementById("networkErrorBox").style.display = "block";
+    document.getElementById("container").style.display = "none";
+    document.getElementById("azinLogo").style.display = "none";
+    document.getElementById("greetingScreen").style.display = "none";
+    channelLoader.style.display = "none";
+    qualitySelector.style.display = "none";
+    qualitySelectorVisible = false;
+    return;
+  }
+  console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
+  currentIndex = index;
+  playingIndex = index;
+  hideErrorVisual();
+  loadVideo(channels[index].url, autoPlay, channels[index].name);
+  video.muted = false;
+  updateUI();
+  hideChannelList();
+  showOverlay(String(index + 1));
+  showPlayButton(); // সব ক্ষেত্রে showPlayButton কল করা হচ্ছে
+  hideQualitySelector();
+}
+
+function showPlayButton() {
+  const isPlaying = !video.paused && !video.ended;
+  const isBuffering = video.readyState < video.HAVE_FUTURE_DATA;
+  console.log("Showing play button, isPlaying:", isPlaying, "isBuffering:", isBuffering, "currentIndex:", currentIndex);
+  if (!isBuffering) { // currentIndex === 0 শর্তটি সরানো হয়েছে
+    playButton.style.display = 'flex';
+    playButton.classList.toggle('playing', isPlaying);
+    playButton.classList.remove('fade-out');
+    if (isPlaying) {
+      setTimeout(() => {
+        playButton.classList.add('fade-out');
+      }, 3000);
     }
+  } else {
+    playButton.style.display = 'none';
+  }
+}
 
     function showChannelList() {
       console.log("Showing channel list");
@@ -1146,12 +1172,12 @@
         }
       } else {
         if (["ArrowUp", "ChannelUp"].includes(key) || code === 33) {
-          changeChannel("up");
+          changeChannel("down");
           e.preventDefault();
           return;
         }
         if (["ArrowDown", "ChannelDown"].includes(key) || code === 34) {
-          changeChannel("down");
+          changeChannel("up");
           e.preventDefault();
           return;
         }
@@ -1159,7 +1185,7 @@
 
       if (["MediaPlayPause", " "].includes(key)) {
         if (video.paused) {
-          console.log("MediaPlayPause pressed, attempting to play video");
+          console.log("Attempting to play video via MediaPlayPause");
           hasManuallyPlayed = true;
           video.play().catch(err => {
             console.error("Play error:", err);
@@ -1169,7 +1195,7 @@
           });
           showPlayButton();
         } else {
-          console.log("MediaPlayPause pressed, pausing video");
+          console.log("Pausing video via MediaPlayPause");
           video.pause();
           showPlayButton();
         }
