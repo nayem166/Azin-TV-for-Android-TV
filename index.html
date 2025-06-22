@@ -277,7 +277,8 @@
         opacity: 1;
       }
       100% {
-        transform: translateY(-80px) scale(0.8);
+        transform: translateY(-80px) scale(0 Mounted at 10:12 AM +06 on Sunday, June 22, 2025
+System: .8);
         opacity: 0;
       }
     }
@@ -495,8 +496,7 @@
       {name: "Channel 24 - Star Jalsha", url: "https://smart.bengaldigital.live/Star-jalsha/tracks-v1a1/mono.ts.m3u8"},
       {name: "Channel 25 - Gazi TV", url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/gazibdz.stream/tracks-v1a1/mono.ts.m3u8"},
       {name: "Channel 26 - Al Jazeera", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8?@amarnettv.live"},
-     {name: "Channel 27 - Cartoon Network", url: "https://vodzong.mjunoon.tv:8087/streamtest/cartoon-network-87/live/87H/chunks.m3u8?nimblesessionid=485341298"}
-      
+      {name: "Channel 27 - Cartoon Network", url: "https://vodzong.mjunoon.tv:8087/streamtest/cartoon-network-87/live/87H/chunks.m3u8?nimblesessionid=485341298"}
     ];
 
     const video = document.getElementById("player"),
@@ -769,18 +769,24 @@
     function showPlayButton() {
       const isPlaying = !video.paused && !video.ended;
       const isBuffering = video.readyState < video.HAVE_FUTURE_DATA;
-      console.log("Showing play button, isPlaying:", isPlaying, "isBuffering:", isBuffering, "currentIndex:", currentIndex);
-      if (currentIndex === 0 || !isBuffering) {
-        playButton.style.display = 'flex';
-        playButton.classList.toggle('playing', isPlaying);
-        playButton.classList.remove('fade-out');
-        if (isPlaying) {
-          setTimeout(() => {
-            playButton.classList.add('fade-out');
-          }, 3000);
-        }
-      } else {
+      console.log("showPlayButton called, isPlaying:", isPlaying, "isBuffering:", isBuffering, "currentIndex:", currentIndex);
+
+      if (isBuffering) {
         playButton.style.display = 'none';
+        playButton.classList.remove('fade-out');
+        return;
+      }
+
+      playButton.style.display = 'flex';
+      playButton.classList.toggle('playing', isPlaying);
+      playButton.classList.remove('fade-out');
+
+      if (isPlaying) {
+        setTimeout(() => {
+          if (!video.paused && !video.ended && video.readyState >= video.HAVE_FUTURE_DATA) {
+            playButton.classList.add('fade-out');
+          }
+        }, 3000);
       }
     }
 
@@ -1010,63 +1016,39 @@
     }
 
     function loadChannel(index, autoPlay = false) {
-  iffunction loadChannel(index, autoPlay = false) {
-  if (!navigator.onLine) {
-    console.log("No internet connection, showing network error");
-    document.getElementById("loadingScreen").style.display = "flex";
-    document.getElementById("loadingScreen").classList.remove("hidden");
-    document.getElementById("networkErrorBox").style.display = "block";
-    document.getElementById("container").style.display = "none";
-    document.getElementById("azinLogo").style.display = "none";
-    document.getElementById("greetingScreen").style.display = "none";
-    channelLoader.style.display = "none";
-    qualitySelector.style.display = "none";
-    qualitySelectorVisible = false;
-    return;
-  }
-  console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
-  currentIndex = index;
-  playingIndex = index;
-  hideErrorVisual();
-  loadVideo(channels[index].url, autoPlay, channels[index].name);
-  video.muted = false;
-  updateUI();
-  hideChannelList();
-  showOverlay(String(index + 1));
-  // Remove immediate showPlayButton call to avoid premature hiding
-  // showPlayButton(); // Moved to event listeners
-  hideQualitySelector();
+      if (!navigator.onLine) {
+        console.log("No internet connection, showing network error");
+        document.getElementById("loadingScreen").style.display = "flex";
+        document.getElementById("loadingScreen").classList.remove("hidden");
+        document.getElementById("networkErrorBox").style.display = "block";
+        document.getElementById("container").style.display = "none";
+        document.getElementById("azinLogo").style.display = "none";
+        document.getElementById("greetingScreen").style.display = "none";
+        channelLoader.style.display = "none";
+        qualitySelector.style.display = "none";
+        qualitySelectorVisible = false;
+        return;
+      }
+      console.log(`Loading channel ${index + 1}: ${channels[index].name}, autoPlay: ${autoPlay}`);
+      currentIndex = index;
+      playingIndex = index;
+      hideErrorVisual();
+      loadVideo(channels[index].url, autoPlay, channels[index].name);
+      video.muted = false;
+      updateUI();
+      hideChannelList();
+      showOverlay(String(index + 1));
+      hideQualitySelector();
 
-  // Add event listeners to handle video state changes
-  video.addEventListener('canplay', showPlayButton, { once: true }); // Show button when video is ready
-  video.addEventListener('playing', showPlayButton, { once: true }); // Show button when playback starts
-  video.addEventListener('waiting', () => {
-    playButton.style.display = 'none'; // Hide button during buffering
-  }, { once: true });
-}
-
-function showPlayButton() {
-  const isPlaying = !video.paused && !video.ended;
-  const isBuffering = video.readyState < video.HAVE_FUTURE_DATA;
-  console.log("Showing play button, isPlaying:", isPlaying, "isBuffering:", isBuffering, "currentIndex:", currentIndex);
-
-  if (isBuffering) {
-    playButton.style.display = 'none'; // Hide during buffering
-    return;
-  }
-
-  // Show button when not buffering
-  playButton.style.display = 'flex';
-  playButton.classList.toggle('playing', isPlaying);
-  playButton.classList.remove('fade-out');
-
-  if (isPlaying) {
-    // Add fade-out after 3 seconds if playing
-    setTimeout(() => {
-      playButton.classList.add('fade-out');
-    }, 3000);
-  }
-}  
+      // Add event listeners for video state changes
+      video.addEventListener('canplay', showPlayButton, { once: true });
+      video.addEventListener('playing', showPlayButton, { once: true });
+      video.addEventListener('waiting', () => {
+        console.log("Video buffering, hiding play button");
+        playButton.style.display = 'none';
+        playButton.classList.remove('fade-out');
+      });
+    }
 
     function showChannelList() {
       console.log("Showing channel list");
@@ -1207,12 +1189,11 @@ function showPlayButton() {
               showErrorVisual();
             }
           });
-          showPlayButton();
         } else {
           console.log("Pausing video via MediaPlayPause");
           video.pause();
-          showPlayButton();
         }
+        showPlayButton();
         e.preventDefault();
       }
     });
@@ -1225,6 +1206,7 @@ function showPlayButton() {
     });
     video.addEventListener('pause', () => {
       console.log("Video paused");
+      playButton.classList.remove('fade-out');
       showPlayButton();
     });
     video.addEventListener('error', () => {
@@ -1238,6 +1220,8 @@ function showPlayButton() {
     video.addEventListener('waiting', () => {
       console.log("Video is buffering");
       showChannelLoader();
+      playButton.style.display = 'none';
+      playButton.classList.remove('fade-out');
     });
 
     shaka.polyfill.installAll();
